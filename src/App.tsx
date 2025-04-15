@@ -9,10 +9,12 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/auth/Auth";
 import CreateListing from "./pages/listing/CreateListing";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import { useState } from "react";
 
 const App = () => {
-  // Create QueryClient inside the component
-  const queryClient = new QueryClient();
+  // Create QueryClient using useState to ensure it's created only once
+  // This resolves the "dispatcher is null" error by properly managing the QueryClient lifecycle
+  const [queryClient] = useState(() => new QueryClient());
   
   return (
     <QueryClientProvider client={queryClient}>
