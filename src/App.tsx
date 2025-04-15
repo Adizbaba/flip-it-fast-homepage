@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/auth/Auth";
 import CreateListing from "./pages/listing/CreateListing";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
   // Create QueryClient inside the component
@@ -23,7 +24,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/create-listing" element={<CreateListing />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
