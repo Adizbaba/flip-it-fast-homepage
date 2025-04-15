@@ -61,13 +61,26 @@ const CreateListing = () => {
     }
 
     try {
+      // Properly format the data to match the database schema
       const { error } = await supabase
         .from('auction_items')
         .insert({
           seller_id: user.id,
-          ...data,
+          title: data.title,
+          description: data.description,
+          condition: data.condition,
+          category_id: data.categoryId,
+          starting_bid: data.startingBid,
+          reserve_price: data.reservePrice || null,
+          buy_now_price: data.buyNowPrice || null,
+          quantity: data.quantity,
           shipping_options: JSON.parse(data.shippingOptions),
+          return_policy: data.returnPolicy,
+          auction_type: data.auctionType,
+          start_date: data.startDate,
+          end_date: data.endDate,
           status: 'Draft',
+          variations: data.variations || null
         });
 
       if (error) throw error;
