@@ -1,13 +1,24 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Menu, X, User, Bell, ShoppingCart } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/auth';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleAuthClick = () => {
+    if (user) {
+      signOut();
+    } else {
+      navigate('/auth');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -46,11 +57,17 @@ const Header = () => {
             <Button variant="ghost" size="icon" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
             </Button>
-            <Button variant="outline" className="gap-2">
-              <User className="h-4 w-4" />
-              <span>Login</span>
-            </Button>
-            <Button>Sign Up</Button>
+            {user ? (
+              <Button variant="outline" onClick={handleAuthClick} className="gap-2">
+                <User className="h-4 w-4" />
+                <span>Sign Out</span>
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={handleAuthClick} className="gap-2">
+                <User className="h-4 w-4" />
+                <span>Sign In</span>
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -81,11 +98,14 @@ const Header = () => {
             <a href="#" className="block py-2 text-sm font-medium">How It Works</a>
             <a href="#" className="block py-2 text-sm font-medium">Sell an Item</a>
             <div className="flex space-x-3 pt-2 border-t">
-              <Button variant="outline" className="flex-1 gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 gap-2"
+                onClick={handleAuthClick}
+              >
                 <User className="h-4 w-4" />
-                <span>Login</span>
+                <span>{user ? 'Sign Out' : 'Sign In'}</span>
               </Button>
-              <Button className="flex-1">Sign Up</Button>
             </div>
           </div>
         </div>
