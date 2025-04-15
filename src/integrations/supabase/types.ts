@@ -9,6 +9,104 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      auction_items: {
+        Row: {
+          auction_type: string
+          buy_now_price: number | null
+          category_id: string
+          condition: string
+          created_at: string
+          description: string
+          end_date: string
+          id: string
+          images: Json | null
+          quantity: number
+          reserve_price: number | null
+          return_policy: string | null
+          seller_id: string
+          shipping_options: Json | null
+          start_date: string
+          starting_bid: number
+          status: string
+          title: string
+          updated_at: string
+          variations: Json | null
+        }
+        Insert: {
+          auction_type: string
+          buy_now_price?: number | null
+          category_id: string
+          condition: string
+          created_at?: string
+          description: string
+          end_date: string
+          id?: string
+          images?: Json | null
+          quantity?: number
+          reserve_price?: number | null
+          return_policy?: string | null
+          seller_id: string
+          shipping_options?: Json | null
+          start_date: string
+          starting_bid: number
+          status?: string
+          title: string
+          updated_at?: string
+          variations?: Json | null
+        }
+        Update: {
+          auction_type?: string
+          buy_now_price?: number | null
+          category_id?: string
+          condition?: string
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          images?: Json | null
+          quantity?: number
+          reserve_price?: number | null
+          return_policy?: string | null
+          seller_id?: string
+          shipping_options?: Json | null
+          start_date?: string
+          starting_bid?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          variations?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

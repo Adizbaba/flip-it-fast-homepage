@@ -38,7 +38,9 @@ const Header = () => {
             <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</a>
             <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Categories</a>
             <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">How It Works</a>
-            <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Sell an Item</a>
+            {user && (
+              <a href="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">Create Listing</a>
+            )}
           </nav>
 
           {/* Search, notification and profile (Desktop) */}
@@ -97,6 +99,9 @@ const Header = () => {
             <a href="#" className="block py-2 text-sm font-medium">Categories</a>
             <a href="#" className="block py-2 text-sm font-medium">How It Works</a>
             <a href="#" className="block py-2 text-sm font-medium">Sell an Item</a>
+            {user && (
+              <a href="/create-listing" className="block py-2 text-sm font-medium">Create Listing</a>
+            )}
             <div className="flex space-x-3 pt-2 border-t">
               <Button 
                 variant="outline" 
