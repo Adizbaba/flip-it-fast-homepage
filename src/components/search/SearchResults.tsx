@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { SearchResultItem } from "@/hooks/useSearch";
+import { useNavigate } from "react-router-dom";
 
 interface SearchResultsProps {
   results: SearchResultItem[];
@@ -32,6 +33,7 @@ const SearchResults = ({
 }: SearchResultsProps) => {
   const { user } = useAuth();
   const { isSaved, addToSavedItems, removeFromSavedItems } = useSavedItems(user);
+  const navigate = useNavigate();
 
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -163,7 +165,10 @@ const SearchResults = ({
                   variant="ghost"
                   size="icon"
                   className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full"
-                  onClick={() => toggleSaved(item.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleSaved(item.id);
+                  }}
                 >
                   <Heart
                     className={`h-5 w-5 ${
@@ -187,7 +192,7 @@ const SearchResults = ({
               <Button
                 variant="outline"
                 className="w-full mt-3"
-                onClick={() => window.location.href = `/auction/${item.id}`}
+                onClick={() => navigate(`/item/${item.id}`)}
               >
                 View Item
               </Button>

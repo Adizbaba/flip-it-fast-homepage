@@ -1,9 +1,9 @@
-
 import { Heart, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AuctionCardProps {
   id: string;
@@ -17,6 +17,7 @@ interface AuctionCardProps {
 const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: AuctionCardProps) => {
   const { user } = useAuth();
   const { addToSavedItems, removeFromSavedItems, isSaved } = useSavedItems(user);
+  const navigate = useNavigate();
 
   const handleWatchlistToggle = async () => {
     if (!user) {
@@ -80,8 +81,12 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">{bids} bids</p>
-            <Button size="sm" className="mt-1">
-              Bid Now
+            <Button 
+              size="sm" 
+              className="mt-1"
+              onClick={() => navigate(`/item/${id}`)}
+            >
+              View Item
             </Button>
           </div>
         </div>
