@@ -26,10 +26,13 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/search');
     }
   };
 
   const handleSearchClick = () => {
+    // Always navigate to search page when clicking the search bar
     navigate('/search');
   };
 
@@ -121,6 +124,7 @@ const Header = () => {
                 className="w-full pl-8 rounded-full bg-muted/50 border-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={handleSearchClick}
               />
             </form>
             <a href="#" className="block py-2 text-sm font-medium">All Auctions</a>

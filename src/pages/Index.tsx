@@ -26,6 +26,11 @@ const Index = () => {
     }
   };
 
+  // Function to handle direct navigation to search page for popular searches
+  const handleSearchClick = (query: string) => {
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -47,6 +52,7 @@ const Index = () => {
                 className="pl-12 pr-28 h-14 text-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={() => navigate('/search')}
               />
               <Button 
                 type="submit" 
@@ -57,11 +63,36 @@ const Index = () => {
             </form>
             <div className="max-w-3xl mx-auto mt-4 flex flex-wrap justify-center gap-2">
               <span className="text-sm text-muted-foreground">Popular searches:</span>
-              <a href="/search?q=Watches" className="text-sm text-primary hover:underline">Watches</a>
-              <a href="/search?q=Electronics" className="text-sm text-primary hover:underline">Electronics</a>
-              <a href="/search?q=Vintage" className="text-sm text-primary hover:underline">Vintage</a>
-              <a href="/search?q=Collectibles" className="text-sm text-primary hover:underline">Collectibles</a>
-              <a href="/search?q=Jewelry" className="text-sm text-primary hover:underline">Jewelry</a>
+              <button 
+                onClick={() => handleSearchClick("Watches")}
+                className="text-sm text-primary hover:underline"
+              >
+                Watches
+              </button>
+              <button 
+                onClick={() => handleSearchClick("Electronics")}
+                className="text-sm text-primary hover:underline"
+              >
+                Electronics
+              </button>
+              <button 
+                onClick={() => handleSearchClick("Vintage")}
+                className="text-sm text-primary hover:underline"
+              >
+                Vintage
+              </button>
+              <button 
+                onClick={() => handleSearchClick("Collectibles")}
+                className="text-sm text-primary hover:underline"
+              >
+                Collectibles
+              </button>
+              <button 
+                onClick={() => handleSearchClick("Jewelry")}
+                className="text-sm text-primary hover:underline"
+              >
+                Jewelry
+              </button>
             </div>
           </div>
         </section>
