@@ -1,12 +1,14 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, Bell, ShoppingCart } from "lucide-react";
+import { Search, Menu, X, User, Bell, ShoppingCart, Heart } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -18,6 +20,17 @@ const Header = () => {
     } else {
       navigate('/auth');
     }
+  };
+  
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleSearchClick = () => {
+    navigate('/search');
   };
 
   return (
@@ -45,17 +58,30 @@ const Header = () => {
 
           {/* Search, notification and profile (Desktop) */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="relative">
+            <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search auctions..."
                 className="w-[200px] pl-8 rounded-full bg-muted/50 border-0 focus-visible:ring-auction-purple"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={handleSearchClick}
               />
-            </div>
+            </form>
             <Button variant="ghost" size="icon" aria-label="Notifications">
               <Bell className="h-5 w-5" />
             </Button>
+            {user && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                aria-label="Saved Items"
+                onClick={() => navigate('/watch-list')}
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
             </Button>
@@ -87,20 +113,25 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t py-4">
           <div className="container mx-auto px-4 flex flex-col space-y-4">
-            <div className="relative mb-2">
+            <form onSubmit={handleSearchSubmit} className="relative mb-2">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search auctions..."
                 className="w-full pl-8 rounded-full bg-muted/50 border-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </form>
             <a href="#" className="block py-2 text-sm font-medium">All Auctions</a>
             <a href="#" className="block py-2 text-sm font-medium">Categories</a>
             <a href="#" className="block py-2 text-sm font-medium">How It Works</a>
             <a href="#" className="block py-2 text-sm font-medium">Sell an Item</a>
             {user && (
-              <a href="/create-listing" className="block py-2 text-sm font-medium">Create Listing</a>
+              <>
+                <a href="/create-listing" className="block py-2 text-sm font-medium">Create Listing</a>
+                <a href="/watch-list" className="block py-2 text-sm font-medium">Saved Items</a>
+              </>
             )}
             <div className="flex space-x-3 pt-2 border-t">
               <Button 
