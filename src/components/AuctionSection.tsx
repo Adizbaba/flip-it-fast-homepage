@@ -47,7 +47,15 @@ const AuctionSection = ({ title, auctions }: AuctionSectionProps) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {auctions.map((auction) => (
-            <AuctionCard key={auction.id} {...auction} />
+            <AuctionCard 
+              key={auction.id} 
+              id={auction.id.toString()} 
+              title={auction.title} 
+              image={auction.image} 
+              currentBid={auction.currentBid} 
+              timeRemaining={auction.timeRemaining} 
+              bids={auction.bids} 
+            />
           ))}
         </div>
 

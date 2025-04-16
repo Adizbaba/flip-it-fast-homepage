@@ -5,7 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { Tables } from '@/integrations/supabase/types';
 
 export const useSavedItems = (user: User | null) => {
-  const [savedItems, setSavedItems] = useState<Tables['saved_items'][]>([]);
+  const [savedItems, setSavedItems] = useState<Tables<'saved_items'>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export const useSavedItems = (user: User | null) => {
       try {
         const { data, error } = await supabase
           .from('saved_items')
-          .select('*, auction_items(*)') // Join with auction items
+          .select('*, auction_items(*)')
           .eq('user_id', user.id);
 
         if (error) throw error;
