@@ -47,7 +47,7 @@ const Search = () => {
       try {
         let queryBuilder = supabase
           .from("auction_items")
-          .select("*, profiles!auction_items_seller_id_fkey(*)", { count: "exact" });
+          .select("*", { count: "exact" });
 
         // Apply search query filter if present
         if (query) {
@@ -92,13 +92,35 @@ const Search = () => {
         const start = (page - 1) * itemsPerPage;
         queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
 
-        const { data, error, count } = await queryBuilder;
+        const { data: itemsData, error: itemsError, count } = await queryBuilder;
 
-        if (error) {
-          throw error;
+        if (itemsError) {
+          throw itemsError;
         }
 
-        setResults(data || []);
+        // Get seller profiles for all items
+        const items = itemsData || [];
+        const enrichedItems: SearchResultItem[] = [...items];
+
+        // Fetch seller profiles for each item
+        if (items.length > 0) {
+          const sellerIds = items.map(item => item.seller_id);
+          const uniqueSellerIds = [...new Set(sellerIds)];
+
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("id", uniqueSellerIds);
+
+          if (!profilesError && profilesData) {
+            // Map profiles to items
+            enrichedItems.forEach(item => {
+              item.profiles = profilesData.find(profile => profile.id === item.seller_id) || null;
+            });
+          }
+        }
+
+        setResults(enrichedItems);
         setTotalCount(count || 0);
 
         // Save query to recent searches if it's not empty
@@ -115,7 +137,7 @@ const Search = () => {
     };
 
     fetchResults();
-  }, [query, category, minPrice, maxPrice, sortBy, page]);
+  }, [query, category, minPrice, maxPrice, sortBy, page, recentSearches]);
 
   // Load recent searches from localStorage on component mount
   useEffect(() => {
