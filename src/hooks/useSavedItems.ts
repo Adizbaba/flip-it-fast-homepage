@@ -4,8 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Tables } from '@/integrations/supabase/types';
 
+// Define a type that includes the joined auction_items data
+type SavedItemWithAuction = Tables<'saved_items'> & {
+  auction_items: Tables<'auction_items'> | null;
+};
+
 export const useSavedItems = (user: User | null) => {
-  const [savedItems, setSavedItems] = useState<Tables<'saved_items'>[]>([]);
+  const [savedItems, setSavedItems] = useState<SavedItemWithAuction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +49,20 @@ export const useSavedItems = (user: User | null) => {
         .select();
 
       if (error) throw error;
-      if (data) setSavedItems(prev => [...prev, data[0]]);
+      if (data) {
+        // Fetch the complete item with auction_items data
+        const { data: fullData, error: fetchError } = await supabase
+          .from('saved_items')
+          .select('*, auction_items(*)')
+          .eq('id', data[0].id)
+          .single();
+          
+        if (!fetchError && fullData) {
+          setSavedItems(prev => [...prev, fullData]);
+        } else {
+          setSavedItems(prev => [...prev, data[0] as SavedItemWithAuction]);
+        }
+      }
       return data;
     } catch (error) {
       console.error('Error adding to saved items:', error);
