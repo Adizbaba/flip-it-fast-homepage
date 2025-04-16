@@ -4,13 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Tables } from '@/integrations/supabase/types';
 
-// Define a type that includes the joined auction_items data
-type SavedItemWithAuction = Tables<'saved_items'> & {
-  auction_items: Tables<'auction_items'> | null;
-};
+// Define types for our saved items and auction items
+interface SavedItem extends Tables<'saved_items'> {
+  auction_items?: Tables<'auction_items'> | null;
+}
 
 export const useSavedItems = (user: User | null) => {
-  const [savedItems, setSavedItems] = useState<SavedItemWithAuction[]>([]);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export const useSavedItems = (user: User | null) => {
       try {
         const { data, error } = await supabase
           .from('saved_items')
-          .select('*, auction_items(*)')
+          .select('*, auction_items:item_id(*)')
           .eq('user_id', user.id);
 
         if (error) throw error;
@@ -49,18 +49,25 @@ export const useSavedItems = (user: User | null) => {
         .select();
 
       if (error) throw error;
+      
       if (data) {
-        // Fetch the complete item with auction_items data
-        const { data: fullData, error: fetchError } = await supabase
-          .from('saved_items')
-          .select('*, auction_items(*)')
-          .eq('id', data[0].id)
+        // Fetch the auction item separately
+        const { data: auctionData, error: auctionError } = await supabase
+          .from('auction_items')
+          .select('*')
+          .eq('id', itemId)
           .single();
           
-        if (!fetchError && fullData) {
-          setSavedItems(prev => [...prev, fullData]);
+        if (!auctionError && auctionData) {
+          // Add the new item with its auction data to the state
+          const newItem: SavedItem = {
+            ...data[0],
+            auction_items: auctionData
+          };
+          setSavedItems(prev => [...prev, newItem]);
         } else {
-          setSavedItems(prev => [...prev, data[0] as SavedItemWithAuction]);
+          // Add just the saved item if we couldn't fetch auction data
+          setSavedItems(prev => [...prev, data[0]]);
         }
       }
       return data;
