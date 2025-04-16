@@ -80,6 +80,7 @@ const SearchBar = ({
           <PopoverContent 
             className="w-[var(--radix-popover-trigger-width)] p-0 max-h-[300px] overflow-y-auto" 
             align="start"
+            sideOffset={5}
           >
             {(recentSearches.length > 0 || popularSearches.length > 0) && (
               <div className="p-2">
@@ -129,7 +130,7 @@ const SearchBar = ({
       </form>
       <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
         <span>Popular:</span>
-        {popularSearches.slice(0, 3).map((keyword, index) => (
+        {popularSearches.slice(0, 5).map((keyword, index) => (
           <button
             key={index}
             className="hover:underline hover:text-primary"

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Menu, X, User, Bell, ShoppingCart, Heart } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 
 const Header = () => {
@@ -29,11 +29,13 @@ const Header = () => {
     } else {
       navigate('/search');
     }
+    setIsMenuOpen(false); // Close mobile menu when searching
   };
 
   const handleSearchClick = () => {
     // Always navigate to search page when clicking the search bar
     navigate('/search');
+    setIsMenuOpen(false); // Close mobile menu when clicking search bar
   };
 
   return (
@@ -42,20 +44,20 @@ const Header = () => {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-auction-purple to-auction-magenta bg-clip-text text-transparent">
                 Fast<span className="text-auction-orange">Flip</span>
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</a>
-            <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Categories</a>
-            <a href="#" className="text-sm font-medium hover:text-auction-purple transition-colors">How It Works</a>
+            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</Link>
+            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Categories</Link>
+            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">How It Works</Link>
             {user && (
-              <a href="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">Create Listing</a>
+              <Link to="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">Create Listing</Link>
             )}
           </nav>
 
@@ -127,14 +129,14 @@ const Header = () => {
                 onClick={handleSearchClick}
               />
             </form>
-            <a href="#" className="block py-2 text-sm font-medium">All Auctions</a>
-            <a href="#" className="block py-2 text-sm font-medium">Categories</a>
-            <a href="#" className="block py-2 text-sm font-medium">How It Works</a>
-            <a href="#" className="block py-2 text-sm font-medium">Sell an Item</a>
+            <Link to="#" className="block py-2 text-sm font-medium">All Auctions</Link>
+            <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
+            <Link to="#" className="block py-2 text-sm font-medium">How It Works</Link>
+            <Link to="#" className="block py-2 text-sm font-medium">Sell an Item</Link>
             {user && (
               <>
-                <a href="/create-listing" className="block py-2 text-sm font-medium">Create Listing</a>
-                <a href="/watch-list" className="block py-2 text-sm font-medium">Saved Items</a>
+                <Link to="/create-listing" className="block py-2 text-sm font-medium">Create Listing</Link>
+                <Link to="/watch-list" className="block py-2 text-sm font-medium">Saved Items</Link>
               </>
             )}
             <div className="flex space-x-3 pt-2 border-t">
