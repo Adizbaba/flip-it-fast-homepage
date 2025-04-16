@@ -22,15 +22,54 @@ export const useSavedItems = (user: User | null) => {
       }
 
       try {
-        const { data, error } = await supabase
+        // First fetch the saved items without joining
+        const { data: savedData, error: savedError } = await supabase
           .from('saved_items')
-          .select('*, auction_items:item_id(*)')
+          .select('*')
           .eq('user_id', user.id);
 
-        if (error) throw error;
-        setSavedItems(data || []);
+        if (savedError) throw savedError;
+        
+        if (savedData && savedData.length > 0) {
+          // Create an array to hold the complete items with auction data
+          const itemsWithAuctions: SavedItem[] = [];
+          
+          // Fetch each auction item separately for each saved item
+          for (const savedItem of savedData) {
+            try {
+              const { data: auctionItem, error: auctionError } = await supabase
+                .from('auction_items')
+                .select('*')
+                .eq('id', savedItem.item_id)
+                .single();
+                
+              if (!auctionError && auctionItem) {
+                itemsWithAuctions.push({
+                  ...savedItem,
+                  auction_items: auctionItem
+                });
+              } else {
+                itemsWithAuctions.push({
+                  ...savedItem,
+                  auction_items: null
+                });
+              }
+            } catch (error) {
+              console.error(`Error fetching auction item ${savedItem.item_id}:`, error);
+              itemsWithAuctions.push({
+                ...savedItem,
+                auction_items: null
+              });
+            }
+          }
+          
+          setSavedItems(itemsWithAuctions);
+        } else {
+          setSavedItems([]);
+        }
       } catch (error) {
         console.error('Error fetching saved items:', error);
+        setSavedItems([]);
       } finally {
         setLoading(false);
       }
@@ -67,7 +106,7 @@ export const useSavedItems = (user: User | null) => {
           setSavedItems(prev => [...prev, newItem]);
         } else {
           // Add just the saved item if we couldn't fetch auction data
-          setSavedItems(prev => [...prev, data[0]]);
+          setSavedItems(prev => [...prev, {...data[0], auction_items: null}]);
         }
       }
       return data;
