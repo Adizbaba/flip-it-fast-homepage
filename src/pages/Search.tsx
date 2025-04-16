@@ -1,153 +1,34 @@
 
-import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SearchBar from "@/components/search/SearchBar";
+import { SearchState } from "@/components/search/SearchState";
 import SearchFilters from "@/components/search/SearchFilters";
 import SearchResults from "@/components/search/SearchResults";
 import { Separator } from "@/components/ui/separator";
-import { Tables } from "@/integrations/supabase/types";
-
-// Define the types for our search results
-export type SearchResultItem = Tables<"auction_items"> & {
-  profiles?: Tables<"profiles"> | null;
-};
+import { useSearch } from "@/hooks/useSearch";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [popularSearches] = useState<string[]>([
-    "Watches", "Electronics", "Vintage", "Collectibles", "Jewelry"
-  ]);
 
-  // Get search parameters from URL
-  const query = searchParams.get("q") || "";
-  const category = searchParams.get("category") || "";
-  const minPrice = searchParams.get("minPrice") || "";
-  const maxPrice = searchParams.get("maxPrice") || "";
-  const sortBy = searchParams.get("sortBy") || "newest";
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo(0, 0); // Scroll to top when changing page
+  const initialFilters = {
+    query: searchParams.get("q") || "",
+    category: searchParams.get("category") || "",
+    minPrice: searchParams.get("minPrice") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
+    sortBy: searchParams.get("sortBy") || "newest"
   };
 
-  // Perform search with current parameters
-  useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
+  const {
+    results,
+    loading,
+    totalCount,
+    page,
+    setPage,
+    filters,
+    setFilters
+  } = useSearch(initialFilters);
 
-      try {
-        let queryBuilder = supabase
-          .from("auction_items")
-          .select("*", { count: "exact" });
-
-        // Apply search query filter if present
-        if (query) {
-          queryBuilder = queryBuilder.or(
-            `title.ilike.%${query}%,description.ilike.%${query}%`
-          );
-        }
-
-        // Apply category filter if present
-        if (category) {
-          queryBuilder = queryBuilder.eq("category_id", category);
-        }
-
-        // Apply price range filters if present
-        if (minPrice) {
-          queryBuilder = queryBuilder.gte("starting_bid", minPrice);
-        }
-        if (maxPrice) {
-          queryBuilder = queryBuilder.lte("starting_bid", maxPrice);
-        }
-
-        // Apply sorting
-        switch (sortBy) {
-          case "priceAsc":
-            queryBuilder = queryBuilder.order("starting_bid", { ascending: true });
-            break;
-          case "priceDesc":
-            queryBuilder = queryBuilder.order("starting_bid", { ascending: false });
-            break;
-          case "newest":
-            queryBuilder = queryBuilder.order("created_at", { ascending: false });
-            break;
-          case "endingSoon":
-            queryBuilder = queryBuilder.order("end_date", { ascending: true });
-            break;
-          default:
-            queryBuilder = queryBuilder.order("created_at", { ascending: false });
-        }
-
-        // Apply pagination - 12 items per page
-        const itemsPerPage = 12;
-        const start = (page - 1) * itemsPerPage;
-        queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
-
-        const { data: itemsData, error: itemsError, count } = await queryBuilder;
-
-        if (itemsError) {
-          throw itemsError;
-        }
-
-        // Get seller profiles for all items
-        const items = itemsData || [];
-        const enrichedItems: SearchResultItem[] = [...items];
-
-        // Fetch seller profiles for each item
-        if (items.length > 0) {
-          const sellerIds = items.map(item => item.seller_id);
-          const uniqueSellerIds = [...new Set(sellerIds)];
-
-          const { data: profilesData, error: profilesError } = await supabase
-            .from("profiles")
-            .select("*")
-            .in("id", uniqueSellerIds);
-
-          if (!profilesError && profilesData) {
-            // Map profiles to items
-            enrichedItems.forEach(item => {
-              item.profiles = profilesData.find(profile => profile.id === item.seller_id) || null;
-            });
-          }
-        }
-
-        setResults(enrichedItems);
-        setTotalCount(count || 0);
-
-        // Save query to recent searches if it's not empty
-        if (query && !recentSearches.includes(query)) {
-          const updatedSearches = [query, ...recentSearches].slice(0, 5);
-          setRecentSearches(updatedSearches);
-          localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
-        }
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [query, category, minPrice, maxPrice, sortBy, page, recentSearches]);
-
-  // Load recent searches from localStorage on component mount
-  useEffect(() => {
-    const savedSearches = localStorage.getItem("recentSearches");
-    if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
-    }
-  }, []);
-
-  // Update URL when search parameters change
   const updateSearchParams = (params: Record<string, string>) => {
     const newSearchParams = new URLSearchParams(searchParams);
     
@@ -162,37 +43,32 @@ const Search = () => {
     setSearchParams(newSearchParams);
   };
 
+  const handleSearch = (query: string) => {
+    setFilters({ ...filters, query });
+    updateSearchParams({ q: query });
+    setPage(1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="mb-6">
-          <SearchBar 
-            initialQuery={query} 
-            recentSearches={recentSearches} 
-            popularSearches={popularSearches}
-            onSearch={(q) => {
-              updateSearchParams({ q });
-              setPage(1);
-            }} 
-          />
-        </div>
+        <SearchState
+          initialQuery={filters.query}
+          onSearch={handleSearch}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1">
             <h2 className="text-xl font-bold mb-4">Filters</h2>
             <SearchFilters
-              selectedCategory={category}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              sortBy={sortBy}
-              onFilterChange={(filters) => {
-                updateSearchParams({
-                  category: filters.category,
-                  minPrice: filters.minPrice,
-                  maxPrice: filters.maxPrice,
-                  sortBy: filters.sortBy
-                });
+              selectedCategory={filters.category}
+              minPrice={filters.minPrice}
+              maxPrice={filters.maxPrice}
+              sortBy={filters.sortBy}
+              onFilterChange={(newFilters) => {
+                updateSearchParams(newFilters);
+                setFilters({ ...filters, ...newFilters });
                 setPage(1);
               }}
             />
@@ -202,7 +78,7 @@ const Search = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {loading ? "Searching..." : `${totalCount} results found`}
-                {query && ` for "${query}"`}
+                {filters.query && ` for "${filters.query}"`}
               </h2>
             </div>
             <Separator className="mb-6" />
@@ -212,7 +88,7 @@ const Search = () => {
               page={page}
               totalCount={totalCount}
               itemsPerPage={12}
-              onPageChange={handlePageChange}
+              onPageChange={setPage}
             />
           </div>
         </div>
