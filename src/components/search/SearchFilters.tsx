@@ -26,11 +26,12 @@ interface Category {
   name: string;
 }
 
-interface FilterState {
+export interface FilterState {
   category: string;
   minPrice: string;
   maxPrice: string;
   sortBy: string;
+  [key: string]: string; // Add index signature to make it compatible with Record<string, string>
 }
 
 interface SearchFiltersProps {

@@ -7,6 +7,7 @@ import SearchFilters from "@/components/search/SearchFilters";
 import SearchResults from "@/components/search/SearchResults";
 import { Separator } from "@/components/ui/separator";
 import { useSearch } from "@/hooks/useSearch";
+import { FilterState } from "@/components/search/SearchFilters";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();

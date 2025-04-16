@@ -1,4 +1,3 @@
-
 import { Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/pagination";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
-import { SearchResultItem } from "@/pages/Search";
+import { SearchResultItem } from "@/hooks/useSearch";
 
 interface SearchResultsProps {
   results: SearchResultItem[];
