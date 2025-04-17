@@ -152,13 +152,15 @@ const ItemDetail = () => {
               <h2 className="text-xl font-semibold">Seller Information</h2>
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  <AvatarImage src={item.profiles?.avatar_url || undefined} />
+                  <AvatarImage src={item.profiles && typeof item.profiles === 'object' ? 
+                    (item.profiles as { avatar_url: string | null })?.avatar_url || undefined : undefined} />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{item.profiles?.username || "Unknown seller"}</p>
+                  <p className="font-medium">{item.profiles && typeof item.profiles === 'object' ? 
+                    (item.profiles as { username: string })?.username || "Unknown seller" : "Unknown seller"}</p>
                   <p className="text-sm text-muted-foreground">Member since {new Date(item.created_at).getFullYear()}</p>
                 </div>
               </div>
