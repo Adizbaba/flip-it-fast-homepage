@@ -35,14 +35,15 @@ export const useItemDetail = (itemId: string) => {
       // Handle the response by safely converting to our expected type
       const itemWithProfiles: ItemDetail = {
         ...item as Database["public"]["Tables"]["auction_items"]["Row"],
-        // Use a type guard to ensure profiles has the right shape
-        profiles: item?.profiles && typeof item.profiles === 'object' && 
-          !('error' in item.profiles) && 'username' in item.profiles ? 
-          {
-            username: (item.profiles as any).username || "Unknown seller",
-            avatar_url: (item.profiles as any).avatar_url || null
-          } : 
-          null
+        // Fixed: Added additional null checks and safe type conversion
+        profiles: item && item.profiles ? 
+          (typeof item.profiles === 'object' && 
+           'username' in (item.profiles as any) ? 
+            {
+              username: (item.profiles as any).username || "Unknown seller",
+              avatar_url: (item.profiles as any).avatar_url || null
+            } : null) 
+          : null
       };
       
       return itemWithProfiles;
