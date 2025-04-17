@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
+type ProfilesResponse = {
+  username: string;
+  avatar_url: string | null;
+} | null;
+
 type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
-  profiles?: {
-    username: string;
-    avatar_url: string | null;
-  } | null;
+  profiles?: ProfilesResponse;
 };
 
 export const useItemDetail = (itemId: string) => {
@@ -27,7 +29,9 @@ export const useItemDetail = (itemId: string) => {
         .single();
 
       if (error) throw error;
-      return item;
+      
+      // Ensure the profiles property is properly typed or null
+      return item as ItemDetail;
     },
     enabled: !!itemId,
   });
