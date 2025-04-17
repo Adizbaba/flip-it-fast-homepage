@@ -16,7 +16,7 @@ interface ConditionFilterProps {
 const ConditionFilter = ({ selectedCondition, onConditionChange }: ConditionFilterProps) => {
   // Condition options
   const conditions = [
-    { value: "", label: "All Conditions" },
+    { value: "all", label: "All Conditions" },
     { value: "New", label: "New" },
     { value: "Like New", label: "Like New" },
     { value: "Excellent", label: "Excellent" },
@@ -29,7 +29,7 @@ const ConditionFilter = ({ selectedCondition, onConditionChange }: ConditionFilt
     <div className="space-y-2">
       <Label htmlFor="condition">Condition</Label>
       <Select
-        value={selectedCondition || ""}
+        value={selectedCondition || "all"}
         onValueChange={onConditionChange}
       >
         <SelectTrigger id="condition">

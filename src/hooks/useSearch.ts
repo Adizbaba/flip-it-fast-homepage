@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -35,7 +36,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
         }
 
         // Filter by category
-        if (filters.category) {
+        if (filters.category && filters.category !== "all") {
           queryBuilder = queryBuilder.eq("category_id", filters.category);
         }
 
@@ -48,7 +49,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
         }
 
         // Filter by condition
-        if (filters.condition) {
+        if (filters.condition && filters.condition !== "all") {
           queryBuilder = queryBuilder.eq("condition", filters.condition);
         }
 

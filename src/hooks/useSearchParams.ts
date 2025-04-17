@@ -12,11 +12,11 @@ export const useSearchParamsState = ({ initialQuery = "" }: UseSearchParamsOptio
 
   const initialFilters: SearchFilters = {
     query: searchParams.get("q") || initialQuery,
-    category: searchParams.get("category") || "",
+    category: searchParams.get("category") || "all",
     minPrice: searchParams.get("minPrice") || "",
     maxPrice: searchParams.get("maxPrice") || "",
     sortBy: searchParams.get("sortBy") || "newest",
-    condition: searchParams.get("condition") || ""
+    condition: searchParams.get("condition") || "all"
   };
 
   const {
@@ -33,7 +33,7 @@ export const useSearchParamsState = ({ initialQuery = "" }: UseSearchParamsOptio
     const newSearchParams = new URLSearchParams(searchParams);
     
     Object.entries(params).forEach(([key, value]) => {
-      if (value) {
+      if (value && value !== "all") {
         newSearchParams.set(key, value);
       } else {
         newSearchParams.delete(key);
