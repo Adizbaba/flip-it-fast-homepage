@@ -1,7 +1,7 @@
 
 import { SearchState } from "@/components/search/SearchState";
 import SearchLayout from "@/components/search/SearchLayout";
-import { useSearchParams } from "@/hooks/useSearchParams";
+import { useSearchParamsState } from "@/hooks/useSearchParams";
 
 const Search = () => {
   const {
@@ -13,7 +13,7 @@ const Search = () => {
     setPage,
     handleFilterChange,
     handleSearch
-  } = useSearchParams();
+  } = useSearchParamsState();
 
   return (
     <SearchLayout

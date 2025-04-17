@@ -1,16 +1,21 @@
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams as useRouterSearchParams } from "react-router-dom";
 import { useSearch, SearchFilters } from "@/hooks/useSearch";
 
 interface UseSearchParamsOptions {
   initialQuery?: string;
 }
 
-export const useSearchParams = ({ initialQuery = "" }: UseSearchParamsOptions = {}) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+// Add index signature to SearchFilters interface
+export interface SearchParamsFilters extends SearchFilters {
+  [key: string]: string;
+}
 
-  const initialFilters: SearchFilters = {
+export const useSearchParamsState = ({ initialQuery = "" }: UseSearchParamsOptions = {}) => {
+  const [searchParams, setSearchParams] = useRouterSearchParams();
+
+  const initialFilters: SearchParamsFilters = {
     query: searchParams.get("q") || initialQuery,
     category: searchParams.get("category") || "",
     minPrice: searchParams.get("minPrice") || "",

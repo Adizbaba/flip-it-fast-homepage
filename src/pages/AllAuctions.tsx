@@ -1,6 +1,6 @@
 
 import SearchLayout from "@/components/search/SearchLayout";
-import { useSearchParams } from "@/hooks/useSearchParams";
+import { useSearchParamsState } from "@/hooks/useSearchParams";
 
 const AllAuctions = () => {
   const {
@@ -11,7 +11,7 @@ const AllAuctions = () => {
     filters,
     setPage,
     handleFilterChange
-  } = useSearchParams({ initialQuery: "" });
+  } = useSearchParamsState({ initialQuery: "" });
 
   return (
     <SearchLayout
