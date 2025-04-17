@@ -7,15 +7,10 @@ interface UseSearchParamsOptions {
   initialQuery?: string;
 }
 
-// Add index signature to SearchFilters interface
-export interface SearchParamsFilters extends SearchFilters {
-  [key: string]: string;
-}
-
 export const useSearchParamsState = ({ initialQuery = "" }: UseSearchParamsOptions = {}) => {
   const [searchParams, setSearchParams] = useRouterSearchParams();
 
-  const initialFilters: SearchParamsFilters = {
+  const initialFilters: SearchFilters = {
     query: searchParams.get("q") || initialQuery,
     category: searchParams.get("category") || "",
     minPrice: searchParams.get("minPrice") || "",

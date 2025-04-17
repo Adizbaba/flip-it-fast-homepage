@@ -1,19 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { FilterState } from "@/components/search/filters/types";
 
 export type SearchResultItem = Tables<"auction_items"> & {
   profiles?: Tables<"profiles"> | null;
 };
 
-export interface SearchFilters {
+export interface SearchFilters extends FilterState {
   query: string;
-  category: string;
-  minPrice: string;
-  maxPrice: string;
-  sortBy: string;
-  condition?: string;
 }
 
 export const useSearch = (initialFilters: SearchFilters) => {
