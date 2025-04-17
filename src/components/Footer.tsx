@@ -1,7 +1,19 @@
-
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 
 const Footer = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleStartSelling = () => {
+    if (user) {
+      navigate("/create-listing");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <footer className="bg-auction-dark text-white">
       <div className="container mx-auto px-4 py-12">
@@ -37,7 +49,14 @@ const Footer = () => {
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">All Auctions</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Categories</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Sell an Item</a></li>
+              <li>
+                <button
+                  onClick={handleStartSelling}
+                  className="text-gray-400 hover:text-white transition-colors text-left"
+                >
+                  Sell an Item
+                </button>
+              </li>
             </ul>
           </div>
 

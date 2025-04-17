@@ -1,7 +1,20 @@
 
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleStartSelling = () => {
+    if (user) {
+      navigate("/create-listing");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <section className="relative bg-gradient-to-tr from-auction-purple to-auction-magenta py-12 md:py-20">
       <div className="absolute inset-0 pattern-dots pattern-blue-500 pattern-bg-white pattern-size-4 pattern-opacity-10"></div>
@@ -17,7 +30,12 @@ const HeroSection = () => {
             <Button size="lg" className="bg-white text-auction-purple hover:bg-gray-100 text-lg px-6">
               Explore Auctions
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-6">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-6"
+              onClick={handleStartSelling}
+            >
               Start Selling
             </Button>
           </div>
