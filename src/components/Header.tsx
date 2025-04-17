@@ -53,7 +53,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</Link>
+            <Link to="/auctions" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</Link>
             <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Categories</Link>
             <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">How It Works</Link>
             {user && (
@@ -129,7 +129,7 @@ const Header = () => {
                 onClick={handleSearchClick}
               />
             </form>
-            <Link to="#" className="block py-2 text-sm font-medium">All Auctions</Link>
+            <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
             <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
             <Link to="#" className="block py-2 text-sm font-medium">How It Works</Link>
             <Link to="#" className="block py-2 text-sm font-medium">Sell an Item</Link>

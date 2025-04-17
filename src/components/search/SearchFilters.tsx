@@ -31,7 +31,8 @@ export interface FilterState {
   minPrice: string;
   maxPrice: string;
   sortBy: string;
-  [key: string]: string; // Add index signature to make it compatible with Record<string, string>
+  condition?: string;
+  [key: string]: string | undefined; // Add index signature to make it compatible with Record<string, string>
 }
 
 interface SearchFiltersProps {
@@ -55,11 +56,23 @@ const SearchFilters = ({
     minPrice: minPrice,
     maxPrice: maxPrice,
     sortBy: sortBy || "newest",
+    condition: "",
   });
   const [sliderValue, setSliderValue] = useState<number[]>([
     parseInt(minPrice) || 0, 
     parseInt(maxPrice) || 1000
   ]);
+
+  // Condition options
+  const conditions = [
+    { value: "", label: "All Conditions" },
+    { value: "New", label: "New" },
+    { value: "Like New", label: "Like New" },
+    { value: "Excellent", label: "Excellent" },
+    { value: "Good", label: "Good" },
+    { value: "Fair", label: "Fair" },
+    { value: "Poor", label: "Poor" }
+  ];
 
   // Fetch categories
   useEffect(() => {
@@ -107,6 +120,7 @@ const SearchFilters = ({
       minPrice: "",
       maxPrice: "",
       sortBy: "newest",
+      condition: "",
     };
     setFilters(resetState);
     setSliderValue([0, 1000]);
@@ -134,6 +148,26 @@ const SearchFilters = ({
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Condition Filter */}
+        <div className="space-y-2">
+          <Label htmlFor="condition">Condition</Label>
+          <Select
+            value={filters.condition || ""}
+            onValueChange={(value) => handleFilterChange("condition", value)}
+          >
+            <SelectTrigger id="condition">
+              <SelectValue placeholder="All Conditions" />
+            </SelectTrigger>
+            <SelectContent>
+              {conditions.map((condition) => (
+                <SelectItem key={condition.value} value={condition.value}>
+                  {condition.label}
                 </SelectItem>
               ))}
             </SelectContent>

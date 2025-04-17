@@ -13,6 +13,7 @@ export interface SearchFilters {
   minPrice: string;
   maxPrice: string;
   sortBy: string;
+  condition?: string;
 }
 
 export const useSearch = (initialFilters: SearchFilters) => {
@@ -31,16 +32,19 @@ export const useSearch = (initialFilters: SearchFilters) => {
           .from("auction_items")
           .select("*", { count: "exact" });
 
+        // Filter by query text
         if (filters.query) {
           queryBuilder = queryBuilder.or(
             `title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`
           );
         }
 
+        // Filter by category
         if (filters.category) {
           queryBuilder = queryBuilder.eq("category_id", filters.category);
         }
 
+        // Filter by price range
         if (filters.minPrice) {
           queryBuilder = queryBuilder.gte("starting_bid", filters.minPrice);
         }
@@ -48,6 +52,15 @@ export const useSearch = (initialFilters: SearchFilters) => {
           queryBuilder = queryBuilder.lte("starting_bid", filters.maxPrice);
         }
 
+        // Filter by condition
+        if (filters.condition) {
+          queryBuilder = queryBuilder.eq("condition", filters.condition);
+        }
+
+        // Only show active listings
+        queryBuilder = queryBuilder.eq("status", "Active");
+
+        // Sort results
         switch (filters.sortBy) {
           case "priceAsc":
             queryBuilder = queryBuilder.order("starting_bid", { ascending: true });

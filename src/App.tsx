@@ -12,7 +12,8 @@ import CreateListing from "./pages/listing/CreateListing";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WatchList from "./pages/WatchList";
 import Search from "./pages/Search";
-import ItemDetail from "./pages/item/ItemDetail"; // New import
+import ItemDetail from "./pages/item/ItemDetail";
+import AllAuctions from "./pages/AllAuctions"; // New import
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -30,7 +31,8 @@ const App = () => {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/watch-list" element={<WatchList />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/item/:itemId" element={<ItemDetail />} /> {/* New route */}
+            <Route path="/item/:itemId" element={<ItemDetail />} />
+            <Route path="/auctions" element={<AllAuctions />} /> {/* New route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
