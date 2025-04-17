@@ -36,12 +36,13 @@ export const useItemDetail = (itemId: string) => {
       const itemWithProfiles: ItemDetail = {
         ...item as Database["public"]["Tables"]["auction_items"]["Row"],
         // Use a type guard to ensure profiles has the right shape
-        profiles: item && item.profiles ? 
-          (typeof item.profiles === 'object' && 
-           !('error' in item.profiles) && 
-           'username' in item.profiles ? 
-            item.profiles as ProfilesResponse : null) 
-          : null
+        profiles: item?.profiles && typeof item.profiles === 'object' && 
+          !('error' in item.profiles) && 'username' in item.profiles ? 
+          {
+            username: (item.profiles as any).username || "Unknown seller",
+            avatar_url: (item.profiles as any).avatar_url || null
+          } : 
+          null
       };
       
       return itemWithProfiles;
