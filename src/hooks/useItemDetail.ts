@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
+// Define a type for the profiles join result that can handle both successful and error cases
 type ProfilesResponse = {
   username: string;
   avatar_url: string | null;
 } | null;
 
+// Define the main item type including the profiles property
 type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
   profiles?: ProfilesResponse;
 };
@@ -30,8 +32,13 @@ export const useItemDetail = (itemId: string) => {
 
       if (error) throw error;
       
-      // Ensure the profiles property is properly typed or null
-      return item as ItemDetail;
+      // Handle the response by explicitly converting to our expected type
+      const itemWithProfiles: ItemDetail = {
+        ...item as Database["public"]["Tables"]["auction_items"]["Row"],
+        profiles: item?.profiles as ProfilesResponse
+      };
+      
+      return itemWithProfiles;
     },
     enabled: !!itemId,
   });
