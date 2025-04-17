@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,7 +6,7 @@ import SearchResults from "@/components/search/SearchResults";
 import { useSearch } from "@/hooks/useSearch";
 import { Separator } from "@/components/ui/separator";
 import { useSearchParams } from "react-router-dom";
-import { FilterState } from "@/components/search/SearchFilters";
+import { FilterState } from "@/components/search/filters/types";
 
 const AllAuctions = () => {
   const [searchParams, setSearchParams] = useSearchParams();

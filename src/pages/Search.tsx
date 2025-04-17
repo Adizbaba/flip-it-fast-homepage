@@ -1,4 +1,3 @@
-
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,7 +6,7 @@ import SearchFilters from "@/components/search/SearchFilters";
 import SearchResults from "@/components/search/SearchResults";
 import { Separator } from "@/components/ui/separator";
 import { useSearch } from "@/hooks/useSearch";
-import { FilterState } from "@/components/search/SearchFilters";
+import { FilterState } from "@/components/search/filters/types";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();

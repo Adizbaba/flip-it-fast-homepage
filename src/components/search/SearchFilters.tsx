@@ -1,39 +1,17 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { 
   Card,
   CardContent,
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tables } from "@/integrations/supabase/types";
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-export interface FilterState {
-  category: string;
-  minPrice: string;
-  maxPrice: string;
-  sortBy: string;
-  condition?: string;
-  [key: string]: string | undefined; // Add index signature to make it compatible with Record<string, string>
-}
+import { FilterState } from "./filters/types";
+import CategoryFilter from "./filters/CategoryFilter";
+import ConditionFilter from "./filters/ConditionFilter";
+import PriceRangeFilter from "./filters/PriceRangeFilter";
+import SortOptions from "./filters/SortOptions";
+import FilterActions from "./filters/FilterActions";
 
 interface SearchFiltersProps {
   selectedCategory: string;
@@ -50,7 +28,6 @@ const SearchFilters = ({
   sortBy,
   onFilterChange,
 }: SearchFiltersProps) => {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [filters, setFilters] = useState<FilterState>({
     category: selectedCategory,
     minPrice: minPrice,
@@ -58,54 +35,10 @@ const SearchFilters = ({
     sortBy: sortBy || "newest",
     condition: "",
   });
-  const [sliderValue, setSliderValue] = useState<number[]>([
-    parseInt(minPrice) || 0, 
-    parseInt(maxPrice) || 1000
-  ]);
-
-  // Condition options
-  const conditions = [
-    { value: "", label: "All Conditions" },
-    { value: "New", label: "New" },
-    { value: "Like New", label: "Like New" },
-    { value: "Excellent", label: "Excellent" },
-    { value: "Good", label: "Good" },
-    { value: "Fair", label: "Fair" },
-    { value: "Poor", label: "Poor" }
-  ];
-
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("categories")
-          .select("id, name")
-          .order("name");
-
-        if (error) throw error;
-        setCategories(data || []);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  // Handle price slider change
-  const handleSliderChange = (values: number[]) => {
-    setSliderValue(values);
-    setFilters((prev) => ({
-      ...prev,
-      minPrice: values[0].toString(),
-      maxPrice: values[1].toString(),
-    }));
   };
 
   // Apply filters
@@ -123,7 +56,6 @@ const SearchFilters = ({
       condition: "",
     };
     setFilters(resetState);
-    setSliderValue([0, 1000]);
     onFilterChange(resetState);
   };
 
@@ -134,122 +66,42 @@ const SearchFilters = ({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Category Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select
-            value={filters.category}
-            onValueChange={(value) => handleFilterChange("category", value)}
-          >
-            <SelectTrigger id="category">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <CategoryFilter 
+          selectedCategory={filters.category} 
+          onCategoryChange={(value) => handleFilterChange("category", value)} 
+        />
 
         {/* Condition Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="condition">Condition</Label>
-          <Select
-            value={filters.condition || ""}
-            onValueChange={(value) => handleFilterChange("condition", value)}
-          >
-            <SelectTrigger id="condition">
-              <SelectValue placeholder="All Conditions" />
-            </SelectTrigger>
-            <SelectContent>
-              {conditions.map((condition) => (
-                <SelectItem key={condition.value} value={condition.value}>
-                  {condition.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <ConditionFilter 
+          selectedCondition={filters.condition || ""} 
+          onConditionChange={(value) => handleFilterChange("condition", value)} 
+        />
 
         {/* Price Range Filter */}
-        <div className="space-y-4">
-          <Label>Price Range</Label>
-          <Slider
-            value={sliderValue}
-            max={10000}
-            step={10}
-            onValueChange={handleSliderChange}
-          />
-          <div className="flex items-center gap-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="minPrice" className="text-xs">Min ($)</Label>
-              <Input
-                id="minPrice"
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-                className="h-8"
-              />
-            </div>
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="maxPrice" className="text-xs">Max ($)</Label>
-              <Input
-                id="maxPrice"
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-                className="h-8"
-              />
-            </div>
-          </div>
-        </div>
+        <PriceRangeFilter 
+          minPrice={filters.minPrice}
+          maxPrice={filters.maxPrice}
+          onMinPriceChange={(value) => handleFilterChange("minPrice", value)}
+          onMaxPriceChange={(value) => handleFilterChange("maxPrice", value)}
+        />
 
         {/* Sort Options */}
-        <div className="space-y-2">
-          <Label>Sort By</Label>
-          <RadioGroup
-            value={filters.sortBy}
-            onValueChange={(value) => handleFilterChange("sortBy", value)}
-            className="space-y-1"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="newest" id="newest" />
-              <Label htmlFor="newest" className="cursor-pointer text-sm">Newest First</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="priceAsc" id="priceAsc" />
-              <Label htmlFor="priceAsc" className="cursor-pointer text-sm">Price: Low to High</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="priceDesc" id="priceDesc" />
-              <Label htmlFor="priceDesc" className="cursor-pointer text-sm">Price: High to Low</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="endingSoon" id="endingSoon" />
-              <Label htmlFor="endingSoon" className="cursor-pointer text-sm">Ending Soon</Label>
-            </div>
-          </RadioGroup>
-        </div>
+        <SortOptions 
+          sortBy={filters.sortBy} 
+          onSortChange={(value) => handleFilterChange("sortBy", value)} 
+        />
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2">
-          <Button onClick={applyFilters} className="w-full">
-            Apply Filters
-          </Button>
-          <Button
-            onClick={resetFilters}
-            variant="outline"
-            className="w-full"
-          >
-            Reset Filters
-          </Button>
-        </div>
+        <FilterActions 
+          onApply={applyFilters} 
+          onReset={resetFilters} 
+        />
       </CardContent>
     </Card>
   );
 };
 
 export default SearchFilters;
+
+// Export the FilterState type from the new location
+export type { FilterState } from "./filters/types";
