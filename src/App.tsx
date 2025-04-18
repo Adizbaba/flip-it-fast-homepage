@@ -17,6 +17,8 @@ import AllAuctions from "./pages/AllAuctions";
 import HowItWorksPage from "./pages/HowItWorks";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
+import Checkout from "./pages/Checkout";
+import PaymentConfirmation from "./pages/PaymentConfirmation";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -39,6 +41,8 @@ const App = () => {
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

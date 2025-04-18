@@ -1,5 +1,6 @@
 
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +12,14 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import ListingImageUpload from "@/components/listing/ListingImageUpload";
 import ListingVariations from "@/components/listing/ListingVariations";
-import { Camera } from "lucide-react";
+import { Camera, AlertCircle } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from "@/components/ui/dialog";
 
 type FormData = {
   title: string;
@@ -36,7 +44,9 @@ type FormData = {
 const CreateListing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>();
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [listingItem, setListingItem] = useState<any>(null);
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -61,8 +71,11 @@ const CreateListing = () => {
     }
 
     try {
+      // Calculate listing fee (5% of starting bid, minimum $5)
+      const listingFee = Math.max(5, data.startingBid * 0.05);
+
       // Properly format the data to match the database schema
-      const { error } = await supabase
+      const { data: item, error } = await supabase
         .from('auction_items')
         .insert({
           seller_id: user.id,
@@ -74,23 +87,28 @@ const CreateListing = () => {
           reserve_price: data.reservePrice || null,
           buy_now_price: data.buyNowPrice || null,
           quantity: data.quantity,
-          shipping_options: JSON.parse(data.shippingOptions),
+          shipping_options: JSON.parse(data.shippingOptions || '{}'),
           return_policy: data.returnPolicy,
           auction_type: data.auctionType,
           start_date: data.startDate,
           end_date: data.endDate,
-          status: 'Draft',
+          status: 'Draft', // Starts as draft until payment is complete
           variations: data.variations || null
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Your listing has been created",
+      // Store the listing item for the payment process
+      setListingItem({
+        id: item.id,
+        title: item.title,
+        startingBid: item.starting_bid,
+        fee: listingFee
       });
       
-      navigate('/my-listings');
+      setShowPaymentDialog(true);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -98,6 +116,22 @@ const CreateListing = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleProceedToPayment = () => {
+    setShowPaymentDialog(false);
+    if (listingItem) {
+      navigate(`/checkout?id=${listingItem.id}&type=listing`);
+    }
+  };
+
+  const handleSkipPayment = async () => {
+    setShowPaymentDialog(false);
+    toast({
+      title: "Listing Created",
+      description: "Your listing has been saved as a draft. To publish it, you'll need to pay the listing fee.",
+    });
+    navigate("/watch-list");
   };
 
   if (!user) {
@@ -215,10 +249,46 @@ const CreateListing = () => {
 
         <ListingVariations />
 
-        <Button type="submit" className="w-full">
-          Create Listing
-        </Button>
+        <div className="bg-blue-50 p-4 rounded-md flex items-start space-x-3">
+          <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+          <div>
+            <p className="text-sm text-blue-700">
+              A listing fee of 5% of your starting bid (minimum $5) will be charged to publish this listing.
+              You can still save as draft and pay later.
+            </p>
+          </div>
+        </div>
+
+        <Button type="submit" className="w-full">Create Listing</Button>
       </form>
+      
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Listing Fee</DialogTitle>
+            <DialogDescription>
+              Pay the listing fee to publish your item immediately
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {listingItem && (
+              <>
+                <p><strong>Item:</strong> {listingItem.title}</p>
+                <p className="mt-2"><strong>Listing Fee:</strong> ${listingItem.fee.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  (5% of your starting bid of ${listingItem.startingBid}, minimum $5)
+                </p>
+              </>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={handleSkipPayment}>Save as Draft</Button>
+            <Button onClick={handleProceedToPayment}>Pay Now</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useItemDetail } from "@/hooks/useItemDetail";
 import Header from "@/components/Header";
@@ -16,13 +16,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Clock, DollarSign, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Clock, DollarSign, User, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 
 const ItemDetail = () => {
   const { itemId } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { data: item, isLoading, error } = useItemDetail(itemId!);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [paymentType, setPaymentType] = useState<"bid" | "purchase" | null>(null);
 
   if (isLoading) {
     return (
@@ -66,15 +71,36 @@ const ItemDetail = () => {
       });
       return;
     }
-    // TODO: Implement bid functionality
-    toast({
-      title: "Coming soon",
-      description: "Bidding functionality will be available soon",
-    });
+    
+    setPaymentType("bid");
+    setDialogOpen(true);
+  };
+  
+  const handleBuyNow = () => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to make a purchase",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setPaymentType("purchase");
+    setDialogOpen(true);
+  };
+  
+  const handlePaymentConfirm = () => {
+    setDialogOpen(false);
+    
+    if (paymentType) {
+      navigate(`/checkout?id=${item.id}&type=${paymentType}`);
+    }
   };
 
   const timeRemaining = new Date(item.end_date).getTime() - Date.now();
   const isEnded = timeRemaining <= 0;
+  const hasBuyNowOption = !!item.buy_now_price;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -128,15 +154,30 @@ const ItemDetail = () => {
                 </div>
               </div>
 
-              <Button 
-                className="w-full" 
-                size="lg"
-                onClick={handleBid}
-                disabled={isEnded || user?.id === item.seller_id}
-              >
-                <DollarSign className="mr-2 h-4 w-4" />
-                Place Bid
-              </Button>
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={handleBid}
+                  disabled={isEnded || user?.id === item.seller_id}
+                >
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Place Bid
+                </Button>
+                
+                {hasBuyNowOption && (
+                  <Button 
+                    className="w-full" 
+                    size="lg"
+                    variant="outline"
+                    onClick={handleBuyNow}
+                    disabled={isEnded || user?.id === item.seller_id}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Buy Now ${item.buy_now_price}
+                  </Button>
+                )}
+              </div>
             </div>
 
             <Separator />
@@ -168,6 +209,35 @@ const ItemDetail = () => {
           </div>
         </div>
       </main>
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{paymentType === "bid" ? "Place a Bid" : "Complete Purchase"}</DialogTitle>
+            <DialogDescription>
+              {paymentType === "bid" 
+                ? "You're about to place a bid on this item"
+                : "You're about to purchase this item at the buy now price"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="font-medium">Item: {item.title}</p>
+            <p className="mt-2">
+              Amount: ${paymentType === "bid" ? item.starting_bid : item.buy_now_price}
+            </p>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handlePaymentConfirm}>
+              {paymentType === "bid" ? "Continue to Bid" : "Continue to Checkout"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       <Footer />
     </div>
   );
