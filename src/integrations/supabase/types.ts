@@ -181,6 +181,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          item_id: string | null
+          metadata: Json | null
+          payment_details: Json | null
+          payment_provider: string
+          payment_type: string
+          reference: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json | null
+          payment_details?: Json | null
+          payment_provider: string
+          payment_type: string
+          reference: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json | null
+          payment_details?: Json | null
+          payment_provider?: string
+          payment_type?: string
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
