@@ -13,7 +13,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import WatchList from "./pages/WatchList";
 import Search from "./pages/Search";
 import ItemDetail from "./pages/item/ItemDetail";
-import AllAuctions from "./pages/AllAuctions"; // New import
+import AllAuctions from "./pages/AllAuctions";
+import HowItWorksPage from "./pages/HowItWorks";
+import ContactPage from "./pages/Contact";
+import AboutPage from "./pages/About";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -32,7 +35,10 @@ const App = () => {
             <Route path="/watch-list" element={<WatchList />} />
             <Route path="/search" element={<Search />} />
             <Route path="/item/:itemId" element={<ItemDetail />} />
-            <Route path="/auctions" element={<AllAuctions />} /> {/* New route */}
+            <Route path="/auctions" element={<AllAuctions />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -1,3 +1,4 @@
+
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -46,9 +47,9 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">All Auctions</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Categories</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
+              <li><a href="/auctions" className="text-gray-400 hover:text-white transition-colors">All Auctions</a></li>
+              <li><a href="/search" className="text-gray-400 hover:text-white transition-colors">Categories</a></li>
+              <li><a href="/how-it-works" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
               <li>
                 <button
                   onClick={handleStartSelling}
@@ -63,8 +64,8 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQs</a></li>
+              <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="/how-it-works#faq" className="text-gray-400 hover:text-white transition-colors">FAQs</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Returns & Refunds</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Shipping Info</a></li>
             </ul>
@@ -73,7 +74,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">About FastFlip</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+              <li><a href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
