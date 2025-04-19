@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -11,14 +10,7 @@ import CheckoutError from "@/components/checkout/CheckoutError";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import PaymentSection from "@/components/checkout/PaymentSection";
 import PaymentDialog from "@/components/checkout/PaymentDialog";
-
-interface CheckoutItem {
-  id: string;
-  title: string;
-  image?: string;
-  amount: number;
-  type: "bid" | "listing" | "purchase";
-}
+import { type CheckoutItem } from "@/components/checkout/schemas";
 
 const Checkout = () => {
   const { user } = useAuth();

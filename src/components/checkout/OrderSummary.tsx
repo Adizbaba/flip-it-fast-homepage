@@ -1,19 +1,7 @@
-
 import { CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
-interface CheckoutItem {
-  id: string;
-  title: string;
-  image?: string;
-  amount: number;
-  type: "bid" | "listing" | "purchase";
-}
-
-interface OrderSummaryProps {
-  item: CheckoutItem;
-}
+import { type OrderSummaryProps } from "./schemas";
 
 const OrderSummary = ({ item }: OrderSummaryProps) => {
   return (

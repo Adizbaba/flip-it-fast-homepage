@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -6,13 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-interface PaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  paymentUrl: string | null;
-  onCancel: () => void;
-}
+import { type PaymentDialogProps } from "./schemas";
 
 const PaymentDialog = ({ open, onOpenChange, paymentUrl, onCancel }: PaymentDialogProps) => {
   return (

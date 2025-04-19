@@ -1,13 +1,7 @@
-
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface PaymentSectionProps {
-  amount: number;
-  processing: boolean;
-  onPaymentClick: () => void;
-}
+import { type PaymentSectionProps } from "./schemas";
 
 const PaymentSection = ({ amount, processing, onPaymentClick }: PaymentSectionProps) => {
   return (
