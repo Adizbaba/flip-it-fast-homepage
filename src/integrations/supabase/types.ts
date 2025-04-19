@@ -86,6 +86,7 @@ export type Database = {
       auction_items: {
         Row: {
           auction_type: string
+          bid_increment: number
           buy_now_price: number | null
           category_id: string
           condition: string
@@ -108,6 +109,7 @@ export type Database = {
         }
         Insert: {
           auction_type: string
+          bid_increment?: number
           buy_now_price?: number | null
           category_id: string
           condition: string
@@ -130,6 +132,7 @@ export type Database = {
         }
         Update: {
           auction_type?: string
+          bid_increment?: number
           buy_now_price?: number | null
           category_id?: string
           condition?: string

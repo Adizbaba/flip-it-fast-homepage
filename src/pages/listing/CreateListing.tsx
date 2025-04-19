@@ -45,32 +45,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AlertCircle, Calendar as CalendarIcon, DollarSign, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const listingFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters."),
-  description: z.string().min(10, "Description must be at least 10 characters."),
-  startingBid: z.number().min(0.01, "Starting bid must be greater than 0."),
-  bidIncrement: z.number().min(0.01, "Bid increment must be greater than 0."),
-  reservePrice: z.number().optional(),
-  categoryId: z.string().min(1, "Please select a category."),
-  startDate: z.date({
-    required_error: "Start date is required.",
-  }),
-  endDate: z.date({
-    required_error: "End date is required.",
-  }).refine(
-    (date) => date > new Date(),
-    "End date must be in the future."
-  ),
-  condition: z.string().min(1, "Please select a condition."),
-  quantity: z.number().int().min(1, "Quantity must be at least 1."),
-  buyNowPrice: z.number().optional(),
-  shippingOptions: z.string(),
-  returnPolicy: z.string(),
-  auctionType: z.string().min(1, "Please select an auction type.")
-});
-
-type FormData = z.infer<typeof listingFormSchema>;
+import { listingFormSchema, type ListingFormData } from "@/components/listing/schemas";
 
 const CreateListing = () => {
   const { user } = useAuth();
@@ -79,7 +54,7 @@ const CreateListing = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [listingItem, setListingItem] = useState<any>(null);
 
-  const form = useForm<FormData>({
+  const form = useForm<ListingFormData>({
     resolver: zodResolver(listingFormSchema),
     defaultValues: {
       title: "",
@@ -111,7 +86,7 @@ const CreateListing = () => {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: ListingFormData) => {
     if (!user) {
       toast({
         title: "Error",
