@@ -1,10 +1,28 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, Bell, ShoppingCart, Heart } from "lucide-react";
+import { Search, Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift } from "lucide-react";
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+
+const categories = [
+  { id: 1, name: 'Electronics', icon: Laptop, href: '/search?category=electronics' },
+  { id: 2, name: 'Cameras', icon: Camera, href: '/search?category=cameras' },
+  { id: 3, name: 'Vehicles', icon: Car, href: '/search?category=vehicles' },
+  { id: 4, name: 'Real Estate', icon: Home, href: '/search?category=real-estate' },
+  { id: 5, name: 'Fashion', icon: ShoppingBag, href: '/search?category=fashion' },
+  { id: 6, name: 'Watches', icon: Watch, href: '/search?category=watches' },
+  { id: 7, name: 'Art', icon: Palette, href: '/search?category=art' },
+  { id: 8, name: 'Collectibles', icon: Gift, href: '/search?category=collectibles' },
+];
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,11 +71,39 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/auctions" className="text-sm font-medium hover:text-auction-purple transition-colors">All Auctions</Link>
-            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">Categories</Link>
-            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">How It Works</Link>
+            <Link to="/auctions" className="text-sm font-medium hover:text-auction-purple transition-colors">
+              All Auctions
+            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-sm font-medium hover:text-auction-purple transition-colors">
+                    Categories
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid grid-cols-2 gap-2 p-4 w-[400px]">
+                      {categories.map((category) => (
+                        <Link
+                          key={category.id}
+                          to={category.href}
+                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                        >
+                          <category.icon className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium">{category.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">
+              How It Works
+            </Link>
             {user && (
-              <Link to="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">Create Listing</Link>
+              <Link to="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">
+                Create Listing
+              </Link>
             )}
           </nav>
 
