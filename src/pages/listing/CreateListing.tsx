@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,8 @@ import { PricingDetails } from "@/components/listing/PricingDetails";
 import { AuctionDetails } from "@/components/listing/AuctionDetails";
 import { PaymentInfoDialog } from "@/components/listing/PaymentInfoDialog";
 import ListingImageUpload from "@/components/listing/ListingImageUpload";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const CreateListing = () => {
   const { user } = useAuth();
@@ -161,49 +164,56 @@ const CreateListing = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Create New Listing</h1>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
-          <BasicDetails control={form.control} />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">Create New Listing</h1>
           
-          <div className="p-4 border rounded-md bg-muted/30">
-            <h3 className="font-medium mb-4">Upload Images</h3>
-            <ListingImageUpload />
-          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+              <BasicDetails control={form.control} />
+              
+              <div className="p-4 border rounded-md bg-muted/30">
+                <h3 className="font-medium mb-4">Upload Images</h3>
+                <ListingImageUpload />
+              </div>
 
-          <PricingDetails control={form.control} />
+              <PricingDetails control={form.control} />
+              
+              <AuctionDetails 
+                control={form.control}
+                categories={categories || []}
+                categoriesLoading={categoriesLoading}
+              />
+
+              <div className="bg-blue-50 p-4 rounded-md flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+                <div>
+                  <p className="text-sm text-blue-700">
+                    A listing fee of 5% of your starting bid (minimum $5) will be charged to publish this listing.
+                    You can still save as draft and pay later.
+                  </p>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full">Create Listing</Button>
+            </form>
+          </Form>
           
-          <AuctionDetails 
-            control={form.control}
-            categories={categories || []}
-            categoriesLoading={categoriesLoading}
+          <PaymentInfoDialog
+            open={showPaymentDialog}
+            onOpenChange={setShowPaymentDialog}
+            listingItem={listingItem}
+            onSkip={handleSkipPayment}
+            onProceed={handleProceedToPayment}
           />
-
-          <div className="bg-blue-50 p-4 rounded-md flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
-            <div>
-              <p className="text-sm text-blue-700">
-                A listing fee of 5% of your starting bid (minimum $5) will be charged to publish this listing.
-                You can still save as draft and pay later.
-              </p>
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full">Create Listing</Button>
-        </form>
-      </Form>
-      
-      <PaymentInfoDialog
-        open={showPaymentDialog}
-        onOpenChange={setShowPaymentDialog}
-        listingItem={listingItem}
-        onSkip={handleSkipPayment}
-        onProceed={handleProceedToPayment}
-      />
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 };
 
 export default CreateListing;
+
