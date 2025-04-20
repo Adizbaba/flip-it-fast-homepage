@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -19,6 +18,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
 
+  // Fetch results based on filters
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
@@ -48,6 +48,11 @@ export const useSearch = (initialFilters: SearchFilters) => {
           queryBuilder = queryBuilder.lte("starting_bid", filters.maxPrice);
         }
 
+        // Filter by auction type
+        if (filters.auctionType && filters.auctionType !== "all") {
+          queryBuilder = queryBuilder.eq("auction_type", filters.auctionType);
+        }
+
         // Filter by condition
         if (filters.condition && filters.condition !== "all") {
           queryBuilder = queryBuilder.eq("condition", filters.condition);
@@ -71,7 +76,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
             queryBuilder = queryBuilder.order("created_at", { ascending: false });
         }
 
-        const itemsPerPage = 12;
+        const itemsPerPage = 10; // Set to 10 as requested
         const start = (page - 1) * itemsPerPage;
         queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
 
@@ -111,6 +116,78 @@ export const useSearch = (initialFilters: SearchFilters) => {
 
     fetchResults();
   }, [filters, page]);
+
+  // Set up real-time subscription for new or updated items
+  useEffect(() => {
+    // Enable real-time subscription to auction_items
+    const channel = supabase
+      .channel('public:auction_items')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for inserts and updates
+          schema: 'public',
+          table: 'auction_items'
+        },
+        (payload) => {
+          // If it's a new item or an update, refresh the query
+          if ((payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') && 
+              payload.new.status === 'Active') {
+            // Get the new item
+            const fetchNewItem = async () => {
+              try {
+                const { data: newItem } = await supabase
+                  .from("auction_items")
+                  .select("*")
+                  .eq("id", payload.new.id)
+                  .single();
+
+                if (newItem) {
+                  // Get seller profile
+                  const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("*")
+                    .eq("id", newItem.seller_id)
+                    .single();
+
+                  const enrichedItem = { ...newItem, profiles: profile || null };
+
+                  // Check if item is already in results
+                  const itemExists = results.some(item => item.id === enrichedItem.id);
+                  
+                  if (!itemExists && page === 1) {
+                    // Only add new items if we're on the first page
+                    setResults(prevResults => {
+                      const updatedResults = [enrichedItem, ...prevResults];
+                      // Keep only first 10 items if we're on page 1
+                      return updatedResults.slice(0, 10);
+                    });
+                    
+                    setTotalCount(prev => prev + 1);
+                  } else if (itemExists) {
+                    // Update existing item
+                    setResults(prevResults => 
+                      prevResults.map(item => 
+                        item.id === enrichedItem.id ? enrichedItem : item
+                      )
+                    );
+                  }
+                }
+              } catch (error) {
+                console.error("Error processing real-time update:", error);
+              }
+            };
+            
+            fetchNewItem();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [page, results]);
 
   return {
     results,

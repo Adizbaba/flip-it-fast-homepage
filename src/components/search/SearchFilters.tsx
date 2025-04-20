@@ -12,12 +12,14 @@ import ConditionFilter from "./filters/ConditionFilter";
 import PriceRangeFilter from "./filters/PriceRangeFilter";
 import SortOptions from "./filters/SortOptions";
 import FilterActions from "./filters/FilterActions";
+import AuctionTypeFilter from "./filters/AuctionTypeFilter";
 
 interface SearchFiltersProps {
   selectedCategory: string;
   minPrice: string;
   maxPrice: string;
   sortBy: string;
+  auctionType?: string;
   onFilterChange: (filters: FilterState) => void;
 }
 
@@ -26,6 +28,7 @@ const SearchFilters = ({
   minPrice,
   maxPrice,
   sortBy,
+  auctionType = "all",
   onFilterChange,
 }: SearchFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
@@ -34,6 +37,7 @@ const SearchFilters = ({
     maxPrice: maxPrice,
     sortBy: sortBy || "newest",
     condition: "",
+    auctionType: auctionType || "all",
   });
 
   // Handle filter changes
@@ -54,6 +58,7 @@ const SearchFilters = ({
       maxPrice: "",
       sortBy: "newest",
       condition: "",
+      auctionType: "all",
     };
     setFilters(resetState);
     onFilterChange(resetState);
@@ -69,6 +74,12 @@ const SearchFilters = ({
         <CategoryFilter 
           selectedCategory={filters.category} 
           onCategoryChange={(value) => handleFilterChange("category", value)} 
+        />
+
+        {/* Auction Type Filter */}
+        <AuctionTypeFilter
+          selectedAuctionType={filters.auctionType || "all"}
+          onAuctionTypeChange={(value) => handleFilterChange("auctionType", value)}
         />
 
         {/* Condition Filter */}
