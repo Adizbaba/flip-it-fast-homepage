@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +41,7 @@ const CreateListing = () => {
         international: "Not available" 
       }),
       returnPolicy: "No returns accepted",
-      auctionType: "standard"
+      auctionType: "standard" // This matches the database constraint now
     },
   });
 
