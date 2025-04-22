@@ -12,6 +12,8 @@ import PaymentSection from "@/components/checkout/PaymentSection";
 import PaymentDialog from "@/components/checkout/PaymentDialog";
 import { type CheckoutItem } from "@/components/checkout/schemas";
 
+const PAYMENT_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 const Checkout = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -22,6 +24,7 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [paymentTimeout, setPaymentTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -32,7 +35,7 @@ const Checkout = () => {
       toast({
         variant: "destructive",
         title: "Invalid checkout request",
-        description: "Missing required parameters",
+        description: "Missing required parameters. Please try again from the item page.",
       });
       navigate("/");
       return;
@@ -50,7 +53,12 @@ const Checkout = () => {
             .eq("id", itemId)
             .single();
 
-          if (error) throw error;
+          if (error) {
+            if (error.code === "PGRST116") {
+              throw new Error("Item not found. It may have been removed or is no longer available.");
+            }
+            throw error;
+          }
           const listingFee = Math.max(5, data.starting_bid * 0.05);
           
           result = {
@@ -63,11 +71,20 @@ const Checkout = () => {
         } else if (itemType === "bid" || itemType === "purchase") {
           const { data, error } = await supabase
             .from("auction_items")
-            .select("id, title, images, starting_bid, buy_now_price")
+            .select("id, title, images, starting_bid, buy_now_price, status")
             .eq("id", itemId)
             .single();
 
-          if (error) throw error;
+          if (error) {
+            if (error.code === "PGRST116") {
+              throw new Error("Item not found. It may have been removed or is no longer available.");
+            }
+            throw error;
+          }
+
+          if (data.status !== "active") {
+            throw new Error("This item is no longer available for purchase.");
+          }
           
           result = {
             id: data.id,
@@ -81,12 +98,12 @@ const Checkout = () => {
         }
 
         setItem(result);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching item:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load checkout item",
+          description: error.message || "Failed to load checkout item. Please try again.",
         });
         navigate("/");
       } finally {
@@ -101,8 +118,8 @@ const Checkout = () => {
     if (!user || !item) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "You must be signed in to complete this transaction",
+        title: "Authentication Required",
+        description: "Please sign in to complete your purchase.",
       });
       navigate("/auth");
       return;
@@ -124,20 +141,40 @@ const Checkout = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("insufficient funds")) {
+          throw new Error("Insufficient funds. Please try a different payment method.");
+        } else if (error.message.includes("card declined")) {
+          throw new Error("Payment was declined. Please check your card details or try a different payment method.");
+        }
+        throw error;
+      }
       
       if (data.status && data.data && data.data.authorization_url) {
         setPaymentUrl(data.data.authorization_url);
         setDialogOpen(true);
+        
+        // Set payment timeout
+        const timeout = setTimeout(() => {
+          setDialogOpen(false);
+          setPaymentUrl(null);
+          toast({
+            variant: "destructive",
+            title: "Payment Timeout",
+            description: "The payment session has expired. Please try again.",
+          });
+        }, PAYMENT_TIMEOUT);
+        
+        setPaymentTimeout(timeout);
       } else {
-        throw new Error("Invalid payment response");
+        throw new Error("Invalid payment response. Please try again.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Payment error:", error);
       toast({
         variant: "destructive",
         title: "Payment Error",
-        description: "Failed to process payment. Please try again.",
+        description: error.message || "Failed to process payment. Please try again.",
       });
     } finally {
       setProcessing(false);
@@ -147,7 +184,19 @@ const Checkout = () => {
   const handleDialogClose = () => {
     setDialogOpen(false);
     setPaymentUrl(null);
+    if (paymentTimeout) {
+      clearTimeout(paymentTimeout);
+      setPaymentTimeout(null);
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      if (paymentTimeout) {
+        clearTimeout(paymentTimeout);
+      }
+    };
+  }, [paymentTimeout]);
 
   if (loading) {
     return (
