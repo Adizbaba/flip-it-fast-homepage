@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift } from "lucide-react";
+import { Search, Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard } from "lucide-react";
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import {
@@ -97,7 +98,7 @@ const Header = () => {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <Link to="#" className="text-sm font-medium hover:text-auction-purple transition-colors">
+            <Link to="/how-it-works" className="text-sm font-medium hover:text-auction-purple transition-colors">
               How It Works
             </Link>
             {user && (
@@ -137,10 +138,20 @@ const Header = () => {
               <ShoppingCart className="h-5 w-5" />
             </Button>
             {user ? (
-              <Button variant="outline" onClick={handleAuthClick} className="gap-2">
-                <User className="h-4 w-4" />
-                <span>Sign Out</span>
-              </Button>
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  aria-label="Dashboard"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" onClick={handleAuthClick} className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </Button>
+              </>
             ) : (
               <Button variant="outline" onClick={handleAuthClick} className="gap-2">
                 <User className="h-4 w-4" />
@@ -177,12 +188,12 @@ const Header = () => {
             </form>
             <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
             <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
-            <Link to="#" className="block py-2 text-sm font-medium">How It Works</Link>
-            <Link to="#" className="block py-2 text-sm font-medium">Sell an Item</Link>
+            <Link to="/how-it-works" className="block py-2 text-sm font-medium">How It Works</Link>
             {user && (
               <>
                 <Link to="/create-listing" className="block py-2 text-sm font-medium">Create Listing</Link>
                 <Link to="/watch-list" className="block py-2 text-sm font-medium">Saved Items</Link>
+                <Link to="/dashboard" className="block py-2 text-sm font-medium">Dashboard</Link>
               </>
             )}
             <div className="flex space-x-3 pt-2 border-t">

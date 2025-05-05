@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,25 @@ import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
 import Checkout from "./pages/Checkout";
 import PaymentConfirmation from "./pages/PaymentConfirmation";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
+import Dashboard from "./pages/dashboard/Dashboard";
+import { 
+  MyBidsPage, 
+  WonAuctionsPage, 
+  FavoritesPage, 
+  PaymentHistoryPage 
+} from "./pages/dashboard/BuyerPages";
+import {
+  MyListingsPage,
+  CreateListingPage,
+  SoldItemsPage,
+  EarningsPage
+} from "./pages/dashboard/SellerPages";
+import {
+  NotificationsPage,
+  ProfilePage,
+  SettingsPage
+} from "./pages/dashboard/SharedPages";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -42,6 +62,29 @@ const App = () => {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+            
+            {/* Dashboard Routes */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              
+              {/* Buyer Pages */}
+              <Route path="bids" element={<MyBidsPage />} />
+              <Route path="won-auctions" element={<WonAuctionsPage />} />
+              <Route path="favorites" element={<FavoritesPage />} />
+              <Route path="payment-history" element={<PaymentHistoryPage />} />
+              
+              {/* Seller Pages */}
+              <Route path="listings" element={<MyListingsPage />} />
+              <Route path="create-listing" element={<CreateListingPage />} />
+              <Route path="sold-items" element={<SoldItemsPage />} />
+              <Route path="earnings" element={<EarningsPage />} />
+              
+              {/* Shared Pages */}
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
