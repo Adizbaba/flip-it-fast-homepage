@@ -6,21 +6,6 @@ import { useSearchParamsState } from "@/hooks/useSearchParams";
 import { supabase } from "@/integrations/supabase/client";
 
 const AllAuctions = () => {
-  // Set up real-time table for auction_items
-  useEffect(() => {
-    // Enable PostgreSQL replication for the table (one-time setup)
-    const enableRealtimeForTable = async () => {
-      try {
-        await supabase.rpc('supabase_realtime.enable_replication', { relation: 'auction_items' });
-      } catch (error) {
-        // Ignore errors - table may already be enabled for replication
-        console.log("Note: Realtime may already be enabled for auction_items");
-      }
-    };
-    
-    enableRealtimeForTable();
-  }, []);
-  
   const {
     results,
     loading,
@@ -31,7 +16,7 @@ const AllAuctions = () => {
     handleFilterChange
   } = useSearchParamsState({ 
     initialQuery: "",
-    itemsPerPage: 10 // Set items per page to 10 as requested
+    itemsPerPage: 10
   });
 
   // Show toast notification when new items are added
