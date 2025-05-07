@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard } from "lucide-react";
+import { Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard, List } from "lucide-react";
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/navigation-menu";
 
 const categories = [
+  { id: 0, name: 'All Auctions', icon: List, href: '/auctions' },
   { id: 1, name: 'Electronics', icon: Laptop, href: '/search?category=electronics' },
   { id: 2, name: 'Cameras', icon: Camera, href: '/search?category=cameras' },
   { id: 3, name: 'Vehicles', icon: Car, href: '/search?category=vehicles' },
@@ -27,7 +27,6 @@ const categories = [
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -39,22 +38,6 @@ const Header = () => {
     } else {
       navigate('/auth');
     }
-  };
-  
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/search');
-    }
-    setIsMenuOpen(false); // Close mobile menu when searching
-  };
-
-  const handleSearchClick = () => {
-    // Always navigate to search page when clicking the search bar
-    navigate('/search');
-    setIsMenuOpen(false); // Close mobile menu when clicking search bar
   };
 
   return (
@@ -72,9 +55,6 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/auctions" className="text-sm font-medium hover:text-auction-purple transition-colors">
-              All Auctions
-            </Link>
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
@@ -108,19 +88,8 @@ const Header = () => {
             )}
           </nav>
 
-          {/* Search, notification and profile (Desktop) */}
+          {/* Notification and profile (Desktop) */}
           <div className="hidden md:flex items-center space-x-4">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search auctions..."
-                className="w-[200px] pl-8 rounded-full bg-muted/50 border-0 focus-visible:ring-auction-purple"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onClick={handleSearchClick}
-              />
-            </form>
             <Button variant="ghost" size="icon" aria-label="Notifications">
               <Bell className="h-5 w-5" />
             </Button>
@@ -175,17 +144,6 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t py-4">
           <div className="container mx-auto px-4 flex flex-col space-y-4">
-            <form onSubmit={handleSearchSubmit} className="relative mb-2">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search auctions..."
-                className="w-full pl-8 rounded-full bg-muted/50 border-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onClick={handleSearchClick}
-              />
-            </form>
             <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
             <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
             <Link to="/how-it-works" className="block py-2 text-sm font-medium">How It Works</Link>
