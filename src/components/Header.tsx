@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard, List } from "lucide-react";
+import { Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard, List, Gavel, PackageOpen } from "lucide-react";
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import {
@@ -78,13 +78,40 @@ const Header = () => {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
+            <Link to="/declutter" className="text-sm font-medium hover:text-auction-purple transition-colors">
+              Declutter
+            </Link>
             <Link to="/how-it-works" className="text-sm font-medium hover:text-auction-purple transition-colors">
               How It Works
             </Link>
             {user && (
-              <Link to="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">
-                Create Listing
-              </Link>
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-sm font-medium hover:text-auction-purple transition-colors">
+                      Create Listing
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="flex flex-col p-4 w-[200px]">
+                        <Link
+                          to="/create-listing"
+                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                        >
+                          <Gavel className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium">Auction Listing</span>
+                        </Link>
+                        <Link
+                          to="/create-declutter-listing"
+                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                        >
+                          <PackageOpen className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium">Declutter Listing</span>
+                        </Link>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             )}
           </nav>
 
@@ -145,11 +172,16 @@ const Header = () => {
         <div className="md:hidden bg-white border-t py-4">
           <div className="container mx-auto px-4 flex flex-col space-y-4">
             <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
+            <Link to="/declutter" className="block py-2 text-sm font-medium">Declutter</Link>
             <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
             <Link to="/how-it-works" className="block py-2 text-sm font-medium">How It Works</Link>
             {user && (
               <>
-                <Link to="/create-listing" className="block py-2 text-sm font-medium">Create Listing</Link>
+                <div className="border-t pt-2">
+                  <p className="text-xs text-muted-foreground mb-2">Create Listings</p>
+                  <Link to="/create-listing" className="block py-2 text-sm font-medium">Auction Listing</Link>
+                  <Link to="/create-declutter-listing" className="block py-2 text-sm font-medium">Declutter Listing</Link>
+                </div>
                 <Link to="/watch-list" className="block py-2 text-sm font-medium">Saved Items</Link>
                 <Link to="/dashboard" className="block py-2 text-sm font-medium">Dashboard</Link>
               </>

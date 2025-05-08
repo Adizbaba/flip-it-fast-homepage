@@ -184,6 +184,77 @@ export type Database = {
         }
         Relationships: []
       }
+      declutter_listings: {
+        Row: {
+          bulk_price: number
+          category_id: string | null
+          condition: string
+          created_at: string
+          description: string
+          edit_count: number
+          id: string
+          images: Json | null
+          is_negotiable: boolean | null
+          location: string | null
+          min_purchase_quantity: number
+          original_price: number
+          quantity: number
+          seller_id: string
+          shipping_options: Json | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          bulk_price: number
+          category_id?: string | null
+          condition: string
+          created_at?: string
+          description: string
+          edit_count?: number
+          id?: string
+          images?: Json | null
+          is_negotiable?: boolean | null
+          location?: string | null
+          min_purchase_quantity?: number
+          original_price: number
+          quantity: number
+          seller_id: string
+          shipping_options?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          bulk_price?: number
+          category_id?: string | null
+          condition?: string
+          created_at?: string
+          description?: string
+          edit_count?: number
+          id?: string
+          images?: Json | null
+          is_negotiable?: boolean | null
+          location?: string | null
+          min_purchase_quantity?: number
+          original_price?: number
+          quantity?: number
+          seller_id?: string
+          shipping_options?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "declutter_listings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_transactions: {
         Row: {
           amount: number

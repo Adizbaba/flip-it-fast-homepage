@@ -38,6 +38,13 @@ import {
   ProfilePage,
   SettingsPage
 } from "./pages/dashboard/SharedPages";
+import {
+  DeclutterListingsPage,
+  EditDeclutterListingPage
+} from "./pages/dashboard/DeclutterPages";
+import Declutter from "./pages/declutter/Declutter";
+import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
+import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -52,10 +59,13 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/create-listing" element={<CreateListing />} />
+            <Route path="/create-declutter-listing" element={<CreateDeclutterListing />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/watch-list" element={<WatchList />} />
             <Route path="/search" element={<Search />} />
             <Route path="/item/:itemId" element={<ItemDetail />} />
+            <Route path="/declutter" element={<Declutter />} />
+            <Route path="/declutter/:id" element={<DeclutterListingDetail />} />
             <Route path="/auctions" element={<AllAuctions />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -76,6 +86,8 @@ const App = () => {
               {/* Seller Pages */}
               <Route path="listings" element={<MyListingsPage />} />
               <Route path="create-listing" element={<CreateListingPage />} />
+              <Route path="declutter-listings" element={<DeclutterListingsPage />} />
+              <Route path="edit-declutter-listing/:id" element={<EditDeclutterListingPage />} />
               <Route path="sold-items" element={<SoldItemsPage />} />
               <Route path="earnings" element={<EarningsPage />} />
               
