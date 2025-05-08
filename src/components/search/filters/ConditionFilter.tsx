@@ -16,7 +16,7 @@ interface ConditionFilterProps {
 const ConditionFilter = ({ selectedCondition, onConditionChange }: ConditionFilterProps) => {
   // Condition options
   const conditions = [
-    { value: "all", label: "All Conditions" },
+    { value: "all", label: "All Conditions" }, // Make sure this isn't an empty string
     { value: "New", label: "New" },
     { value: "Like New", label: "Like New" },
     { value: "Excellent", label: "Excellent" },

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -22,10 +21,10 @@ const Declutter = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
-    categoryId: '',
+    categoryId: 'all',
     minPrice: undefined,
     maxPrice: undefined,
-    condition: '',
+    condition: 'all',
     location: '',
   });
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -38,10 +37,10 @@ const Declutter = () => {
     error, 
     totalCount 
   } = useDeclutterListings({
-    categoryId: filters.categoryId || undefined,
+    categoryId: filters.categoryId !== 'all' ? filters.categoryId : undefined,
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
-    condition: filters.condition || undefined,
+    condition: filters.condition !== 'all' ? filters.condition : undefined,
     location: filters.location || undefined,
     searchQuery: searchQuery || undefined,
     limit: ITEMS_PER_PAGE,
@@ -233,10 +232,10 @@ const Declutter = () => {
               <Button 
                 onClick={() => {
                   setFilters({
-                    categoryId: '',
+                    categoryId: 'all',
                     minPrice: undefined,
                     maxPrice: undefined,
-                    condition: '',
+                    condition: 'all',
                     location: '',
                   });
                   setSearchQuery('');

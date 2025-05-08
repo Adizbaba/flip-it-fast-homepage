@@ -61,7 +61,7 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
         .select('*');
         
       // Apply filters
-      if (options.categoryId) {
+      if (options.categoryId && options.categoryId !== 'all') {
         query = query.eq('category_id', options.categoryId);
         countQuery = countQuery.eq('category_id', options.categoryId);
       }
@@ -76,7 +76,7 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
         countQuery = countQuery.lte('bulk_price', options.maxPrice);
       }
       
-      if (options.condition) {
+      if (options.condition && options.condition !== 'all') {
         query = query.eq('condition', options.condition);
         countQuery = countQuery.eq('condition', options.condition);
       }

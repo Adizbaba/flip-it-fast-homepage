@@ -31,7 +31,7 @@ interface Category {
 }
 
 const CONDITIONS = [
-  { value: '', label: 'Any condition' },
+  { value: 'all', label: 'Any condition' }, // Changed from empty string to 'all'
   { value: 'New', label: 'New' },
   { value: 'Like New', label: 'Like New' },
   { value: 'Good', label: 'Good' },
@@ -77,10 +77,10 @@ const DeclutterFilters = ({ filters, onFilterChange }: DeclutterFiltersProps) =>
   
   const handleReset = () => {
     const resetFilters = {
-      categoryId: '',
+      categoryId: 'all', // Changed from empty string to 'all'
       minPrice: undefined,
       maxPrice: undefined,
-      condition: '',
+      condition: 'all', // Changed from empty string to 'all'
       location: '',
     };
     setLocalFilters(resetFilters);
@@ -99,7 +99,7 @@ const DeclutterFilters = ({ filters, onFilterChange }: DeclutterFiltersProps) =>
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem> {/* Changed from empty string to 'all' */}
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
