@@ -16,11 +16,11 @@ import {
   Settings,
   PackageOpen,
 } from "lucide-react";
-import { useDisplayRole } from "@/contexts/DashboardContext";
+import { useDashboard } from "@/contexts/DashboardContext";
 
 export function DashboardNav() {
   const { pathname } = useLocation();
-  const { displayRole } = useDisplayRole();
+  const { activeRole } = useDashboard();
   const [activeGroups, setActiveGroups] = useState<string[]>([]);
 
   // Buyer Links
@@ -95,13 +95,13 @@ export function DashboardNav() {
       id: "buyer",
       title: "Buyer",
       links: buyerLinks,
-      visible: displayRole === "buyer" || displayRole === "both",
+      visible: activeRole === "buyer" || activeRole === "both",
     },
     {
       id: "seller",
       title: "Seller",
       links: sellerLinks,
-      visible: displayRole === "seller" || displayRole === "both",
+      visible: activeRole === "seller" || activeRole === "both",
     },
     {
       id: "account",

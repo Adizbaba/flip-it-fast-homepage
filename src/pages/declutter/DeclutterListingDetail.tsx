@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +35,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
+import { Json } from "@/integrations/supabase/types";
 
 const DeclutterListingDetail = () => {
   const { id } = useParams();
@@ -70,10 +70,18 @@ const DeclutterListingDetail = () => {
           
         if (error) throw error;
         
+        // Convert images from JSON to array if needed
+        const images = data.images as Json;
+        const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
+        data.images = imageArray;
+        
         setListing(data);
+        
+        // Safely extract profile data
+        const sellerProfile = data.profiles || {};
         setSeller({
-          username: data.profiles?.username || 'Unknown Seller',
-          avatar_url: data.profiles?.avatar_url
+          username: sellerProfile.username || 'Unknown Seller',
+          avatar_url: sellerProfile.avatar_url
         });
         
         // Set initial quantity to minimum purchase quantity

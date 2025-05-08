@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 export interface DeclutterListing {
   id: string;
@@ -120,11 +121,18 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       if (listingsResult.error) throw listingsResult.error;
       if (countResult.error) throw countResult.error;
       
-      const processedListings = listingsResult.data.map(listing => ({
-        ...listing,
-        seller_name: listing.profiles?.username || 'Unknown Seller',
-        category_name: listing.categories?.name || 'Uncategorized'
-      }));
+      const processedListings = listingsResult.data.map(listing => {
+        // Convert JSON images to string array if needed
+        const images = listing.images as Json;
+        const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
+        
+        return {
+          ...listing,
+          images: imageArray,
+          seller_name: listing.profiles?.username || 'Unknown Seller',
+          category_name: listing.categories?.name || 'Uncategorized'
+        } as DeclutterListing;
+      });
       
       setListings(processedListings);
       setTotalCount(countResult.count || 0);
