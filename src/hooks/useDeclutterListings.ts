@@ -126,15 +126,15 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
         const images = listing.images as Json;
         const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
         
-        // Safely extract seller and category data
-        const sellerData = listing.profiles || {};
-        const categoryData = listing.categories || {};
+        // Safely extract seller and category data - fix the type issues
+        const sellerData = listing.profiles as any || {};
+        const categoryData = listing.categories as any || {};
 
         return {
           ...listing,
           images: imageArray,
-          seller_name: sellerData.username || 'Unknown Seller',
-          category_name: categoryData.name || 'Uncategorized',
+          seller_name: sellerData?.username || 'Unknown Seller',
+          category_name: categoryData?.name || 'Uncategorized',
           // Make sure profiles and categories aren't included in the final object
           profiles: undefined,
           categories: undefined

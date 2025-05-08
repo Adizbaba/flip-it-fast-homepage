@@ -1,9 +1,8 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
-type DashboardRole = "seller" | "buyer";
+type DashboardRole = "seller" | "buyer" | "both";
 
 interface DashboardContextType {
   activeRole: DashboardRole;
