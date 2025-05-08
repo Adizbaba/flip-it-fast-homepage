@@ -78,10 +78,10 @@ const DeclutterListingDetail = () => {
         setListing(data);
         
         // Safely extract profile data
-        const sellerProfile = data.profiles || {};
+        const profileData = data.profiles || {};
         setSeller({
-          username: sellerProfile.username || 'Unknown Seller',
-          avatar_url: sellerProfile.avatar_url
+          username: profileData.username || 'Unknown Seller',
+          avatar_url: profileData.avatar_url
         });
         
         // Set initial quantity to minimum purchase quantity

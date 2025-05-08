@@ -126,11 +126,15 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
         const images = listing.images as Json;
         const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
         
+        // Safely extract seller and category data
+        const profiles = listing.profiles || {};
+        const categories = listing.categories || {};
+
         return {
           ...listing,
           images: imageArray,
-          seller_name: listing.profiles?.username || 'Unknown Seller',
-          category_name: listing.categories?.name || 'Uncategorized'
+          seller_name: profiles.username || 'Unknown Seller',
+          category_name: categories.name || 'Uncategorized'
         } as DeclutterListing;
       });
       
