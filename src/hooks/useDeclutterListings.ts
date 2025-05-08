@@ -55,14 +55,10 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
         .from('declutter_listings')
         .select('id', { count: 'exact', head: true });
       
-      // Main query
+      // Main query - modify to avoid join issues
       let query = supabase
         .from('declutter_listings')
-        .select(`
-          *,
-          profiles:seller_id (username),
-          categories:category_id (name)
-        `);
+        .select('*');
         
       // Apply filters
       if (options.categoryId) {
@@ -121,25 +117,67 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       if (listingsResult.error) throw listingsResult.error;
       if (countResult.error) throw countResult.error;
       
-      const processedListings: DeclutterListing[] = listingsResult.data.map(listing => {
+      // Process listing data and fetch related information separately 
+      let processedListings: DeclutterListing[] = listingsResult.data.map(listing => {
         // Convert JSON images to string array if needed
         const images = listing.images as Json;
         const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
         
-        // Safely extract seller and category data - fix the type issues
-        const sellerData = listing.profiles as any || {};
-        const categoryData = listing.categories as any || {};
-
         return {
           ...listing,
           images: imageArray,
-          seller_name: sellerData?.username || 'Unknown Seller',
-          category_name: categoryData?.name || 'Uncategorized',
-          // Make sure profiles and categories aren't included in the final object
-          profiles: undefined,
-          categories: undefined
-        } as unknown as DeclutterListing;
+          seller_name: 'Loading...',
+          category_name: 'Uncategorized',
+        } as DeclutterListing;
       });
+
+      // Fetch seller information separately
+      if (processedListings.length > 0) {
+        const sellerIds = [...new Set(processedListings.map(item => item.seller_id))];
+        const { data: sellerData, error: sellerError } = await supabase
+          .from('profiles')
+          .select('id, username')
+          .in('id', sellerIds);
+        
+        if (!sellerError && sellerData) {
+          // Create a map of seller_id to username
+          const sellerMap = new Map();
+          sellerData.forEach(seller => {
+            sellerMap.set(seller.id, seller.username || 'Unknown User');
+          });
+          
+          // Update listings with seller information
+          processedListings = processedListings.map(listing => ({
+            ...listing,
+            seller_name: sellerMap.get(listing.seller_id) || 'Unknown Seller',
+          }));
+        }
+      }
+
+      // Fetch category information separately if needed
+      if (processedListings.length > 0) {
+        const categoryIds = [...new Set(processedListings.map(item => item.category_id).filter(Boolean))];
+        if (categoryIds.length > 0) {
+          const { data: categoryData, error: categoryError } = await supabase
+            .from('categories')
+            .select('id, name')
+            .in('id', categoryIds);
+          
+          if (!categoryError && categoryData) {
+            // Create a map of category_id to name
+            const categoryMap = new Map();
+            categoryData.forEach(category => {
+              categoryMap.set(category.id, category.name);
+            });
+            
+            // Update listings with category information
+            processedListings = processedListings.map(listing => ({
+              ...listing,
+              category_name: listing.category_id ? (categoryMap.get(listing.category_id) || 'Uncategorized') : 'Uncategorized',
+            }));
+          }
+        }
+      }
       
       setListings(processedListings);
       setTotalCount(countResult.count || 0);
