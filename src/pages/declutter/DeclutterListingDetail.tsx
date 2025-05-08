@@ -47,7 +47,10 @@ const DeclutterListingDetail = () => {
   
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [seller, setSeller] = useState<any>(null);
+  const [seller, setSeller] = useState<{username: string, avatar_url?: string}>({
+    username: 'Unknown Seller',
+    avatar_url: undefined
+  });
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [contactDialogOpen, setContactDialogOpen] = useState(showContact);
@@ -78,11 +81,12 @@ const DeclutterListingDetail = () => {
         setListing(data);
         
         // Safely extract profile data
-        const profileData = data.profiles || {};
-        setSeller({
-          username: profileData.username || 'Unknown Seller',
-          avatar_url: profileData.avatar_url
-        });
+        if (data.profiles) {
+          setSeller({
+            username: data.profiles.username || 'Unknown Seller',
+            avatar_url: data.profiles.avatar_url
+          });
+        }
         
         // Set initial quantity to minimum purchase quantity
         if (data.min_purchase_quantity) {

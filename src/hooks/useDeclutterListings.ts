@@ -121,21 +121,24 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       if (listingsResult.error) throw listingsResult.error;
       if (countResult.error) throw countResult.error;
       
-      const processedListings = listingsResult.data.map(listing => {
+      const processedListings: DeclutterListing[] = listingsResult.data.map(listing => {
         // Convert JSON images to string array if needed
         const images = listing.images as Json;
         const imageArray = Array.isArray(images) ? images : (images ? [images.toString()] : null);
         
         // Safely extract seller and category data
-        const profiles = listing.profiles || {};
-        const categories = listing.categories || {};
+        const sellerData = listing.profiles || {};
+        const categoryData = listing.categories || {};
 
         return {
           ...listing,
           images: imageArray,
-          seller_name: profiles.username || 'Unknown Seller',
-          category_name: categories.name || 'Uncategorized'
-        } as DeclutterListing;
+          seller_name: sellerData.username || 'Unknown Seller',
+          category_name: categoryData.name || 'Uncategorized',
+          // Make sure profiles and categories aren't included in the final object
+          profiles: undefined,
+          categories: undefined
+        } as unknown as DeclutterListing;
       });
       
       setListings(processedListings);
