@@ -82,9 +82,10 @@ const DeclutterListingDetail = () => {
         
         // Safely extract profile data
         if (data.profiles) {
+          const profileData = data.profiles as any;
           setSeller({
-            username: data.profiles.username || 'Unknown Seller',
-            avatar_url: data.profiles.avatar_url
+            username: profileData.username || 'Unknown Seller',
+            avatar_url: profileData.avatar_url
           });
         }
         

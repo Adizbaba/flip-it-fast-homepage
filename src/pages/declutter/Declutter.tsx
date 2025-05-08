@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { SearchIcon, FilterIcon, ViewIcon, GridIcon, PackageOpen } from 'lucide-react';
 import { useDeclutterListings } from '@/hooks/useDeclutterListings';
 import DeclutterListingCard from '@/components/declutter/DeclutterListingCard';
-import { Pagination } from '@/components/ui/pagination';
 import { 
   Sheet, 
   SheetContent, 
@@ -64,6 +63,58 @@ const Declutter = () => {
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
+  };
+  
+  // Pagination component
+  const Pagination = () => {
+    return (
+      <div className="flex justify-center items-center gap-2 mt-8">
+        <Button
+          variant="outline"
+          onClick={() => setPage(Math.max(1, page - 1))}
+          disabled={page === 1}
+        >
+          Previous
+        </Button>
+        <div className="flex items-center gap-1">
+          {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+            // Show pagination numbers intelligently
+            let pageNumber = 0;
+            if (totalPages <= 5) {
+              pageNumber = idx + 1;
+            } else if (page <= 3) {
+              pageNumber = idx + 1;
+              if (idx === 4) pageNumber = totalPages;
+            } else if (page >= totalPages - 2) {
+              pageNumber = totalPages - 4 + idx;
+              if (idx === 0) pageNumber = 1;
+            } else {
+              pageNumber = page - 2 + idx;
+              if (idx === 0) pageNumber = 1;
+              if (idx === 4) pageNumber = totalPages;
+            }
+
+            return (
+              <Button
+                key={`page-${pageNumber}`}
+                variant={pageNumber === page ? "default" : "outline"}
+                className="w-10 h-10 p-0"
+                onClick={() => setPage(pageNumber)}
+              >
+                {pageNumber}
+              </Button>
+            );
+          })}
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setPage(Math.min(totalPages, page + 1))}
+          disabled={page === totalPages}
+        >
+          Next
+        </Button>
+      </div>
+    );
   };
   
   return (
@@ -206,15 +257,7 @@ const Declutter = () => {
           )}
           
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
-          )}
+          {totalPages > 1 && <Pagination />}
         </div>
       </main>
       <Footer />
