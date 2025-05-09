@@ -44,6 +44,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatCurrency } from "@/lib/utils";
 import { DeclutterListing } from "@/hooks/useDeclutterListings";
+import { Json } from "@/integrations/supabase/types";
 
 // Add this function to safely access the username
 const getSellerUsername = (profiles: any): string => {
@@ -52,6 +53,15 @@ const getSellerUsername = (profiles: any): string => {
     return profiles.username || "Unknown seller";
   }
   return "Unknown seller";
+};
+
+// Helper function to convert Json array to string array
+const convertJsonToStringArray = (images: Json | null): string[] => {
+  if (!images) return [];
+  if (Array.isArray(images)) {
+    return images.map(img => String(img));
+  }
+  return [String(images)];
 };
 
 const DeclutterListingDetail = () => {
@@ -97,9 +107,8 @@ const DeclutterListingDetail = () => {
           ...data,
           category_name: categoryName,
           seller_name: getSellerUsername(data.profiles),
-          // Convert JSON images to string array if needed
-          images: Array.isArray(data.images) ? data.images : 
-                 (data.images ? [data.images.toString()] : null)
+          // Convert JSON images to string array using our new helper function
+          images: convertJsonToStringArray(data.images)
         });
       } catch (err) {
         console.error("Error fetching declutter listing:", err);
