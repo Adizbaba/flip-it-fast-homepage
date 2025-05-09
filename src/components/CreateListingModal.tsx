@@ -93,16 +93,13 @@ export const createListingModal = () => {
     }, 300); // Small delay to allow for exit animations
   };
   
-  import('react-dom/client').then((ReactDOMClient) => {
-    const root = ReactDOMClient.createRoot(element);
-    root.render(
-      <CreateListingModal open={isOpen} onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) cleanup();
-      }} />
-    );
-  }).catch(err => {
-    console.error("Failed to load react-dom/client:", err);
-    document.body.removeChild(element);
-  });
+  const ReactDOM = require('react-dom/client');
+  
+  const root = ReactDOM.createRoot(element);
+  root.render(
+    <CreateListingModal open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) cleanup();
+    }} />
+  );
 };
