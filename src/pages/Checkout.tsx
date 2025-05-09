@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -86,14 +85,17 @@ const Checkout = () => {
         if (itemsError) throw itemsError;
         
         // Transform data for display
-        const items = orderItems.map(item => ({
-          id: item.id,
-          title: item.item_data?.title || "Unknown item",
-          price: item.price,
-          quantity: item.quantity,
-          image: item.item_data?.image,
-          itemType: item.item_type
-        }));
+        const items = orderItems.map(item => {
+          const itemData = item.item_data as Record<string, any> || {}; // Cast to proper type
+          return {
+            id: item.id,
+            title: itemData.title || "Unknown item",
+            price: item.price,
+            quantity: item.quantity,
+            image: itemData.image,
+            itemType: item.item_type
+          };
+        });
 
         setOrder({
           id: orderData.id,

@@ -96,15 +96,18 @@ const OrderDetail = () => {
         if (itemsError) throw itemsError;
         
         // Transform items for display
-        const transformedItems = orderItems.map(item => ({
-          id: item.id,
-          item_id: item.item_id,
-          item_type: item.item_type,
-          title: item.item_data?.title || 'Unknown Item',
-          price: item.price,
-          quantity: item.quantity,
-          image: item.item_data?.image,
-        }));
+        const transformedItems = orderItems.map(item => {
+          const itemData = item.item_data as Record<string, any> || {}; // Cast to proper type
+          return {
+            id: item.id,
+            item_id: item.item_id,
+            item_type: item.item_type,
+            title: itemData.title || 'Unknown Item',
+            price: item.price,
+            quantity: item.quantity,
+            image: itemData.image,
+          };
+        });
         
         setOrder({
           ...orderData,

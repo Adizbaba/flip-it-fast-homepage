@@ -93,13 +93,16 @@ const OrdersPage = () => {
         const ordersWithItems = ordersData.map(order => {
           const items = orderItems
             .filter(item => item.order_id === order.id)
-            .map(item => ({
-              id: item.id,
-              title: item.item_data?.title || 'Unknown Item',
-              price: item.price,
-              quantity: item.quantity,
-              image: item.item_data?.image,
-            }));
+            .map(item => {
+              const itemData = item.item_data as Record<string, any> || {}; // Cast to proper type
+              return {
+                id: item.id,
+                title: itemData.title || 'Unknown Item',
+                price: item.price,
+                quantity: item.quantity,
+                image: itemData.image,
+              };
+            });
             
           return {
             ...order,
