@@ -1,206 +1,194 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Gavel, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard, List, Gavel, PackageOpen } from "lucide-react";
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/lib/auth';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-
-const categories = [
-  { id: 0, name: 'All Auctions', icon: List, href: '/auctions' },
-  { id: 1, name: 'Electronics', icon: Laptop, href: '/search?category=electronics' },
-  { id: 2, name: 'Cameras', icon: Camera, href: '/search?category=cameras' },
-  { id: 3, name: 'Vehicles', icon: Car, href: '/search?category=vehicles' },
-  { id: 4, name: 'Real Estate', icon: Home, href: '/search?category=real-estate' },
-  { id: 5, name: 'Fashion', icon: ShoppingBag, href: '/search?category=fashion' },
-  { id: 6, name: 'Watches', icon: Watch, href: '/search?category=watches' },
-  { id: 7, name: 'Art', icon: Palette, href: '/search?category=art' },
-  { id: 8, name: 'Collectibles', icon: Gift, href: '/search?category=collectibles' },
-];
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/lib/auth";
+import { useMobile } from "@/hooks/use-mobile";
+import CartIcon from "@/components/CartIcon";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const handleAuthClick = () => {
-    if (user) {
-      signOut();
-    } else {
-      navigate('/auth');
-    }
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-auction-purple to-auction-magenta bg-clip-text text-transparent">
-                Fast<span className="text-auction-orange">Flip</span>
-              </span>
-            </Link>
-          </div>
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
-          {/* Desktop Navigation */}
+  const navItems = [
+    { name: "Auctions", href: "/auctions" },
+    { name: "Declutter", href: "/declutter" },
+    { name: "How it Works", href: "/how-it-works" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
+  ];
+
+  const handleLogin = () => {
+    navigate("/auth");
+    closeMobileMenu();
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+    closeMobileMenu();
+  };
+
+  const handleNavigateToProfile = () => {
+    navigate("/dashboard");
+    closeMobileMenu();
+  };
+
+  return mounted ? (
+    <header className="bg-white border-b py-4 sticky top-0 z-40">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
+          <Gavel className="h-6 w-6 text-auction-purple" />
+          <span className="font-bold text-lg text-auction-purple">BidHub</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        {!isMobile && (
           <nav className="hidden md:flex items-center space-x-6">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-sm font-medium hover:text-auction-purple transition-colors">
-                    Categories
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid grid-cols-2 gap-2 p-4 w-[400px]">
-                      {categories.map((category) => (
-                        <Link
-                          key={category.id}
-                          to={category.href}
-                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-                        >
-                          <category.icon className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium">{category.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-            <Link to="/declutter" className="text-sm font-medium hover:text-auction-purple transition-colors">
-              Declutter
-            </Link>
-            <Link to="/how-it-works" className="text-sm font-medium hover:text-auction-purple transition-colors">
-              How It Works
-            </Link>
-            {user && (
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium hover:text-auction-purple transition-colors">
-                      Create Listing
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="flex flex-col p-4 w-[200px]">
-                        <Link
-                          to="/create-listing"
-                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-                        >
-                          <Gavel className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium">Auction Listing</span>
-                        </Link>
-                        <Link
-                          to="/create-declutter-listing"
-                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-                        >
-                          <PackageOpen className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium">Declutter Listing</span>
-                        </Link>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            )}
-          </nav>
-
-          {/* Notification and profile (Desktop) */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="icon" aria-label="Notifications">
-              <Bell className="h-5 w-5" />
-            </Button>
-            {user && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                aria-label="Saved Items"
-                onClick={() => navigate('/watch-list')}
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="text-gray-600 hover:text-auction-purple transition-colors"
               >
-                <Heart className="h-5 w-5" />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
-            </Button>
-            {user ? (
-              <>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  aria-label="Dashboard"
-                  onClick={() => navigate('/dashboard')}
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" onClick={handleAuthClick} className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={handleAuthClick} className="gap-2">
-                <User className="h-4 w-4" />
-                <span>Sign In</span>
-              </Button>
-            )}
-          </div>
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+        )}
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-md"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+        {/* Right Side Actions */}
+        <div className="flex items-center space-x-2">
+          {!isMobile && (
+            <>
+              <CartIcon />
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
+                        <AvatarFallback>{user.email ? user.email[0].toUpperCase() : "U"}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || user.email}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleNavigateToProfile}>Dashboard</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard/orders")}>My Orders</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/cart")}>Cart</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button onClick={handleLogin} variant="ghost">
+                  Sign In
+                </Button>
+              )}
+            </>
+          )}
+
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <>
+              <CartIcon />
+              <Button variant="ghost" size="sm" onClick={toggleMobileMenu}>
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t py-4">
-          <div className="container mx-auto px-4 flex flex-col space-y-4">
-            <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
-            <Link to="/declutter" className="block py-2 text-sm font-medium">Declutter</Link>
-            <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
-            <Link to="/how-it-works" className="block py-2 text-sm font-medium">How It Works</Link>
-            {user && (
-              <>
-                <div className="border-t pt-2">
-                  <p className="text-xs text-muted-foreground mb-2">Create Listings</p>
-                  <Link to="/create-listing" className="block py-2 text-sm font-medium">Auction Listing</Link>
-                  <Link to="/create-declutter-listing" className="block py-2 text-sm font-medium">Declutter Listing</Link>
-                </div>
-                <Link to="/watch-list" className="block py-2 text-sm font-medium">Saved Items</Link>
-                <Link to="/dashboard" className="block py-2 text-sm font-medium">Dashboard</Link>
-              </>
-            )}
-            <div className="flex space-x-3 pt-2 border-t">
-              <Button 
-                variant="outline" 
-                className="flex-1 gap-2"
-                onClick={handleAuthClick}
+      {/* Mobile Navigation */}
+      {isMobile && mobileMenuOpen && (
+        <div className="fixed inset-0 top-16 bg-white z-50 p-4 overflow-auto">
+          <nav className="flex flex-col space-y-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+                onClick={closeMobileMenu}
               >
-                <User className="h-4 w-4" />
-                <span>{user ? 'Sign Out' : 'Sign In'}</span>
+                {item.name}
+              </Link>
+            ))}
+            {user ? (
+              <>
+                <div className="flex items-center space-x-3 py-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
+                    <AvatarFallback>{user.email ? user.email[0].toUpperCase() : "U"}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{user.user_metadata?.full_name || user.email}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+                  onClick={closeMobileMenu}
+                >
+                  <User className="h-5 w-5" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  to="/dashboard/orders"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+                  onClick={closeMobileMenu}
+                >
+                  <Gavel className="h-5 w-5" />
+                  <span>My Orders</span>
+                </Link>
+                <Button onClick={handleLogout} className="w-full mt-4">
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleLogin} className="w-full mt-4">
+                Sign In
               </Button>
-            </div>
-          </div>
+            )}
+          </nav>
         </div>
       )}
     </header>
-  );
+  ) : null;
 };
 
 export default Header;

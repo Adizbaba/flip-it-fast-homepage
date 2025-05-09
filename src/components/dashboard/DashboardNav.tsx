@@ -15,6 +15,7 @@ import {
   UserRound,
   Settings,
   PackageOpen,
+  Receipt,
 } from "lucide-react";
 import { useDashboard } from "@/contexts/DashboardContext";
 
@@ -34,6 +35,11 @@ export function DashboardNav() {
       title: "Won Auctions",
       href: "/dashboard/won-auctions",
       icon: ShoppingBag,
+    },
+    {
+      title: "My Orders",
+      href: "/dashboard/orders",
+      icon: Receipt,
     },
     {
       title: "Favorites",
@@ -114,12 +120,12 @@ export function DashboardNav() {
   // Auto-expand the group containing the active link
   useEffect(() => {
     navGroups.forEach(group => {
-      const isActive = group.links.some(link => pathname === link.href);
+      const isActive = group.links.some(link => pathname === link.href || pathname.startsWith(link.href + '/'));
       if (isActive && !activeGroups.includes(group.id)) {
-        setActiveGroups([...activeGroups, group.id]);
+        setActiveGroups(prev => [...prev, group.id]);
       }
     });
-  }, [pathname, navGroups]);
+  }, [pathname]);
 
   // Toggle group expansion
   const toggleGroup = (groupId: string) => {
@@ -152,10 +158,10 @@ export function DashboardNav() {
                     to={link.href}
                   >
                     <Button
-                      variant={pathname === link.href ? "secondary" : "ghost"}
+                      variant={pathname === link.href || pathname.startsWith(link.href + '/') ? "secondary" : "ghost"}
                       className={cn(
                         "w-full justify-start gap-2",
-                        pathname === link.href &&
+                        (pathname === link.href || pathname.startsWith(link.href + '/')) &&
                           "bg-muted font-medium"
                       )}
                     >
