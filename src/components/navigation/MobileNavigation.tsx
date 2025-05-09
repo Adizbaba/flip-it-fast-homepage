@@ -3,14 +3,15 @@ import { Gavel, Tag, Plus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
-import { auctionCategories, navItems, handleCreateListing } from "@/components/Header";
+import { auctionCategories, navItems } from "@/components/Header";
 
 interface MobileNavigationProps {
   user: any;
   closeMobileMenu: () => void;
+  onCreateListing: () => void;
 }
 
-const MobileNavigation = ({ user, closeMobileMenu }: MobileNavigationProps) => {
+const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavigationProps) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
@@ -25,14 +26,21 @@ const MobileNavigation = ({ user, closeMobileMenu }: MobileNavigationProps) => {
     closeMobileMenu();
   };
 
-  const handleCreateListingClick = () => {
-    handleCreateListing();
-    closeMobileMenu();
-  };
-
   return (
     <div className="fixed inset-0 top-16 bg-white z-50 p-4 overflow-auto">
       <nav className="flex flex-col space-y-4">
+        {/* Create Listing Button */}
+        <Button 
+          onClick={() => {
+            onCreateListing();
+            closeMobileMenu();
+          }} 
+          className="w-full bg-auction-purple hover:bg-purple-700 text-white flex items-center justify-center gap-2 mb-4"
+        >
+          <Plus className="h-4 w-4" />
+          Create Listing
+        </Button>
+        
         {/* Auctions dropdown for mobile */}
         <div className="space-y-2">
           <div className="flex items-center justify-between py-2 border-b">
@@ -58,13 +66,6 @@ const MobileNavigation = ({ user, closeMobileMenu }: MobileNavigationProps) => {
                 <span>{category.name}</span>
               </Link>
             ))}
-            <button
-              onClick={handleCreateListingClick}
-              className="flex w-full items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Create Listing</span>
-            </button>
           </div>
         </div>
 

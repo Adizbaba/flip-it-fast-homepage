@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Gavel, Tag, Plus } from "lucide-react";
+import { Gavel, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { auctionCategories, navItems, handleCreateListing } from "@/components/Header";
+import { auctionCategories, navItems } from "@/components/Header";
 
 const DesktopNavigation = () => {
   return (
@@ -58,13 +58,6 @@ const DesktopNavigation = () => {
                   </Link>
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={handleCreateListing}>
-                <div className="flex items-center gap-2 cursor-pointer transition-colors hover:text-auction-purple">
-                  <Plus className="h-4 w-4" />
-                  <span>Create Listing</span>
-                </div>
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (

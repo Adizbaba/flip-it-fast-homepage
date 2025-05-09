@@ -1,13 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gavel } from "lucide-react";
+import { Gavel, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import UserMenuSection from "@/components/navigation/UserMenuSection";
 import { useAuth } from "@/lib/auth";
-import { createListingModal } from "@/components/CreateListingModal";
+import { Button } from "@/components/ui/button";
+import { CreateListingModal } from "@/components/CreateListingModal";
 
 // Mock categories data - in a real app, this would come from an API
 export const auctionCategories = [
@@ -26,15 +27,12 @@ export const navItems = [
   { name: "Contact", href: "/contact" },
 ];
 
-export const handleCreateListing = () => {
-  createListingModal();
-};
-
 const Header = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [createListingModalOpen, setCreateListingModalOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -48,6 +46,10 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
+  const handleCreateListingClick = () => {
+    setCreateListingModalOpen(true);
+  };
+
   return mounted ? (
     <header className="bg-white border-b py-4 sticky top-0 z-40">
       <div className="container mx-auto px-4 flex justify-between items-center">
@@ -59,6 +61,17 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         {!isMobile && <DesktopNavigation />}
+
+        {/* Create Listing Button */}
+        {!isMobile && (
+          <Button 
+            onClick={handleCreateListingClick} 
+            className="mr-4 bg-auction-purple hover:bg-purple-700 text-white flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create Listing
+          </Button>
+        )}
 
         {/* Right Side Actions */}
         <UserMenuSection 
@@ -74,8 +87,18 @@ const Header = () => {
         <MobileNavigation 
           user={user} 
           closeMobileMenu={closeMobileMenu} 
+          onCreateListing={() => {
+            setCreateListingModalOpen(true);
+            closeMobileMenu();
+          }}
         />
       )}
+
+      {/* Create Listing Modal */}
+      <CreateListingModal 
+        open={createListingModalOpen} 
+        onOpenChange={setCreateListingModalOpen} 
+      />
     </header>
   ) : null;
 };

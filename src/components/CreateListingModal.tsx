@@ -21,13 +21,13 @@ export function CreateListingModal({ open, onOpenChange }: CreateListingModalPro
   const navigate = useNavigate();
 
   const handleNormalListing = () => {
-    navigate("/listing/create");
+    navigate("/create-listing");
     onOpenChange(false);
     toast.success("Creating a new auction listing");
   };
 
   const handleDeclutterListing = () => {
-    navigate("/declutter/create");
+    navigate("/create-declutter-listing");
     onOpenChange(false);
     toast.success("Creating a new declutter listing");
   };
