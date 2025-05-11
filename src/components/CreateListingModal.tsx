@@ -93,13 +93,18 @@ export const createListingModal = () => {
     }, 300); // Small delay to allow for exit animations
   };
   
-  const ReactDOM = require('react-dom/client');
-  
-  const root = ReactDOM.createRoot(element);
-  root.render(
-    <CreateListingModal open={isOpen} onOpenChange={(open) => {
-      setIsOpen(open);
-      if (!open) cleanup();
-    }} />
-  );
+  try {
+    const ReactDOM = require('react-dom/client');
+    
+    const root = ReactDOM.createRoot(element);
+    root.render(
+      <CreateListingModal open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) cleanup();
+      }} />
+    );
+  } catch (error) {
+    console.error("Error rendering modal:", error);
+    cleanup();
+  }
 };

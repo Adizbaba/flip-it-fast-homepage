@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gavel, Plus } from "lucide-react";
+import { Gavel } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import UserMenuSection from "@/components/navigation/UserMenuSection";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import { CreateListingModal } from "@/components/CreateListingModal";
 
 // Mock categories data - in a real app, this would come from an API
@@ -60,18 +59,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        {!isMobile && <DesktopNavigation />}
-
-        {/* Create Listing Button */}
-        {!isMobile && (
-          <Button 
-            onClick={handleCreateListingClick} 
-            className="mr-4 bg-auction-purple hover:bg-purple-700 text-white flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Create Listing
-          </Button>
-        )}
+        <DesktopNavigation onCreateListingClick={handleCreateListingClick} />
 
         {/* Right Side Actions */}
         <UserMenuSection 
