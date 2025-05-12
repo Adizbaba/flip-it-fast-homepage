@@ -27,6 +27,39 @@ interface ItemDetailModalProps {
   onClose: () => void;
 }
 
+// Define stronger types for the item and related items
+interface ItemProfile {
+  username?: string;
+  avatar_url?: string | null;
+}
+
+interface ItemData {
+  id: string;
+  title: string;
+  description: string;
+  starting_bid: string;
+  buy_now_price?: string;
+  bid_increment?: string;
+  images?: string[];
+  seller_id: string;
+  condition: string;
+  end_date: string;
+  quantity: number;
+  category_id?: string;
+  profiles?: ItemProfile | null;
+}
+
+interface RelatedItemData {
+  id: string;
+  title: string;
+  description: string;
+  starting_bid: string;
+  images?: string[];
+  profiles?: {
+    username?: string;
+  };
+}
+
 const fetchItem = async (itemId: string) => {
   const { data, error } = await supabase
     .from("auction_items")
@@ -41,7 +74,7 @@ const fetchItem = async (itemId: string) => {
     .single();
 
   if (error) throw error;
-  return data;
+  return data as ItemData;
 };
 
 const fetchSimilarItems = async (itemId: string, categoryId: string) => {
@@ -63,7 +96,7 @@ const fetchSimilarItems = async (itemId: string, categoryId: string) => {
     .limit(5);
 
   if (error) throw error;
-  return data;
+  return data as RelatedItemData[];
 };
 
 const fetchSellerItems = async (sellerId: string, itemId: string) => {
@@ -84,7 +117,7 @@ const fetchSellerItems = async (sellerId: string, itemId: string) => {
     .limit(5);
 
   if (error) throw error;
-  return data;
+  return data as RelatedItemData[];
 };
 
 export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProps) {
@@ -117,7 +150,10 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
   // Reset bid amount when modal closes or item changes
   useEffect(() => {
     if (isOpen && item) {
-      setBidAmount(parseFloat(item.starting_bid) + parseFloat(item.bid_increment || "1"));
+      // Convert string values to numbers for calculation
+      const startingBid = parseFloat(item.starting_bid);
+      const bidIncrement = item.bid_increment ? parseFloat(item.bid_increment) : 1;
+      setBidAmount(startingBid + bidIncrement);
     } else {
       setBidAmount("");
     }
@@ -134,7 +170,8 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
     }
 
     if (bidAmount && item) {
-      if (parseFloat(bidAmount.toString()) < parseFloat(item.starting_bid)) {
+      // Convert string starting_bid to number for comparison
+      if (typeof bidAmount === 'number' && bidAmount < parseFloat(item.starting_bid)) {
         toast({
           title: "Invalid bid",
           description: "Your bid must be at least the starting bid amount",
@@ -251,8 +288,8 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                       <div className="flex gap-2 items-center">
                         <Input
                           type="number"
-                          min={parseFloat(item.starting_bid) + parseFloat(item.bid_increment || "1")}
-                          step={item.bid_increment || 1}
+                          min={parseFloat(item.starting_bid) + (item.bid_increment ? parseFloat(item.bid_increment) : 1)}
+                          step={item.bid_increment ? parseFloat(item.bid_increment) : 1}
                           value={bidAmount}
                           onChange={(e) => setBidAmount(e.target.value ? parseFloat(e.target.value) : "")}
                           placeholder="Enter bid amount"
@@ -331,7 +368,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
               <div className="py-2">
                 <h3 className="font-semibold mb-3">Similar Items</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {similarItems.map((similarItem: any) => (
+                  {similarItems.map((similarItem) => (
                     <div 
                       key={similarItem.id}
                       className="border rounded-md p-2 cursor-pointer hover:border-primary transition-colors"
@@ -355,7 +392,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
               <div className="py-2">
                 <h3 className="font-semibold mb-3">More from this seller</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {sellerItems.map((sellerItem: any) => (
+                  {sellerItems.map((sellerItem) => (
                     <div 
                       key={sellerItem.id}
                       className="border rounded-md p-2 cursor-pointer hover:border-primary transition-colors"
