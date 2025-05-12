@@ -42,7 +42,7 @@ const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => 
                   </svg>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56">
+              <DropdownMenuContent align="center" className="w-56 bg-white border shadow-md" sideOffset={8}>
                 <DropdownMenuItem asChild>
                   <Link 
                     to="/auctions" 

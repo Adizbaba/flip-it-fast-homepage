@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -51,14 +51,14 @@ const UserMenuSection = ({
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-gray-100 transition-colors">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
                     <AvatarFallback>{user.email ? user.email[0].toUpperCase() : "U"}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 bg-white border shadow-md" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || user.email}</p>
@@ -66,15 +66,15 @@ const UserMenuSection = ({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleNavigateToProfile}>Dashboard</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/orders")}>My Orders</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/cart")}>Cart</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleNavigateToProfile} className="cursor-pointer hover:text-auction-purple hover:bg-gray-50">Dashboard</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/orders")} className="cursor-pointer hover:text-auction-purple hover:bg-gray-50">My Orders</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/cart")} className="cursor-pointer hover:text-auction-purple hover:bg-gray-50">Cart</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:text-auction-purple hover:bg-gray-50">Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button onClick={handleLogin} variant="ghost">
+            <Button onClick={handleLogin} variant="ghost" className="hover:bg-gray-100 hover:text-auction-purple transition-colors">
               Sign In
             </Button>
           )}
@@ -85,7 +85,13 @@ const UserMenuSection = ({
       {isMobile && (
         <>
           <CartIcon />
-          <Button variant="ghost" size="sm" onClick={toggleMobileMenu}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleMobileMenu}
+            className="hover:bg-gray-100 transition-colors"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </>

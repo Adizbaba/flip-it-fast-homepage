@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { Gavel, Tag, Plus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
   };
 
   return (
-    <div className="fixed inset-0 top-16 bg-white z-50 p-4 overflow-auto">
+    <div className="fixed inset-0 top-16 bg-white z-50 p-4 overflow-auto animate-in fade-in slide-in-from-top duration-300">
       <nav className="flex flex-col space-y-4">
         {/* Create Listing Button */}
         <Button 
@@ -44,12 +45,12 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
         {/* Auctions dropdown for mobile */}
         <div className="space-y-2">
           <div className="flex items-center justify-between py-2 border-b">
-            <span className="text-gray-600">Auctions</span>
+            <span className="font-medium text-gray-800">Auctions</span>
           </div>
           <div className="pl-4 space-y-2">
             <Link
               to="/auctions"
-              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2"
+              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
               onClick={closeMobileMenu}
             >
               <Gavel className="h-5 w-5" />
@@ -59,7 +60,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
               <Link
                 key={category.id}
                 to={`/auctions/category/${category.slug}`}
-                className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2"
+                className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
                 onClick={closeMobileMenu}
               >
                 <Tag className="h-5 w-5" />
@@ -74,7 +75,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
           <Link
             key={item.name}
             to={item.href}
-            className="text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+            className="text-gray-600 hover:text-auction-purple hover:bg-gray-50 transition-colors py-2 px-2 border-b rounded-md"
             onClick={closeMobileMenu}
           >
             {item.name}
@@ -83,7 +84,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
         
         {user ? (
           <>
-            <div className="flex items-center space-x-3 py-4">
+            <div className="flex items-center space-x-3 py-4 border-t mt-2">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
                 <AvatarFallback>{user.email ? user.email[0].toUpperCase() : "U"}</AvatarFallback>
@@ -95,7 +96,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             </div>
             <Link
               to="/dashboard"
-              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
               onClick={closeMobileMenu}
             >
               <User className="h-5 w-5" />
@@ -103,7 +104,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             </Link>
             <Link
               to="/dashboard/orders"
-              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple transition-colors py-2 border-b"
+              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
               onClick={closeMobileMenu}
             >
               <Gavel className="h-5 w-5" />

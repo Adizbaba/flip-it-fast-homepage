@@ -35,7 +35,17 @@ const Header = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Close mobile menu when resizing to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileMenuOpen]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -49,8 +59,22 @@ const Header = () => {
     setCreateListingModalOpen(true);
   };
 
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobile) {
+      if (mobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [mobileMenuOpen, isMobile]);
+
   return mounted ? (
-    <header className="bg-white border-b py-4 sticky top-0 z-40">
+    <header className="bg-white border-b py-4 sticky top-0 z-40 shadow-sm">
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
