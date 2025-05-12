@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Control } from "react-hook-form";
 import { ListingFormData } from "./schemas";
+import { Smartphone, Shirt, Home, Trophy, Ring, Car } from "lucide-react";
 
 interface CategorySelectorProps {
   control: Control<ListingFormData>;
@@ -11,6 +12,26 @@ interface CategorySelectorProps {
 }
 
 export const CategorySelector = ({ control, categories, categoriesLoading }: CategorySelectorProps) => {
+  // Function to get the appropriate icon for each category
+  const getCategoryIcon = (slug: string) => {
+    switch (slug) {
+      case "electronics":
+        return <Smartphone className="h-4 w-4" />;
+      case "clothing":
+        return <Shirt className="h-4 w-4" />;
+      case "home-garden":
+        return <Home className="h-4 w-4" />;
+      case "collectibles":
+        return <Trophy className="h-4 w-4" />;
+      case "jewelry":
+        return <Ring className="h-4 w-4" />;
+      case "motors":
+        return <Car className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <FormField
       control={control}
@@ -32,7 +53,8 @@ export const CategorySelector = ({ control, categories, categoriesLoading }: Cat
                 <SelectItem value="loading">Loading categories...</SelectItem>
               ) : (
                 categories?.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
+                  <SelectItem key={category.id} value={category.id} className="flex items-center gap-2">
+                    {category.slug && getCategoryIcon(category.slug)}
                     {category.name}
                   </SelectItem>
                 ))

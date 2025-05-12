@@ -1,6 +1,16 @@
 
 import { Link } from "react-router-dom";
-import { Gavel, Tag, Plus } from "lucide-react";
+import { 
+  Gavel, 
+  Tag, 
+  Plus, 
+  Smartphone, 
+  Shirt, 
+  Home, 
+  Trophy, 
+  Ring,
+  Car
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +26,26 @@ interface DesktopNavigationProps {
 }
 
 const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => {
+  // Function to get the appropriate icon for each category
+  const getCategoryIcon = (slug: string) => {
+    switch (slug) {
+      case "electronics":
+        return <Smartphone className="h-4 w-4" />;
+      case "clothing":
+        return <Shirt className="h-4 w-4" />;
+      case "home-garden":
+        return <Home className="h-4 w-4" />;
+      case "collectibles":
+        return <Trophy className="h-4 w-4" />;
+      case "jewelry":
+        return <Ring className="h-4 w-4" />;
+      case "motors":
+        return <Car className="h-4 w-4" />;
+      default:
+        return <Tag className="h-4 w-4" />;
+    }
+  };
+
   return (
     <div className="hidden md:flex items-center space-x-6">
       {/* Main navigation */}
@@ -57,9 +87,9 @@ const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => 
                   <DropdownMenuItem key={category.id} asChild>
                     <Link 
                       to={`/auctions/category/${category.slug}`} 
-                      className="flex items-center gap-2 cursor-pointer transition-colors hover:text-auction-purple"
+                      className="flex items-center gap-2 cursor-pointer transition-colors hover:text-auction-purple hover:scale-105 duration-200"
                     >
-                      <Tag className="h-4 w-4" />
+                      {getCategoryIcon(category.slug)}
                       <span>{category.name}</span>
                     </Link>
                   </DropdownMenuItem>

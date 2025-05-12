@@ -1,6 +1,17 @@
 
 import { Link, useNavigate } from "react-router-dom";
-import { Gavel, Tag, Plus, User } from "lucide-react";
+import { 
+  Gavel, 
+  Tag, 
+  Plus, 
+  User, 
+  Smartphone, 
+  Shirt, 
+  Home, 
+  Trophy, 
+  Ring,
+  Car 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
@@ -25,6 +36,26 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
     await signOut();
     navigate("/");
     closeMobileMenu();
+  };
+
+  // Function to get the appropriate icon for each category
+  const getCategoryIcon = (slug: string) => {
+    switch (slug) {
+      case "electronics":
+        return <Smartphone className="h-5 w-5" />;
+      case "clothing":
+        return <Shirt className="h-5 w-5" />;
+      case "home-garden":
+        return <Home className="h-5 w-5" />;
+      case "collectibles":
+        return <Trophy className="h-5 w-5" />;
+      case "jewelry":
+        return <Ring className="h-5 w-5" />;
+      case "motors":
+        return <Car className="h-5 w-5" />;
+      default:
+        return <Tag className="h-5 w-5" />;
+    }
   };
 
   return (
@@ -60,10 +91,10 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
               <Link
                 key={category.id}
                 to={`/auctions/category/${category.slug}`}
-                className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
+                className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors transform hover:scale-105 duration-200"
                 onClick={closeMobileMenu}
               >
-                <Tag className="h-5 w-5" />
+                {getCategoryIcon(category.slug)}
                 <span>{category.name}</span>
               </Link>
             ))}

@@ -16,6 +16,7 @@ export const auctionCategories = [
   { id: 3, name: "Home & Garden", slug: "home-garden" },
   { id: 4, name: "Collectibles", slug: "collectibles" },
   { id: 5, name: "Jewelry", slug: "jewelry" },
+  { id: 6, name: "Motors", slug: "motors" },
 ];
 
 export const navItems = [
