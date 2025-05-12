@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -333,7 +332,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                             itemId={item.id}
                             itemType="auction"
                             title={item.title}
-                            price={item.buy_now_price?.toString()}
+                            price={item.buy_now_price || 0}
                             image={(item.images as string[])?.[0]}
                             className="flex-1"
                           />
