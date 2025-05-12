@@ -37,9 +37,9 @@ interface ItemData {
   id: string;
   title: string;
   description: string;
-  starting_bid: string;
-  buy_now_price?: string;
-  bid_increment?: string;
+  starting_bid: number;
+  buy_now_price?: number | null;
+  bid_increment?: number;
   images?: string[];
   seller_id: string;
   condition: string;
@@ -53,11 +53,11 @@ interface RelatedItemData {
   id: string;
   title: string;
   description: string;
-  starting_bid: string;
+  starting_bid: number;
   images?: string[];
   profiles?: {
     username?: string;
-  };
+  } | null;
 }
 
 const fetchItem = async (itemId: string) => {
@@ -74,7 +74,15 @@ const fetchItem = async (itemId: string) => {
     .single();
 
   if (error) throw error;
-  return data as ItemData;
+  
+  // Handle the profiles separately to ensure proper typing
+  const itemData: ItemData = {
+    ...data,
+    profiles: data.profiles as ItemProfile | null,
+    images: data.images as string[] || []
+  };
+  
+  return itemData;
 };
 
 const fetchSimilarItems = async (itemId: string, categoryId: string) => {
@@ -96,7 +104,15 @@ const fetchSimilarItems = async (itemId: string, categoryId: string) => {
     .limit(5);
 
   if (error) throw error;
-  return data as RelatedItemData[];
+  
+  // Map the data to ensure proper typing
+  const relatedItems: RelatedItemData[] = data.map(item => ({
+    ...item,
+    images: item.images as string[] || [],
+    profiles: item.profiles as { username?: string } | null
+  }));
+  
+  return relatedItems;
 };
 
 const fetchSellerItems = async (sellerId: string, itemId: string) => {
@@ -117,7 +133,15 @@ const fetchSellerItems = async (sellerId: string, itemId: string) => {
     .limit(5);
 
   if (error) throw error;
-  return data as RelatedItemData[];
+  
+  // Map the data to ensure proper typing
+  const sellerItems: RelatedItemData[] = data.map(item => ({
+    ...item,
+    images: item.images as string[] || [],
+    profiles: item.profiles as { username?: string } | null
+  }));
+  
+  return sellerItems;
 };
 
 export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProps) {
@@ -150,9 +174,9 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
   // Reset bid amount when modal closes or item changes
   useEffect(() => {
     if (isOpen && item) {
-      // Convert string values to numbers for calculation
-      const startingBid = parseFloat(item.starting_bid);
-      const bidIncrement = item.bid_increment ? parseFloat(item.bid_increment) : 1;
+      // Set initial bid amount based on starting bid and increment
+      const startingBid = item.starting_bid;
+      const bidIncrement = item.bid_increment || 1;
       setBidAmount(startingBid + bidIncrement);
     } else {
       setBidAmount("");
@@ -170,8 +194,8 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
     }
 
     if (bidAmount && item) {
-      // Convert string starting_bid to number for comparison
-      if (typeof bidAmount === 'number' && bidAmount < parseFloat(item.starting_bid)) {
+      // Compare bid amount with starting bid
+      if (typeof bidAmount === 'number' && bidAmount < item.starting_bid) {
         toast({
           title: "Invalid bid",
           description: "Your bid must be at least the starting bid amount",
@@ -288,8 +312,8 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                       <div className="flex gap-2 items-center">
                         <Input
                           type="number"
-                          min={parseFloat(item.starting_bid) + (item.bid_increment ? parseFloat(item.bid_increment) : 1)}
-                          step={item.bid_increment ? parseFloat(item.bid_increment) : 1}
+                          min={item.starting_bid + (item.bid_increment || 1)}
+                          step={item.bid_increment || 1}
                           value={bidAmount}
                           onChange={(e) => setBidAmount(e.target.value ? parseFloat(e.target.value) : "")}
                           placeholder="Enter bid amount"
@@ -309,7 +333,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                             itemId={item.id}
                             itemType="auction"
                             title={item.title}
-                            price={item.buy_now_price}
+                            price={item.buy_now_price?.toString()}
                             image={(item.images as string[])?.[0]}
                             className="flex-1"
                           />
