@@ -9,7 +9,7 @@ import {
   Shirt, 
   Home, 
   Trophy, 
-  Ring,
+  Gem, // Changed from Ring to Gem
   Car 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
       case "collectibles":
         return <Trophy className="h-5 w-5" />;
       case "jewelry":
-        return <Ring className="h-5 w-5" />;
+        return <Gem className="h-5 w-5" />; // Changed from Ring to Gem
       case "motors":
         return <Car className="h-5 w-5" />;
       default:

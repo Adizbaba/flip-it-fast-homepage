@@ -1,9 +1,8 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Control } from "react-hook-form";
 import { ListingFormData } from "./schemas";
-import { Smartphone, Shirt, Home, Trophy, Ring, Car } from "lucide-react";
+import { Smartphone, Shirt, Home, Trophy, Gem, Car } from "lucide-react";
 
 interface CategorySelectorProps {
   control: Control<ListingFormData>;
@@ -24,7 +23,7 @@ export const CategorySelector = ({ control, categories, categoriesLoading }: Cat
       case "collectibles":
         return <Trophy className="h-4 w-4" />;
       case "jewelry":
-        return <Ring className="h-4 w-4" />;
+        return <Gem className="h-4 w-4" />; // Changed from Ring to Gem
       case "motors":
         return <Car className="h-4 w-4" />;
       default:

@@ -8,7 +8,7 @@ import {
   Shirt, 
   Home, 
   Trophy, 
-  Ring,
+  Gem, // Changed from Ring to Gem
   Car
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => 
       case "collectibles":
         return <Trophy className="h-4 w-4" />;
       case "jewelry":
-        return <Ring className="h-4 w-4" />;
+        return <Gem className="h-4 w-4" />; // Changed from Ring to Gem
       case "motors":
         return <Car className="h-4 w-4" />;
       default:
