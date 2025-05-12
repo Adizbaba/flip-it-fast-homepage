@@ -1,9 +1,12 @@
+
 import { Heart, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { ItemDetailModal } from "@/components/item/ItemDetailModal";
 
 interface AuctionCardProps {
   id: string;
@@ -18,6 +21,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
   const { user } = useAuth();
   const { addToSavedItems, removeFromSavedItems, isSaved } = useSavedItems(user);
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleWatchlistToggle = async () => {
     if (!user) {
@@ -53,45 +57,61 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
   };
 
   return (
-    <div className="auction-card">
-      <div className="relative">
-        <img src={image} alt={title} className="auction-image" />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className={`absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full ${isSaved(id) ? 'text-red-500' : ''}`}
-          aria-label={isSaved(id) ? "Remove from watchlist" : "Add to watchlist"}
-          onClick={handleWatchlistToggle}
-        >
-          <Heart className="h-4 w-4" />
-        </Button>
-        <div className="absolute bottom-2 left-2">
-          <div className="countdown-badge flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span>{timeRemaining}</span>
+    <>
+      <div className="auction-card">
+        <div className="relative">
+          <img 
+            src={image} 
+            alt={title} 
+            className="auction-image cursor-pointer transition-transform duration-300 hover:scale-105" 
+            onClick={() => setModalOpen(true)}
+          />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full ${isSaved(id) ? 'text-red-500' : ''}`}
+            aria-label={isSaved(id) ? "Remove from watchlist" : "Add to watchlist"}
+            onClick={handleWatchlistToggle}
+          >
+            <Heart className="h-4 w-4" />
+          </Button>
+          <div className="absolute bottom-2 left-2">
+            <div className="countdown-badge flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>{timeRemaining}</span>
+            </div>
+          </div>
+        </div>
+        <div className="p-4">
+          <h3 
+            className="font-medium text-sm line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors" 
+            onClick={() => setModalOpen(true)}
+          >{title}</h3>
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Current Bid</p>
+              <p className="font-bold text-lg">${currentBid.toLocaleString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">{bids} bids</p>
+              <Button 
+                size="sm" 
+                className="mt-1"
+                onClick={() => setModalOpen(true)}
+              >
+                View Item
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-      <div className="p-4">
-        <h3 className="font-medium text-sm line-clamp-2 mb-2">{title}</h3>
-        <div className="flex justify-between items-end">
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Current Bid</p>
-            <p className="font-bold text-lg">${currentBid.toLocaleString()}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">{bids} bids</p>
-            <Button 
-              size="sm" 
-              className="mt-1"
-              onClick={() => navigate(`/item/${id}`)}
-            >
-              View Item
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+
+      <ItemDetailModal 
+        itemId={modalOpen ? id : null}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
+    </>
   );
 };
 

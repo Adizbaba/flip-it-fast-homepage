@@ -24,7 +24,7 @@ const DeclutterListingCard = ({ listing }: DeclutterListingCardProps) => {
   return (
     <Card className="overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow">
       <div 
-        className="h-48 bg-center bg-cover relative cursor-pointer"
+        className="h-48 bg-center bg-cover relative cursor-pointer transition-transform duration-300 hover:scale-105"
         style={{ backgroundImage: `url(${imageUrl})` }}
         onClick={() => navigate(`/declutter/${listing.id}`)}
       >
@@ -99,10 +99,10 @@ const DeclutterListingCard = ({ listing }: DeclutterListingCardProps) => {
       <CardFooter className="border-t pt-3 gap-2 flex">
         <Button 
           variant="default"
-          className="flex-1"
+          className="flex-1 group"
           onClick={() => navigate(`/declutter/${listing.id}`)}
         >
-          <ShoppingBag className="h-4 w-4 mr-2" />
+          <ShoppingBag className="h-4 w-4 mr-2 group-hover:animate-bounce" />
           Buy in Bulk
         </Button>
         
