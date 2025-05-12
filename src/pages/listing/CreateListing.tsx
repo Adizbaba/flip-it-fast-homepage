@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Form } from "@/components/ui/form";
-import { AlertCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { listingFormSchema, type ListingFormData } from "@/components/listing/schemas";
 import { BasicDetails } from "@/components/listing/BasicDetails";
@@ -22,7 +22,7 @@ const CreateListing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [images, setImages] = useState<File[]>([]);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [listingItem, setListingItem] = useState<any>(null);
 
   const form = useForm<ListingFormData>({
@@ -41,7 +41,7 @@ const CreateListing = () => {
         international: "Not available" 
       }),
       returnPolicy: "No returns accepted",
-      auctionType: "standard" // This matches the database constraint now
+      auctionType: "standard"
     },
   });
 
@@ -93,9 +93,6 @@ const CreateListing = () => {
         imageUrls = uploadedImages;
       }
 
-      // Calculate listing fee (5% of starting bid, minimum $5)
-      const listingFee = Math.max(5, data.startingBid * 0.05);
-
       // Properly format the data to match the database schema
       const { data: item, error } = await supabase
         .from('auction_items')
@@ -115,7 +112,7 @@ const CreateListing = () => {
           auction_type: data.auctionType,
           start_date: data.startDate.toISOString(),
           end_date: data.endDate.toISOString(),
-          status: 'Draft', // Starts as draft until payment is complete
+          status: 'Draft', // Starts as draft until published
           images: imageUrls.length > 0 ? imageUrls : null
         })
         .select()
@@ -123,15 +120,13 @@ const CreateListing = () => {
 
       if (error) throw error;
 
-      // Store the listing item for the payment process
+      // Store the listing item for the confirmation dialog
       setListingItem({
         id: item.id,
-        title: item.title,
-        startingBid: item.starting_bid,
-        fee: listingFee
+        title: item.title
       });
       
-      setShowPaymentDialog(true);
+      setShowConfirmDialog(true);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -141,18 +136,40 @@ const CreateListing = () => {
     }
   };
 
-  const handleProceedToPayment = () => {
-    setShowPaymentDialog(false);
+  const handlePublishListing = async () => {
+    setShowConfirmDialog(false);
+    
     if (listingItem) {
-      navigate(`/checkout?id=${listingItem.id}&type=listing`);
+      try {
+        // Update the listing status to Active
+        const { error } = await supabase
+          .from('auction_items')
+          .update({ status: 'Active' })
+          .eq('id', listingItem.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Success",
+          description: "Your listing has been published successfully",
+        });
+        
+        navigate("/watch-list");
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleSkipPayment = async () => {
-    setShowPaymentDialog(false);
+  const handleSaveAsDraft = async () => {
+    setShowConfirmDialog(false);
     toast({
       title: "Listing Created",
-      description: "Your listing has been saved as a draft. To publish it, you'll need to pay the listing fee.",
+      description: "Your listing has been saved as a draft. You can publish it later.",
     });
     navigate("/watch-list");
   };
@@ -187,27 +204,17 @@ const CreateListing = () => {
                   categoriesLoading={categoriesLoading}
                 />
 
-                <div className="bg-blue-50 p-4 rounded-md flex items-start space-x-3">
-                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-blue-700">
-                      A listing fee of 5% of your starting bid (minimum $5) will be charged to publish this listing.
-                      You can still save as draft and pay later.
-                    </p>
-                  </div>
-                </div>
-
                 <Button type="submit" className="w-full">Create Listing</Button>
               </form>
             </Form>
           </div>
           
           <PaymentInfoDialog
-            open={showPaymentDialog}
-            onOpenChange={setShowPaymentDialog}
+            open={showConfirmDialog}
+            onOpenChange={setShowConfirmDialog}
             listingItem={listingItem}
-            onSkip={handleSkipPayment}
-            onProceed={handleProceedToPayment}
+            onSkip={handleSaveAsDraft}
+            onProceed={handlePublishListing}
           />
         </div>
       </main>

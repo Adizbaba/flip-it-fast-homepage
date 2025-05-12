@@ -7,8 +7,6 @@ interface PaymentInfoDialogProps {
   onOpenChange: (open: boolean) => void;
   listingItem: {
     title: string;
-    fee: number;
-    startingBid: number;
   } | null;
   onSkip: () => void;
   onProceed: () => void;
@@ -25,9 +23,9 @@ export const PaymentInfoDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Listing Fee</DialogTitle>
+          <DialogTitle>Listing Confirmation</DialogTitle>
           <DialogDescription>
-            Pay the listing fee to publish your item immediately
+            Confirm your listing details before publishing
           </DialogDescription>
         </DialogHeader>
         
@@ -35,9 +33,8 @@ export const PaymentInfoDialog = ({
           {listingItem && (
             <>
               <p><strong>Item:</strong> {listingItem.title}</p>
-              <p className="mt-2"><strong>Listing Fee:</strong> ${listingItem.fee.toFixed(2)}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                (5% of your starting bid of ${listingItem.startingBid}, minimum $5)
+                Your listing will be published immediately
               </p>
             </>
           )}
@@ -45,7 +42,7 @@ export const PaymentInfoDialog = ({
         
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onSkip}>Save as Draft</Button>
-          <Button onClick={onProceed}>Pay Now</Button>
+          <Button onClick={onProceed}>Publish Now</Button>
         </div>
       </DialogContent>
     </Dialog>
