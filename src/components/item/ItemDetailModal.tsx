@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -39,7 +40,7 @@ interface ItemData {
   starting_bid: number;
   buy_now_price?: number | null;
   bid_increment?: number;
-  images?: string[];
+  images: string[];
   seller_id: string;
   condition: string;
   end_date: string;
@@ -53,13 +54,14 @@ interface RelatedItemData {
   title: string;
   description: string;
   starting_bid: number;
-  images?: string[];
+  images: string[];
   profiles?: {
     username?: string;
   } | null;
 }
 
 const fetchItem = async (itemId: string) => {
+  console.log("Fetching item with ID:", itemId);
   const { data, error } = await supabase
     .from("auction_items")
     .select(`
@@ -72,13 +74,23 @@ const fetchItem = async (itemId: string) => {
     .eq("id", itemId)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching item:", error);
+    throw error;
+  }
+  
+  console.log("Item fetched:", data);
+  
+  // Process the images to ensure they're an array
+  const images = data.images ? 
+    (Array.isArray(data.images) ? data.images : [data.images]) : 
+    [];
   
   // Handle the profiles separately to ensure proper typing
   const itemData: ItemData = {
     ...data,
     profiles: data.profiles as ItemProfile | null,
-    images: data.images as string[] || []
+    images
   };
   
   return itemData;
@@ -104,12 +116,18 @@ const fetchSimilarItems = async (itemId: string, categoryId: string) => {
 
   if (error) throw error;
   
-  // Map the data to ensure proper typing
-  const relatedItems: RelatedItemData[] = data.map(item => ({
-    ...item,
-    images: item.images as string[] || [],
-    profiles: item.profiles as { username?: string } | null
-  }));
+  // Process the items to ensure images are arrays
+  const relatedItems: RelatedItemData[] = (data || []).map(item => {
+    const images = item.images ? 
+      (Array.isArray(item.images) ? item.images : [item.images]) : 
+      [];
+      
+    return {
+      ...item,
+      images,
+      profiles: item.profiles as { username?: string } | null
+    };
+  });
   
   return relatedItems;
 };
@@ -133,12 +151,18 @@ const fetchSellerItems = async (sellerId: string, itemId: string) => {
 
   if (error) throw error;
   
-  // Map the data to ensure proper typing
-  const sellerItems: RelatedItemData[] = data.map(item => ({
-    ...item,
-    images: item.images as string[] || [],
-    profiles: item.profiles as { username?: string } | null
-  }));
+  // Process the items to ensure images are arrays
+  const sellerItems: RelatedItemData[] = (data || []).map(item => {
+    const images = item.images ? 
+      (Array.isArray(item.images) ? item.images : [item.images]) : 
+      [];
+      
+    return {
+      ...item,
+      images,
+      profiles: item.profiles as { username?: string } | null
+    };
+  });
   
   return sellerItems;
 };
@@ -274,7 +298,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
               <div>
                 <Carousel>
                   <CarouselContent>
-                    {(item.images as string[] || ["/placeholder.svg"]).map((image, index) => (
+                    {(item.images && item.images.length > 0 ? item.images : ["/placeholder.svg"]).map((image, index) => (
                       <CarouselItem key={index}>
                         <div className="overflow-hidden rounded-md">
                           <img
@@ -333,7 +357,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                             itemType="auction"
                             title={item.title}
                             price={item.buy_now_price || 0}
-                            image={(item.images as string[])?.[0]}
+                            image={item.images[0] || "/placeholder.svg"}
                             className="flex-1"
                           />
                         </div>
@@ -398,7 +422,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                       onClick={() => handleViewItem(similarItem.id)}
                     >
                       <img
-                        src={(similarItem.images as string[])?.[0] || "/placeholder.svg"}
+                        src={similarItem.images[0] || "/placeholder.svg"}
                         alt={similarItem.title}
                         className="w-full aspect-square object-cover rounded-sm"
                       />
@@ -422,7 +446,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
                       onClick={() => handleViewItem(sellerItem.id)}
                     >
                       <img
-                        src={(sellerItem.images as string[])?.[0] || "/placeholder.svg"}
+                        src={sellerItem.images[0] || "/placeholder.svg"}
                         alt={sellerItem.title}
                         className="w-full aspect-square object-cover rounded-sm"
                       />

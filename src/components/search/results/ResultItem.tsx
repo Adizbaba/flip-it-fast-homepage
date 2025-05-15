@@ -8,6 +8,7 @@ import { SearchResultItem } from "@/hooks/useSearch";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ItemDetailModal } from "@/components/item/ItemDetailModal";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ResultItemProps {
   item: SearchResultItem;
@@ -18,6 +19,11 @@ const ResultItem = ({ item }: ResultItemProps) => {
   const { isSaved, addToSavedItems, removeFromSavedItems } = useSavedItems(user);
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Ensure images is an array and get the first one or use placeholder
+  const itemImage = item.images && Array.isArray(item.images) && item.images.length > 0
+    ? item.images[0]
+    : "/placeholder.svg";
 
   // Toggle saved status
   const toggleSaved = (itemId: string) => {
@@ -35,11 +41,13 @@ const ResultItem = ({ item }: ResultItemProps) => {
           className="relative h-48 overflow-hidden cursor-pointer"
           onClick={() => setModalOpen(true)}
         >
-          <img
-            src={item.images?.[0] || "/placeholder.svg"}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-          />
+          <AspectRatio ratio={1/1} className="bg-muted">
+            <img
+              src={itemImage}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </AspectRatio>
           {user && (
             <Button
               variant="ghost"

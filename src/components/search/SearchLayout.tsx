@@ -62,6 +62,8 @@ const SearchLayout = ({
               minPrice={filters.minPrice}
               maxPrice={filters.maxPrice}
               sortBy={filters.sortBy}
+              condition={filters.condition}
+              auctionType={filters.auctionType}
               onFilterChange={onFilterChange}
             />
           </div>

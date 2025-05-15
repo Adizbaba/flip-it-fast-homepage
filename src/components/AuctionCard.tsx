@@ -7,6 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ItemDetailModal } from "@/components/item/ItemDetailModal";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface AuctionCardProps {
   id: string;
@@ -58,14 +59,16 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
 
   return (
     <>
-      <div className="auction-card">
+      <div className="auction-card border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
         <div className="relative">
-          <img 
-            src={image} 
-            alt={title} 
-            className="auction-image cursor-pointer transition-transform duration-300 hover:scale-105" 
-            onClick={() => setModalOpen(true)}
-          />
+          <AspectRatio ratio={1/1} className="bg-muted">
+            <img 
+              src={image} 
+              alt={title} 
+              className="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105" 
+              onClick={() => setModalOpen(true)}
+            />
+          </AspectRatio>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -73,10 +76,10 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
             aria-label={isSaved(id) ? "Remove from watchlist" : "Add to watchlist"}
             onClick={handleWatchlistToggle}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${isSaved(id) ? 'fill-red-500' : ''}`} />
           </Button>
           <div className="absolute bottom-2 left-2">
-            <div className="countdown-badge flex items-center gap-1">
+            <div className="countdown-badge flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-full text-xs">
               <Clock className="h-3 w-3" />
               <span>{timeRemaining}</span>
             </div>

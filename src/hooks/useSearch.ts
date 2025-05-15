@@ -26,7 +26,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       try {
         let queryBuilder = supabase
           .from("auction_items")
-          .select("*", { count: "exact" });
+          .select("*, profiles:seller_id(*)", { count: "exact" });
 
         // Filter by query text
         if (filters.query) {
@@ -80,32 +80,26 @@ export const useSearch = (initialFilters: SearchFilters) => {
         const start = (page - 1) * itemsPerPage;
         queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
 
-        const { data: itemsData, error: itemsError, count } = await queryBuilder;
+        const { data: items, error, count } = await queryBuilder;
 
-        if (itemsError) {
-          throw itemsError;
+        if (error) {
+          throw error;
         }
 
-        const items = itemsData || [];
-        const enrichedItems: SearchResultItem[] = [...items];
+        // Process items to ensure images are properly formatted
+        const processedItems = (items || []).map(item => {
+          // Ensure images is an array if it exists
+          const images = item.images ? 
+            (Array.isArray(item.images) ? item.images : [item.images]) : 
+            [];
+            
+          return {
+            ...item,
+            images
+          };
+        });
 
-        if (items.length > 0) {
-          const sellerIds = items.map(item => item.seller_id);
-          const uniqueSellerIds = [...new Set(sellerIds)];
-
-          const { data: profilesData, error: profilesError } = await supabase
-            .from("profiles")
-            .select("*")
-            .in("id", uniqueSellerIds);
-
-          if (!profilesError && profilesData) {
-            enrichedItems.forEach(item => {
-              item.profiles = profilesData.find(profile => profile.id === item.seller_id) || null;
-            });
-          }
-        }
-
-        setResults(enrichedItems);
+        setResults(processedItems);
         setTotalCount(count || 0);
       } catch (error) {
         console.error("Error fetching search results:", error);
@@ -138,27 +132,26 @@ export const useSearch = (initialFilters: SearchFilters) => {
               try {
                 const { data: newItem } = await supabase
                   .from("auction_items")
-                  .select("*")
+                  .select("*, profiles:seller_id(*)")
                   .eq("id", payload.new.id)
                   .single();
 
                 if (newItem) {
-                  // Get seller profile
-                  const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("*")
-                    .eq("id", newItem.seller_id)
-                    .single();
-
-                  const enrichedItem = { ...newItem, profiles: profile || null };
+                  // Process images for the new item
+                  const processedItem = {
+                    ...newItem,
+                    images: newItem.images ? 
+                      (Array.isArray(newItem.images) ? newItem.images : [newItem.images]) : 
+                      []
+                  };
 
                   // Check if item is already in results
-                  const itemExists = results.some(item => item.id === enrichedItem.id);
+                  const itemExists = results.some(item => item.id === processedItem.id);
                   
                   if (!itemExists && page === 1) {
                     // Only add new items if we're on the first page
                     setResults(prevResults => {
-                      const updatedResults = [enrichedItem, ...prevResults];
+                      const updatedResults = [processedItem, ...prevResults];
                       // Keep only first 10 items if we're on page 1
                       return updatedResults.slice(0, 10);
                     });
@@ -168,7 +161,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
                     // Update existing item
                     setResults(prevResults => 
                       prevResults.map(item => 
-                        item.id === enrichedItem.id ? enrichedItem : item
+                        item.id === processedItem.id ? processedItem : item
                       )
                     );
                   }
