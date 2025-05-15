@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -251,7 +250,7 @@ const CreateDeclutterListing = () => {
                 {/* Images */}
                 <div className="p-4 border rounded-md bg-muted/30">
                   <h3 className="font-medium mb-4">Upload Images</h3>
-                  <ListingImageUpload />
+                  <ListingImageUpload images={images} setImages={setImages} />
                 </div>
 
                 {/* Pricing and Quantity */}

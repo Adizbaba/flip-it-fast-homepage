@@ -1,244 +1,160 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables, Json } from "@/integrations/supabase/types";
-import { FilterState, SafeImageArray } from "@/components/search/filters/types";
 
-export type SearchResultItem = Tables<"auction_items"> & {
-  profiles?: Tables<"profiles"> | null;
-  images: SafeImageArray; // Ensure images are always string array
-};
-
-export interface SearchFilters extends FilterState {
+export interface SearchFilters {
   query: string;
+  category: string;
+  minPrice: string;
+  maxPrice: string;
+  sortBy: string;
+  condition: string;
+  auctionType: string;
 }
 
 export const useSearch = (initialFilters: SearchFilters) => {
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
-  const [refreshKey, setRefreshKey] = useState(0); // Add a refresh key
 
-  // Helper function to safely process image data
-  const processImageData = (imageData: Json | null): SafeImageArray => {
-    if (!imageData) return [];
-    
-    // If it's already an array, map each item to string
-    if (Array.isArray(imageData)) {
-      return imageData.map(img => String(img));
-    }
-    
-    // If it's a single value, convert to string and wrap in array
-    return [String(imageData)];
-  };
+  const fetchResults = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  // Helper function to safely process profiles data
-  const processProfileData = (profileData: any): Tables<"profiles"> | null => {
-    // If profileData is null or has an error property, return null
-    if (!profileData || profileData.error) {
-      return null;
-    }
-    
-    // Otherwise return the profile data as is
-    return profileData as Tables<"profiles">;
-  };
-
-  // Function to force refresh the results
-  const refreshResults = useCallback(() => {
-    console.log("Manually refreshing results");
-    setRefreshKey(prev => prev + 1);
-  }, []);
-
-  // Fetch results based on filters
-  useEffect(() => {
-    const fetchResults = async () => {
-      console.log("Fetching auction results with filters:", filters);
-      setLoading(true);
-
-      try {
-        let queryBuilder = supabase
-          .from("auction_items")
-          .select("*, profiles:seller_id(*)", { count: "exact" });
-
-        // Filter by query text
-        if (filters.query) {
-          queryBuilder = queryBuilder.or(
-            `title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`
-          );
-        }
-
-        // Filter by category
-        if (filters.category && filters.category !== "all") {
-          queryBuilder = queryBuilder.eq("category_id", filters.category);
-        }
-
-        // Filter by price range
-        if (filters.minPrice) {
-          queryBuilder = queryBuilder.gte("starting_bid", filters.minPrice);
-        }
-        if (filters.maxPrice) {
-          queryBuilder = queryBuilder.lte("starting_bid", filters.maxPrice);
-        }
-
-        // Filter by auction type
-        if (filters.auctionType && filters.auctionType !== "all") {
-          queryBuilder = queryBuilder.eq("auction_type", filters.auctionType);
-        }
-
-        // Filter by condition
-        if (filters.condition && filters.condition !== "all") {
-          queryBuilder = queryBuilder.eq("condition", filters.condition);
-        }
-
-        // Only show active listings - THIS IS CRITICAL
-        queryBuilder = queryBuilder.eq("status", "Active");
-
-        // Sort results
-        switch (filters.sortBy) {
-          case "priceAsc":
-            queryBuilder = queryBuilder.order("starting_bid", { ascending: true });
-            break;
-          case "priceDesc":
-            queryBuilder = queryBuilder.order("starting_bid", { ascending: false });
-            break;
-          case "endingSoon":
-            queryBuilder = queryBuilder.order("end_date", { ascending: true });
-            break;
-          default:
-            queryBuilder = queryBuilder.order("created_at", { ascending: false });
-        }
-
-        const itemsPerPage = 10; // Set to 10 as requested
-        const start = (page - 1) * itemsPerPage;
-        queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
-
-        console.log("Executing query for auction items...");
-        const { data: items, error, count } = await queryBuilder;
-
-        if (error) {
-          console.error("Error fetching auction items:", error);
-          throw error;
-        }
-
-        console.log(`Found ${items?.length || 0} auction items, total: ${count || 0}`);
-        
-        // Process items to ensure images are properly formatted as string arrays and profiles are typed correctly
-        const processedItems: SearchResultItem[] = (items || []).map(item => {
-          const processedItem = {
-            ...item,
-            images: processImageData(item.images),
-            profiles: processProfileData(item.profiles)
-          };
-          console.log("Processed item:", {
-            id: processedItem.id,
-            title: processedItem.title,
-            images: processedItem.images?.length || 0,
-            status: processedItem.status
-          });
-          return processedItem;
-        });
-
-        setResults(processedItems);
-        setTotalCount(count || 0);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-      } finally {
-        setLoading(false);
+    try {
+      console.log("Fetching with filters:", filters);
+      
+      // Start building the query
+      let query = supabase
+        .from('auction_items')
+        .select('*, categories(*)', { count: 'exact' })
+        .eq('status', 'Active'); // Only get active items
+      
+      // Apply filters
+      if (filters.query) {
+        query = query.ilike('title', `%${filters.query}%`);
       }
-    };
-
-    fetchResults();
-  }, [filters, page, refreshKey]);
-
-  // Set up real-time subscription for new or updated items
-  useEffect(() => {
-    // Enable real-time subscription to auction_items
-    const channel = supabase
-      .channel('public:auction_items')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for inserts and updates
-          schema: 'public',
-          table: 'auction_items'
-        },
-        (payload) => {
-          console.log("Real-time update detected:", payload.eventType, payload.new?.id);
-          
-          // If it's a new item or an update, refresh the query
-          if ((payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') && 
-              payload.new.status === 'Active') {
-                
-            // Get the new item
-            const fetchNewItem = async () => {
-              try {
-                const { data: newItemData } = await supabase
-                  .from("auction_items")
-                  .select("*, profiles:seller_id(*)")
-                  .eq("id", payload.new.id)
-                  .single();
-
-                if (newItemData) {
-                  console.log("New item fetched via real-time:", newItemData.title);
-                  
-                  // Process the new item data
-                  const newItem: SearchResultItem = {
-                    ...newItemData,
-                    images: processImageData(newItemData.images),
-                    profiles: processProfileData(newItemData.profiles)
-                  };
-
-                  // Check if item is already in results
-                  const itemExists = results.some(item => item.id === newItem.id);
-                  
-                  if (!itemExists && page === 1) {
-                    // Only add new items if we're on the first page
-                    console.log("Adding new item to results:", newItem.title);
-                    setResults(prevResults => {
-                      const updatedResults = [newItem, ...prevResults];
-                      // Keep only first 10 items if we're on page 1
-                      return updatedResults.slice(0, 10);
-                    });
-                    
-                    setTotalCount(prev => prev + 1);
-                  } else if (itemExists) {
-                    // Update existing item
-                    console.log("Updating existing item in results:", newItem.title);
-                    setResults(prevResults => 
-                      prevResults.map(item => 
-                        item.id === newItem.id ? newItem : item
-                      )
-                    );
-                  }
-                }
-              } catch (error) {
-                console.error("Error processing real-time update:", error);
-              }
-            };
-            
-            fetchNewItem();
-          }
+      
+      if (filters.category && filters.category !== 'all') {
+        query = query.eq('category_id', filters.category);
+      }
+      
+      if (filters.minPrice) {
+        const minPrice = parseFloat(filters.minPrice);
+        if (!isNaN(minPrice)) {
+          query = query.gte('starting_bid', minPrice);
         }
-      )
-      .subscribe();
-    
-    console.log("Real-time subscription established for search results");
+      }
+      
+      if (filters.maxPrice) {
+        const maxPrice = parseFloat(filters.maxPrice);
+        if (!isNaN(maxPrice)) {
+          query = query.lte('starting_bid', maxPrice);
+        }
+      }
+      
+      if (filters.condition && filters.condition !== 'all') {
+        query = query.eq('condition', filters.condition);
+      }
+      
+      if (filters.auctionType && filters.auctionType !== 'all') {
+        query = query.eq('auction_type', filters.auctionType);
+      }
+      
+      // Apply sorting
+      switch(filters.sortBy) {
+        case 'priceAsc':
+          query = query.order('starting_bid', { ascending: true });
+          break;
+        case 'priceDesc':
+          query = query.order('starting_bid', { ascending: false });
+          break;
+        case 'endingSoon':
+          query = query.order('end_date', { ascending: true });
+          break;
+        case 'newest':
+        default:
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+      
+      // Apply pagination (items per page is set in the component)
+      const itemsPerPage = 10;
+      const start = (page - 1) * itemsPerPage;
+      query = query.range(start, start + itemsPerPage - 1);
+      
+      // Execute the query
+      const { data, error, count } = await query;
+      
+      if (error) throw error;
+      
+      console.log("Results:", data);
+      console.log("Total count:", count);
+      
+      // Update state with results
+      setResults(data || []);
+      setTotalCount(count || 0);
+    } catch (err) {
+      console.error("Error fetching search results:", err);
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      setResults([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, page]);
 
-    return () => {
-      supabase.removeChannel(channel);
+  // Fetch results when filters or page changes
+  useEffect(() => {
+    fetchResults();
+  }, [fetchResults]);
+
+  // Function to manually refresh results
+  const refreshResults = useCallback(() => {
+    fetchResults();
+  }, [fetchResults]);
+
+  // Format the results to match the expected structure for the UI components
+  const formattedResults = results.map(item => {
+    // Make sure item is an object and has an id before trying to access it
+    if (typeof item !== 'object' || item === null) {
+      return {
+        id: 'unknown',
+        title: 'Unknown Item',
+        price: 0,
+        image: null,
+        status: 'unknown'
+      };
+    }
+    
+    return {
+      id: item.id || 'unknown',
+      title: item.title || 'Untitled Item',
+      price: item.starting_bid || 0,
+      image: item.images && item.images.length > 0 ? item.images[0] : null,
+      category: item.categories?.name || 'Uncategorized',
+      endDate: item.end_date || new Date(),
+      description: item.description || '',
+      status: item.status || 'unknown',
+      condition: item.condition || 'Unknown',
+      highestBid: item.highest_bid || item.starting_bid || 0,
+      sellerId: item.seller_id || '',
+      auctionType: item.auction_type || 'standard',
     };
-  }, [page, results]);
+  });
 
   return {
-    results,
+    results: formattedResults,
     loading,
+    error,
     totalCount,
     page,
     setPage,
     filters,
     setFilters,
-    refreshResults
+    refreshResults,
   };
 };
