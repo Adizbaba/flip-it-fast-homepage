@@ -19,6 +19,30 @@ export const useSearch = (initialFilters: SearchFilters) => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
 
+  // Helper function to safely process image data
+  const processImageData = (imageData: Json | null): SafeImageArray => {
+    if (!imageData) return [];
+    
+    // If it's already an array, map each item to string
+    if (Array.isArray(imageData)) {
+      return imageData.map(img => String(img));
+    }
+    
+    // If it's a single value, convert to string and wrap in array
+    return [String(imageData)];
+  };
+
+  // Helper function to safely process profiles data
+  const processProfileData = (profileData: any): Tables<"profiles"> | null => {
+    // If profileData is null or has an error property, return null
+    if (!profileData || profileData.error) {
+      return null;
+    }
+    
+    // Otherwise return the profile data as is
+    return profileData as Tables<"profiles">;
+  };
+
   // Fetch results based on filters
   useEffect(() => {
     const fetchResults = async () => {
@@ -87,14 +111,12 @@ export const useSearch = (initialFilters: SearchFilters) => {
           throw error;
         }
 
-        // Process items to ensure images are properly formatted as string arrays
+        // Process items to ensure images are properly formatted as string arrays and profiles are typed correctly
         const processedItems: SearchResultItem[] = (items || []).map(item => {
-          // Convert images to string array safely
-          const safeImages: SafeImageArray = processImageData(item.images);
-          
           return {
             ...item,
-            images: safeImages
+            images: processImageData(item.images),
+            profiles: processProfileData(item.profiles)
           };
         });
 
@@ -109,19 +131,6 @@ export const useSearch = (initialFilters: SearchFilters) => {
 
     fetchResults();
   }, [filters, page]);
-
-  // Helper function to safely process image data
-  const processImageData = (imageData: Json | null): SafeImageArray => {
-    if (!imageData) return [];
-    
-    // If it's already an array, map each item to string
-    if (Array.isArray(imageData)) {
-      return imageData.map(img => String(img));
-    }
-    
-    // If it's a single value, convert to string and wrap in array
-    return [String(imageData)];
-  };
 
   // Set up real-time subscription for new or updated items
   useEffect(() => {
@@ -149,12 +158,11 @@ export const useSearch = (initialFilters: SearchFilters) => {
                   .single();
 
                 if (newItemData) {
-                  // Process images for the new item
-                  const safeImages = processImageData(newItemData.images);
-                  
+                  // Process the new item data
                   const newItem: SearchResultItem = {
                     ...newItemData,
-                    images: safeImages
+                    images: processImageData(newItemData.images),
+                    profiles: processProfileData(newItemData.profiles)
                   };
 
                   // Check if item is already in results
