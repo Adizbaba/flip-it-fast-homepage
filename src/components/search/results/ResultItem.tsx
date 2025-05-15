@@ -21,7 +21,7 @@ const ResultItem = ({ item }: ResultItemProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   // Ensure images is an array and get the first one or use placeholder
-  const itemImage = item.images && Array.isArray(item.images) && item.images.length > 0
+  const itemImage = item.images && item.images.length > 0
     ? item.images[0]
     : "/placeholder.svg";
 

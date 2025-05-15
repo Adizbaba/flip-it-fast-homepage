@@ -8,3 +8,6 @@ export interface FilterState {
   auctionType: string;
   [key: string]: string;
 }
+
+// Add a utility type for image processing
+export type SafeImageArray = string[];

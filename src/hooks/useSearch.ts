@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
-import { FilterState } from "@/components/search/filters/types";
+import { Tables, Json } from "@/integrations/supabase/types";
+import { FilterState, SafeImageArray } from "@/components/search/filters/types";
 
 export type SearchResultItem = Tables<"auction_items"> & {
   profiles?: Tables<"profiles"> | null;
+  images: SafeImageArray; // Ensure images are always string array
 };
 
 export interface SearchFilters extends FilterState {
@@ -86,16 +87,14 @@ export const useSearch = (initialFilters: SearchFilters) => {
           throw error;
         }
 
-        // Process items to ensure images are properly formatted
-        const processedItems = (items || []).map(item => {
-          // Ensure images is an array if it exists
-          const images = item.images ? 
-            (Array.isArray(item.images) ? item.images : [item.images]) : 
-            [];
-            
+        // Process items to ensure images are properly formatted as string arrays
+        const processedItems: SearchResultItem[] = (items || []).map(item => {
+          // Convert images to string array safely
+          const safeImages: SafeImageArray = processImageData(item.images);
+          
           return {
             ...item,
-            images
+            images: safeImages
           };
         });
 
@@ -110,6 +109,19 @@ export const useSearch = (initialFilters: SearchFilters) => {
 
     fetchResults();
   }, [filters, page]);
+
+  // Helper function to safely process image data
+  const processImageData = (imageData: Json | null): SafeImageArray => {
+    if (!imageData) return [];
+    
+    // If it's already an array, map each item to string
+    if (Array.isArray(imageData)) {
+      return imageData.map(img => String(img));
+    }
+    
+    // If it's a single value, convert to string and wrap in array
+    return [String(imageData)];
+  };
 
   // Set up real-time subscription for new or updated items
   useEffect(() => {
@@ -130,28 +142,28 @@ export const useSearch = (initialFilters: SearchFilters) => {
             // Get the new item
             const fetchNewItem = async () => {
               try {
-                const { data: newItem } = await supabase
+                const { data: newItemData } = await supabase
                   .from("auction_items")
                   .select("*, profiles:seller_id(*)")
                   .eq("id", payload.new.id)
                   .single();
 
-                if (newItem) {
+                if (newItemData) {
                   // Process images for the new item
-                  const processedItem = {
-                    ...newItem,
-                    images: newItem.images ? 
-                      (Array.isArray(newItem.images) ? newItem.images : [newItem.images]) : 
-                      []
+                  const safeImages = processImageData(newItemData.images);
+                  
+                  const newItem: SearchResultItem = {
+                    ...newItemData,
+                    images: safeImages
                   };
 
                   // Check if item is already in results
-                  const itemExists = results.some(item => item.id === processedItem.id);
+                  const itemExists = results.some(item => item.id === newItem.id);
                   
                   if (!itemExists && page === 1) {
                     // Only add new items if we're on the first page
                     setResults(prevResults => {
-                      const updatedResults = [processedItem, ...prevResults];
+                      const updatedResults = [newItem, ...prevResults];
                       // Keep only first 10 items if we're on page 1
                       return updatedResults.slice(0, 10);
                     });
@@ -161,7 +173,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
                     // Update existing item
                     setResults(prevResults => 
                       prevResults.map(item => 
-                        item.id === processedItem.id ? processedItem : item
+                        item.id === newItem.id ? newItem : item
                       )
                     );
                   }

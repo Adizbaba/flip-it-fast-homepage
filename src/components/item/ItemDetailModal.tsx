@@ -13,6 +13,8 @@ import AddToCartButton from "@/components/AddToCartButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Clock, DollarSign, User, ShoppingCart, Info, ArrowRight } from "lucide-react";
+import { Json } from "@/integrations/supabase/types";
+import { SafeImageArray } from "@/components/search/filters/types";
 import {
   Carousel,
   CarouselContent,
@@ -40,7 +42,7 @@ interface ItemData {
   starting_bid: number;
   buy_now_price?: number | null;
   bid_increment?: number;
-  images: string[];
+  images: SafeImageArray; // Changed to SafeImageArray
   seller_id: string;
   condition: string;
   end_date: string;
@@ -54,11 +56,24 @@ interface RelatedItemData {
   title: string;
   description: string;
   starting_bid: number;
-  images: string[];
+  images: SafeImageArray; // Changed to SafeImageArray
   profiles?: {
     username?: string;
   } | null;
 }
+
+// Helper function to safely process image data
+const processImageData = (imageData: Json | null): SafeImageArray => {
+  if (!imageData) return [];
+  
+  // If it's already an array, map each item to string
+  if (Array.isArray(imageData)) {
+    return imageData.map(img => String(img));
+  }
+  
+  // If it's a single value, convert to string and wrap in array
+  return [String(imageData)];
+};
 
 const fetchItem = async (itemId: string) => {
   console.log("Fetching item with ID:", itemId);
@@ -81,16 +96,14 @@ const fetchItem = async (itemId: string) => {
   
   console.log("Item fetched:", data);
   
-  // Process the images to ensure they're an array
-  const images = data.images ? 
-    (Array.isArray(data.images) ? data.images : [data.images]) : 
-    [];
+  // Process the images to ensure they're a string array
+  const safeImages = processImageData(data.images);
   
   // Handle the profiles separately to ensure proper typing
   const itemData: ItemData = {
     ...data,
     profiles: data.profiles as ItemProfile | null,
-    images
+    images: safeImages
   };
   
   return itemData;
@@ -116,15 +129,13 @@ const fetchSimilarItems = async (itemId: string, categoryId: string) => {
 
   if (error) throw error;
   
-  // Process the items to ensure images are arrays
+  // Process the items to ensure images are string arrays
   const relatedItems: RelatedItemData[] = (data || []).map(item => {
-    const images = item.images ? 
-      (Array.isArray(item.images) ? item.images : [item.images]) : 
-      [];
+    const safeImages = processImageData(item.images);
       
     return {
       ...item,
-      images,
+      images: safeImages,
       profiles: item.profiles as { username?: string } | null
     };
   });
@@ -151,15 +162,13 @@ const fetchSellerItems = async (sellerId: string, itemId: string) => {
 
   if (error) throw error;
   
-  // Process the items to ensure images are arrays
+  // Process the items to ensure images are string arrays
   const sellerItems: RelatedItemData[] = (data || []).map(item => {
-    const images = item.images ? 
-      (Array.isArray(item.images) ? item.images : [item.images]) : 
-      [];
+    const safeImages = processImageData(item.images);
       
     return {
       ...item,
-      images,
+      images: safeImages,
       profiles: item.profiles as { username?: string } | null
     };
   });
