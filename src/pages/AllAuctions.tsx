@@ -13,7 +13,8 @@ const AllAuctions = () => {
     page,
     filters,
     setPage,
-    handleFilterChange
+    handleFilterChange,
+    refreshResults // Add this to allow manual refresh of results
   } = useSearchParamsState({ 
     initialQuery: "",
     itemsPerPage: 10
@@ -21,6 +22,7 @@ const AllAuctions = () => {
 
   // Show toast notification when new items are added
   useEffect(() => {
+    // Set up real-time subscription for new auction items
     const channel = supabase
       .channel('public:auction_items')
       .on(
@@ -31,20 +33,45 @@ const AllAuctions = () => {
           table: 'auction_items'
         },
         (payload) => {
+          console.log("Real-time update received:", payload);
           if (payload.new && payload.new.status === 'Active') {
             toast.info('New auction listing added!', {
               description: payload.new.title || 'Check it out!',
               duration: 5000,
             });
+            // Refresh results to show the new item
+            refreshResults();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'auction_items',
+          filter: 'status=eq.Active'
+        },
+        (payload) => {
+          console.log("Listing updated:", payload);
+          if (payload.new && payload.old.status !== 'Active' && payload.new.status === 'Active') {
+            toast.info('New auction listing published!', {
+              description: payload.new.title || 'Check it out!',
+              duration: 5000,
+            });
+            // Refresh results when a draft is published
+            refreshResults();
           }
         }
       )
       .subscribe();
 
+    console.log("Real-time subscription set up for auction_items");
+    
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [refreshResults]);
 
   return (
     <SearchLayout

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables, Json } from "@/integrations/supabase/types";
 import { FilterState, SafeImageArray } from "@/components/search/filters/types";
@@ -18,6 +19,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+  const [refreshKey, setRefreshKey] = useState(0); // Add a refresh key
 
   // Helper function to safely process image data
   const processImageData = (imageData: Json | null): SafeImageArray => {
@@ -43,9 +45,16 @@ export const useSearch = (initialFilters: SearchFilters) => {
     return profileData as Tables<"profiles">;
   };
 
+  // Function to force refresh the results
+  const refreshResults = useCallback(() => {
+    console.log("Manually refreshing results");
+    setRefreshKey(prev => prev + 1);
+  }, []);
+
   // Fetch results based on filters
   useEffect(() => {
     const fetchResults = async () => {
+      console.log("Fetching auction results with filters:", filters);
       setLoading(true);
 
       try {
@@ -83,7 +92,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
           queryBuilder = queryBuilder.eq("condition", filters.condition);
         }
 
-        // Only show active listings
+        // Only show active listings - THIS IS CRITICAL
         queryBuilder = queryBuilder.eq("status", "Active");
 
         // Sort results
@@ -105,19 +114,30 @@ export const useSearch = (initialFilters: SearchFilters) => {
         const start = (page - 1) * itemsPerPage;
         queryBuilder = queryBuilder.range(start, start + itemsPerPage - 1);
 
+        console.log("Executing query for auction items...");
         const { data: items, error, count } = await queryBuilder;
 
         if (error) {
+          console.error("Error fetching auction items:", error);
           throw error;
         }
 
+        console.log(`Found ${items?.length || 0} auction items, total: ${count || 0}`);
+        
         // Process items to ensure images are properly formatted as string arrays and profiles are typed correctly
         const processedItems: SearchResultItem[] = (items || []).map(item => {
-          return {
+          const processedItem = {
             ...item,
             images: processImageData(item.images),
             profiles: processProfileData(item.profiles)
           };
+          console.log("Processed item:", {
+            id: processedItem.id,
+            title: processedItem.title,
+            images: processedItem.images?.length || 0,
+            status: processedItem.status
+          });
+          return processedItem;
         });
 
         setResults(processedItems);
@@ -130,7 +150,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     };
 
     fetchResults();
-  }, [filters, page]);
+  }, [filters, page, refreshKey]);
 
   // Set up real-time subscription for new or updated items
   useEffect(() => {
@@ -145,9 +165,12 @@ export const useSearch = (initialFilters: SearchFilters) => {
           table: 'auction_items'
         },
         (payload) => {
+          console.log("Real-time update detected:", payload.eventType, payload.new?.id);
+          
           // If it's a new item or an update, refresh the query
           if ((payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') && 
               payload.new.status === 'Active') {
+                
             // Get the new item
             const fetchNewItem = async () => {
               try {
@@ -158,6 +181,8 @@ export const useSearch = (initialFilters: SearchFilters) => {
                   .single();
 
                 if (newItemData) {
+                  console.log("New item fetched via real-time:", newItemData.title);
+                  
                   // Process the new item data
                   const newItem: SearchResultItem = {
                     ...newItemData,
@@ -170,6 +195,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
                   
                   if (!itemExists && page === 1) {
                     // Only add new items if we're on the first page
+                    console.log("Adding new item to results:", newItem.title);
                     setResults(prevResults => {
                       const updatedResults = [newItem, ...prevResults];
                       // Keep only first 10 items if we're on page 1
@@ -179,6 +205,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
                     setTotalCount(prev => prev + 1);
                   } else if (itemExists) {
                     // Update existing item
+                    console.log("Updating existing item in results:", newItem.title);
                     setResults(prevResults => 
                       prevResults.map(item => 
                         item.id === newItem.id ? newItem : item
@@ -196,6 +223,8 @@ export const useSearch = (initialFilters: SearchFilters) => {
         }
       )
       .subscribe();
+    
+    console.log("Real-time subscription established for search results");
 
     return () => {
       supabase.removeChannel(channel);
@@ -210,5 +239,6 @@ export const useSearch = (initialFilters: SearchFilters) => {
     setPage,
     filters,
     setFilters,
+    refreshResults
   };
 };

@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -176,6 +175,8 @@ const CreateListing = () => {
         throw error;
       }
 
+      console.log("Item created successfully:", item);
+
       // Store the listing item for the confirmation dialog
       setListingItem({
         id: item.id,
@@ -198,21 +199,30 @@ const CreateListing = () => {
     
     if (listingItem) {
       try {
+        console.log("Publishing listing:", listingItem.id);
+        
         // Update the listing status to Active
         const { error } = await supabase
           .from('auction_items')
           .update({ status: 'Active' })
           .eq('id', listingItem.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error publishing listing:", error);
+          throw error;
+        }
+        
+        console.log("Listing published successfully");
         
         toast({
           title: "Success",
           description: "Your listing has been published successfully",
         });
         
-        navigate("/watch-list");
+        navigate("/auctions");
       } catch (error: any) {
+        console.error("Error in handlePublishListing:", error);
+        
         toast({
           title: "Error",
           description: error.message,
@@ -257,7 +267,7 @@ const CreateListing = () => {
                 
                 <div className="p-4 border rounded-md bg-muted/30">
                   <h3 className="font-medium mb-4">Upload Images</h3>
-                  <ListingImageUpload />
+                  <ListingImageUpload images={images} setImages={setImages} />
                 </div>
 
                 <PricingDetails control={form.control} />

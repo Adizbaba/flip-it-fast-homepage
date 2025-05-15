@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams as useRouterSearchParams } from "react-router-dom";
 import { useSearch, SearchFilters } from "@/hooks/useSearch";
 
@@ -31,7 +31,8 @@ export const useSearchParamsState = ({
     page,
     setPage,
     filters,
-    setFilters
+    setFilters,
+    refreshResults
   } = useSearch(initialFilters);
 
   // Update search params whenever filters change
@@ -95,6 +96,7 @@ export const useSearchParamsState = ({
     itemsPerPage,
     setPage,
     handleFilterChange,
-    handleSearch
+    handleSearch,
+    refreshResults
   };
 };
