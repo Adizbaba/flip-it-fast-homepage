@@ -23,6 +23,12 @@ export const listingFormSchema = z.object({
   shippingOptions: z.string(),
   returnPolicy: z.string(),
   auctionType: z.string().min(1, "Please select an auction type.")
-});
+}).refine(
+  (data) => data.endDate > data.startDate,
+  {
+    message: "End date must be after start date",
+    path: ["endDate"]
+  }
+);
 
 export type ListingFormData = z.infer<typeof listingFormSchema>;

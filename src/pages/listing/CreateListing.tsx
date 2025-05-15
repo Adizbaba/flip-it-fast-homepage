@@ -24,6 +24,7 @@ const CreateListing = () => {
   const [images, setImages] = useState<File[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [listingItem, setListingItem] = useState<any>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const form = useForm<ListingFormData>({
     resolver: zodResolver(listingFormSchema),
@@ -41,7 +42,9 @@ const CreateListing = () => {
         international: "Not available" 
       }),
       returnPolicy: "No returns accepted",
-      auctionType: "standard"
+      auctionType: "standard",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default to 7 days from now
     },
   });
 
@@ -67,7 +70,32 @@ const CreateListing = () => {
       return;
     }
 
+    setSubmissionError(null);
+
     try {
+      // Validate dates
+      const now = new Date();
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      
+      if (endDate <= startDate) {
+        toast({
+          title: "Error",
+          description: "End date must be after start date",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (endDate <= now) {
+        toast({
+          title: "Error",
+          description: "End date must be in the future",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Upload images first
       let imageUrls: string[] = [];
       if (images.length > 0) {
@@ -93,6 +121,31 @@ const CreateListing = () => {
         imageUrls = uploadedImages;
       }
 
+      // Format dates for Postgres
+      const formattedStartDate = startDate.toISOString();
+      const formattedEndDate = endDate.toISOString();
+
+      // Log the formatted data for debugging
+      console.log("Submitting data to Supabase:", {
+        seller_id: user.id,
+        title: data.title,
+        description: data.description,
+        condition: data.condition,
+        category_id: data.categoryId,
+        starting_bid: data.startingBid,
+        bid_increment: data.bidIncrement,
+        reserve_price: data.reservePrice || null,
+        buy_now_price: data.buyNowPrice || null,
+        quantity: data.quantity,
+        shipping_options: JSON.parse(data.shippingOptions || '{}'),
+        return_policy: data.returnPolicy,
+        auction_type: data.auctionType,
+        start_date: formattedStartDate,
+        end_date: formattedEndDate,
+        status: 'Draft',
+        images: imageUrls.length > 0 ? imageUrls : null
+      });
+
       // Properly format the data to match the database schema
       const { data: item, error } = await supabase
         .from('auction_items')
@@ -110,15 +163,18 @@ const CreateListing = () => {
           shipping_options: JSON.parse(data.shippingOptions || '{}'),
           return_policy: data.returnPolicy,
           auction_type: data.auctionType,
-          start_date: data.startDate.toISOString(),
-          end_date: data.endDate.toISOString(),
+          start_date: formattedStartDate,
+          end_date: formattedEndDate,
           status: 'Draft', // Starts as draft until published
           images: imageUrls.length > 0 ? imageUrls : null
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       // Store the listing item for the confirmation dialog
       setListingItem({
@@ -128,6 +184,7 @@ const CreateListing = () => {
       
       setShowConfirmDialog(true);
     } catch (error: any) {
+      setSubmissionError(error.message);
       toast({
         title: "Error",
         description: error.message,
@@ -186,6 +243,13 @@ const CreateListing = () => {
         <div className="w-full max-w-4xl px-4">
           <div className="bg-white rounded-xl shadow-md p-8 md:p-12 space-y-6">
             <h1 className="text-3xl font-bold text-center mb-6">Create New Listing</h1>
+            
+            {submissionError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <p className="text-red-800 font-medium">Error: {submissionError}</p>
+                <p className="text-sm text-red-600 mt-1">Please check your form values and try again.</p>
+              </div>
+            )}
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
