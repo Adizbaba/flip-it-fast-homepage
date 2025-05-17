@@ -1,8 +1,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { FilterState } from "@/components/search/filters/types";
 
-export interface SearchFilters {
+// Make SearchFilters compatible with FilterState by adding index signature
+export interface SearchFilters extends FilterState {
   query: string;
   category: string;
   minPrice: string;
@@ -10,6 +12,28 @@ export interface SearchFilters {
   sortBy: string;
   condition: string;
   auctionType: string;
+  [key: string]: string; // Add index signature to fix compatibility issue
+}
+
+// Add the SearchResultItem interface that components are trying to import
+export interface SearchResultItem {
+  id: string;
+  title: string;
+  price: number;
+  image: string | null;
+  images?: string[];
+  category?: string;
+  endDate?: Date;
+  description?: string;
+  status?: string;
+  condition?: string;
+  highestBid?: number;
+  sellerId?: string;
+  auctionType?: string;
+  starting_bid?: number;
+  profiles?: {
+    username?: string;
+  }
 }
 
 export const useSearch = (initialFilters: SearchFilters) => {
@@ -118,7 +142,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
   }, [fetchResults]);
 
   // Format the results to match the expected structure for the UI components
-  const formattedResults = results.map(item => {
+  const formattedResults: SearchResultItem[] = results.map(item => {
     // Make sure item is an object and has an id before trying to access it
     if (typeof item !== 'object' || item === null) {
       return {
@@ -135,6 +159,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       title: item.title || 'Untitled Item',
       price: item.starting_bid || 0,
       image: item.images && item.images.length > 0 ? item.images[0] : null,
+      images: item.images,
       category: item.categories?.name || 'Uncategorized',
       endDate: item.end_date || new Date(),
       description: item.description || '',
@@ -143,6 +168,8 @@ export const useSearch = (initialFilters: SearchFilters) => {
       highestBid: item.highest_bid || item.starting_bid || 0,
       sellerId: item.seller_id || '',
       auctionType: item.auction_type || 'standard',
+      starting_bid: item.starting_bid || 0,
+      profiles: item.profiles,
     };
   });
 
