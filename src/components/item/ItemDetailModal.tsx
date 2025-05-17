@@ -11,6 +11,7 @@ import { ItemData, RelatedItemData } from "./types";
 import { fetchItemDetails, fetchSimilarItems, fetchSellerItems } from "./utils";
 import ItemDetailContent from "./ItemDetailContent";
 import RelatedItemsGrid from "./RelatedItemsGrid";
+import { useItemDetail } from "@/hooks/useItemDetail";
 
 interface ItemDetailModalProps {
   itemId: string | null;
@@ -20,14 +21,9 @@ interface ItemDetailModalProps {
 
 export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProps) {
   const navigate = useNavigate();
-
-  // Fetch item details
-  const { data: item, isLoading: itemLoading, error, refetch } = useQuery({
-    queryKey: ["item", itemId],
-    queryFn: () => (itemId ? fetchItemDetails(supabase, itemId) : null),
-    enabled: !!itemId && isOpen,
-    staleTime: 60000, // Consider data fresh for 1 minute
-  });
+  
+  // Fetch item details using our updated hook
+  const { data: item, isLoading: itemLoading, error, refetch } = useItemDetail(itemId);
 
   // Reset query on modal close to ensure fresh data on next open
   useEffect(() => {
@@ -36,6 +32,24 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
       refetch();
     }
   }, [isOpen, itemId, refetch]);
+
+  // Convert hook data to expected ItemData format if it exists
+  const itemData = item ? {
+    id: item.id,
+    title: item.title || "",
+    description: item.description || "",
+    starting_bid: item.starting_bid || 0,
+    buy_now_price: item.buy_now_price || null,
+    bid_increment: item.bid_increment || 1,
+    images: Array.isArray(item.images) ? item.images : 
+           (item.images ? [String(item.images)] : ["/placeholder.svg"]),
+    seller_id: item.seller_id,
+    condition: item.condition || "",
+    end_date: item.end_date || new Date().toISOString(),
+    quantity: item.quantity || 1,
+    category_id: item.category_id,
+    profiles: item.profiles || null
+  } as ItemData : null;
 
   // Fetch similar items
   const { data: similarItems = [] } = useQuery({
@@ -56,8 +70,14 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
     navigate(`/item/${id}`);
   };
 
-  const timeRemaining = item ? new Date(item.end_date).getTime() - Date.now() : 0;
+  // Define time remaining logic (if item exists)
+  const timeRemaining = itemData ? new Date(itemData.end_date).getTime() - Date.now() : 0;
   const isEnded = timeRemaining <= 0;
+
+  // Handle errors for debugging
+  if (error) {
+    console.error("Modal item detail error:", error);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
@@ -68,16 +88,21 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
           </div>
         ) : error ? (
           <div className="text-center py-8">
-            <p className="text-red-500">Error loading item details</p>
-            <p className="text-sm text-muted-foreground mt-2">Please try again later</p>
+            <DialogHeader>
+              <DialogTitle>Error Loading Item</DialogTitle>
+              <DialogDescription>
+                We couldn't load the item details. Please try again later.
+              </DialogDescription>
+            </DialogHeader>
+            <p className="text-red-500 mt-4">Unable to retrieve item information</p>
           </div>
-        ) : item ? (
+        ) : itemData ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">{item.title}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">{itemData.title}</DialogTitle>
               <DialogDescription>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline">{item.condition}</Badge>
+                  <Badge variant="outline">{itemData.condition}</Badge>
                   {isEnded ? (
                     <Badge variant="destructive">Auction Ended</Badge>
                   ) : (
@@ -89,7 +114,7 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
               </DialogDescription>
             </DialogHeader>
 
-            <ItemDetailContent item={item} onClose={onClose} />
+            <ItemDetailContent item={itemData} onClose={onClose} />
 
             <Separator className="my-4" />
 
@@ -113,7 +138,12 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
           </>
         ) : (
           <div className="text-center py-8">
-            <p>Item not found</p>
+            <DialogHeader>
+              <DialogTitle>Item Not Found</DialogTitle>
+              <DialogDescription>
+                The item you're looking for couldn't be found.
+              </DialogDescription>
+            </DialogHeader>
           </div>
         )}
       </DialogContent>

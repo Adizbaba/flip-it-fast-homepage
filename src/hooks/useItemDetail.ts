@@ -19,16 +19,11 @@ export const useItemDetail = (itemId: string | null) => {
     queryKey: ["item", itemId],
     queryFn: async (): Promise<ItemDetail | null> => {
       if (!itemId) return null;
-      
+
+      // First, let's fetch the item without trying to join the profiles table
       const { data: item, error } = await supabase
         .from("auction_items")
-        .select(`
-          *,
-          profiles:seller_id (
-            username,
-            avatar_url
-          )
-        `)
+        .select("*")
         .eq("id", itemId)
         .single();
 
@@ -36,19 +31,28 @@ export const useItemDetail = (itemId: string | null) => {
         console.error("Error fetching item:", error);
         throw error;
       }
+
+      // Then, if we successfully got the item, fetch the seller profile separately
+      let profileData = null;
+      if (item && item.seller_id) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("id", item.seller_id)
+          .single();
+
+        if (profileError) {
+          console.log("Could not fetch seller profile:", profileError);
+          // Non-blocking error, we'll continue with null profile
+        } else {
+          profileData = profile;
+        }
+      }
       
-      // Handle the response by safely converting to our expected type
+      // Combine item data with profile data
       const itemWithProfiles: ItemDetail = {
-        ...item as Database["public"]["Tables"]["auction_items"]["Row"],
-        // Fixed: Added additional null checks and safe type conversion
-        profiles: item && item.profiles ? 
-          (typeof item.profiles === 'object' && 
-           'username' in (item.profiles as any) ? 
-            {
-              username: (item.profiles as any).username || "Unknown seller",
-              avatar_url: (item.profiles as any).avatar_url || null
-            } : null) 
-          : null
+        ...item,
+        profiles: profileData
       };
       
       return itemWithProfiles;
