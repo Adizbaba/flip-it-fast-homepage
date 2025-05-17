@@ -56,6 +56,14 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
       });
     }
   };
+  
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+  
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
 
   return (
     <>
@@ -66,7 +74,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
               src={image} 
               alt={title} 
               className="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105" 
-              onClick={() => setModalOpen(true)}
+              onClick={handleOpenModal}
             />
           </AspectRatio>
           <Button 
@@ -88,7 +96,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
         <div className="p-4">
           <h3 
             className="font-medium text-sm line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors" 
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpenModal}
           >{title}</h3>
           <div className="flex justify-between items-end">
             <div>
@@ -100,7 +108,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
               <Button 
                 size="sm" 
                 className="mt-1"
-                onClick={() => setModalOpen(true)}
+                onClick={handleOpenModal}
               >
                 View Item
               </Button>
@@ -112,7 +120,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
       <ItemDetailModal 
         itemId={modalOpen ? id : null}
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={handleCloseModal}
       />
     </>
   );

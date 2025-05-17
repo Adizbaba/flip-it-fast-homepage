@@ -34,12 +34,20 @@ const ResultItem = ({ item }: ResultItemProps) => {
     }
   };
 
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
   return (
     <>
       <Card key={item.id} className="overflow-hidden h-full">
         <div 
           className="relative h-48 overflow-hidden cursor-pointer"
-          onClick={() => setModalOpen(true)}
+          onClick={handleOpenModal}
         >
           <AspectRatio ratio={1/1} className="bg-muted">
             <img
@@ -69,13 +77,13 @@ const ResultItem = ({ item }: ResultItemProps) => {
         <CardContent className="p-4">
           <h3 
             className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpenModal}
           >{item.title}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2 h-10">
             {item.description}
           </p>
           <div className="mt-2 flex justify-between items-center">
-            <span className="font-bold">${item.starting_bid}</span>
+            <span className="font-bold">${item.starting_bid || item.price}</span>
             <span className="text-sm text-muted-foreground">
               {item.profiles?.username || "Unknown seller"}
             </span>
@@ -83,7 +91,7 @@ const ResultItem = ({ item }: ResultItemProps) => {
           <Button
             variant="outline"
             className="w-full mt-3"
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpenModal}
           >
             View Item
           </Button>
@@ -93,7 +101,7 @@ const ResultItem = ({ item }: ResultItemProps) => {
       <ItemDetailModal 
         itemId={modalOpen ? item.id : null} 
         isOpen={modalOpen} 
-        onClose={() => setModalOpen(false)} 
+        onClose={handleCloseModal} 
       />
     </>
   );

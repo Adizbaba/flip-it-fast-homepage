@@ -14,10 +14,12 @@ type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
   profiles?: ProfilesResponse;
 };
 
-export const useItemDetail = (itemId: string) => {
+export const useItemDetail = (itemId: string | null) => {
   return useQuery({
     queryKey: ["item", itemId],
     queryFn: async (): Promise<ItemDetail | null> => {
+      if (!itemId) return null;
+      
       const { data: item, error } = await supabase
         .from("auction_items")
         .select(`
@@ -30,7 +32,10 @@ export const useItemDetail = (itemId: string) => {
         .eq("id", itemId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching item:", error);
+        throw error;
+      }
       
       // Handle the response by safely converting to our expected type
       const itemWithProfiles: ItemDetail = {

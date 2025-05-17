@@ -33,13 +33,18 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
   useEffect(() => {
     if (item) {
       // Set initial bid amount based on starting bid and increment
-      const startingBid = item.starting_bid;
+      const startingBid = item.starting_bid || 0;
       const bidIncrement = item.bid_increment || 1;
       setBidAmount(startingBid + bidIncrement);
     } else {
       setBidAmount("");
     }
   }, [item]);
+
+  // Ensure we have valid images array
+  const itemImages = item.images && Array.isArray(item.images) && item.images.length > 0 
+    ? item.images 
+    : ["/placeholder.svg"];
 
   const handlePlaceBid = () => {
     if (!user) {
@@ -53,7 +58,7 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
 
     if (bidAmount && item) {
       // Compare bid amount with starting bid
-      if (typeof bidAmount === 'number' && bidAmount < item.starting_bid) {
+      if (typeof bidAmount === 'number' && bidAmount < (item.starting_bid || 0)) {
         toast({
           title: "Invalid bid",
           description: "Your bid must be at least the starting bid amount",
@@ -104,7 +109,7 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
       <div>
         <Carousel>
           <CarouselContent>
-            {(item.images && item.images.length > 0 ? item.images : ["/placeholder.svg"]).map((image, index) => (
+            {itemImages.map((image, index) => (
               <CarouselItem key={index}>
                 <div className="overflow-hidden rounded-md">
                   <img
@@ -128,11 +133,11 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-sm text-muted-foreground">Current Bid</p>
-              <p className="text-2xl font-bold">${item.starting_bid}</p>
+              <p className="text-2xl font-bold">${item.starting_bid || 0}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Quantity</p>
-              <p className="font-medium">{item.quantity} available</p>
+              <p className="font-medium">{item.quantity || 1} available</p>
             </div>
           </div>
 
@@ -141,7 +146,7 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
               <div className="flex gap-2 items-center">
                 <Input
                   type="number"
-                  min={item.starting_bid + (item.bid_increment || 1)}
+                  min={(item.starting_bid || 0) + (item.bid_increment || 1)}
                   step={item.bid_increment || 1}
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value ? parseFloat(e.target.value) : "")}
@@ -163,7 +168,7 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
                     itemType="auction"
                     title={item.title}
                     price={item.buy_now_price || 0}
-                    image={item.images[0] || "/placeholder.svg"}
+                    image={itemImages[0]}
                     className="flex-1"
                   />
                 </div>

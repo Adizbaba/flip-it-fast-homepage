@@ -6,13 +6,31 @@ import { ItemData, RelatedItemData, SafeImageArray, ItemProfile } from "./types"
 export const processImageData = (imageData: Json | null): SafeImageArray => {
   if (!imageData) return [];
   
-  // If it's already an array, map each item to string
-  if (Array.isArray(imageData)) {
-    return imageData.map(img => String(img));
+  try {
+    // If it's already an array, map each item to string
+    if (Array.isArray(imageData)) {
+      return imageData.map(img => String(img || ""));
+    }
+    
+    // If it's a JSON string that contains an array
+    if (typeof imageData === 'string') {
+      try {
+        const parsed = JSON.parse(imageData);
+        if (Array.isArray(parsed)) {
+          return parsed.map(img => String(img || ""));
+        }
+      } catch (e) {
+        // If it's not valid JSON, treat as a single string
+        return [imageData];
+      }
+    }
+    
+    // If it's a single value, convert to string and wrap in array
+    return [String(imageData)];
+  } catch (error) {
+    console.error("Error processing image data:", error);
+    return ["/placeholder.svg"];
   }
-  
-  // If it's a single value, convert to string and wrap in array
-  return [String(imageData)];
 };
 
 // Helper function to safely process profile data
@@ -29,6 +47,8 @@ export const processProfileData = (profileData: any): ItemProfile | null => {
 
 // Fetch item details from Supabase
 export const fetchItemDetails = async (supabase: any, itemId: string): Promise<ItemData> => {
+  console.log("Fetching item details for ID:", itemId);
+  
   const { data, error } = await supabase
     .from("auction_items")
     .select(`
@@ -45,6 +65,8 @@ export const fetchItemDetails = async (supabase: any, itemId: string): Promise<I
     console.error("Error fetching item:", error);
     throw error;
   }
+  
+  console.log("Raw item data:", data);
   
   // Process the images to ensure they're a string array
   const safeImages = processImageData(data.images);
@@ -75,6 +97,7 @@ export const fetchSimilarItems = async (supabase: any, itemId: string, categoryI
       )
     `)
     .eq("category_id", categoryId)
+    .eq("status", "Active")
     .neq("id", itemId)
     .limit(5);
 
@@ -109,6 +132,7 @@ export const fetchSellerItems = async (supabase: any, sellerId: string, itemId: 
       )
     `)
     .eq("seller_id", sellerId)
+    .eq("status", "Active")
     .neq("id", itemId)
     .limit(5);
 

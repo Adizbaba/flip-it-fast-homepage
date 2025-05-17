@@ -22,11 +22,20 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
   const navigate = useNavigate();
 
   // Fetch item details
-  const { data: item, isLoading: itemLoading } = useQuery({
+  const { data: item, isLoading: itemLoading, error, refetch } = useQuery({
     queryKey: ["item", itemId],
     queryFn: () => (itemId ? fetchItemDetails(supabase, itemId) : null),
     enabled: !!itemId && isOpen,
+    staleTime: 60000, // Consider data fresh for 1 minute
   });
+
+  // Reset query on modal close to ensure fresh data on next open
+  useEffect(() => {
+    if (!isOpen && itemId) {
+      // Reset when modal closes
+      refetch();
+    }
+  }, [isOpen, itemId, refetch]);
 
   // Fetch similar items
   const { data: similarItems = [] } = useQuery({
@@ -57,6 +66,11 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
           <div className="flex items-center justify-center h-60">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">Error loading item details</p>
+            <p className="text-sm text-muted-foreground mt-2">Please try again later</p>
+          </div>
         ) : item ? (
           <>
             <DialogHeader>
@@ -80,18 +94,22 @@ export function ItemDetailModal({ itemId, isOpen, onClose }: ItemDetailModalProp
             <Separator className="my-4" />
 
             {/* Similar Items */}
-            <RelatedItemsGrid 
-              title="Similar Items"
-              items={similarItems}
-              onItemClick={handleViewItem}
-            />
+            {similarItems.length > 0 && (
+              <RelatedItemsGrid 
+                title="Similar Items"
+                items={similarItems}
+                onItemClick={handleViewItem}
+              />
+            )}
 
             {/* Seller's Other Items */}
-            <RelatedItemsGrid 
-              title="More from this seller"
-              items={sellerItems}
-              onItemClick={handleViewItem}
-            />
+            {sellerItems.length > 0 && (
+              <RelatedItemsGrid 
+                title="More from this seller"
+                items={sellerItems}
+                onItemClick={handleViewItem}
+              />
+            )}
           </>
         ) : (
           <div className="text-center py-8">
