@@ -18,28 +18,38 @@ type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
 const processImages = (images: any): string[] => {
   if (!images) return ["/placeholder.svg"];
   
-  // If it's already an array of strings
-  if (Array.isArray(images) && typeof images[0] === 'string') {
-    return images.length > 0 ? images : ["/placeholder.svg"];
-  }
-  
-  // If it's a JSON string that contains an array
-  if (typeof images === 'string') {
-    try {
-      const parsed = JSON.parse(images);
-      if (Array.isArray(parsed)) {
-        return parsed.length > 0 ? parsed.map(img => String(img)) : ["/placeholder.svg"];
-      }
-      // If it's a single string (URL)
-      return [images];
-    } catch (e) {
-      // If not valid JSON, treat as a single URL
-      return [images];
+  try {
+    // If it's already an array of strings
+    if (Array.isArray(images)) {
+      return images.length > 0 ? images.map(img => String(img || "")) : ["/placeholder.svg"];
     }
+    
+    // If it's a JSON string that contains an array
+    if (typeof images === 'string') {
+      try {
+        const parsed = JSON.parse(images);
+        if (Array.isArray(parsed)) {
+          return parsed.length > 0 ? parsed.map(img => String(img || "")) : ["/placeholder.svg"];
+        }
+        // If it's a single string (URL)
+        return [images];
+      } catch (e) {
+        // If not valid JSON, treat as a single URL
+        return [images];
+      }
+    }
+    
+    // If it's an object with url property (from Supabase Storage)
+    if (images && typeof images === 'object' && 'url' in images) {
+      return [String(images.url)];
+    }
+    
+    // Default fallback
+    return ["/placeholder.svg"];
+  } catch (error) {
+    console.error("Error processing images:", error);
+    return ["/placeholder.svg"];
   }
-  
-  // Default fallback
-  return ["/placeholder.svg"];
 };
 
 export const useItemDetail = (itemId: string | null) => {

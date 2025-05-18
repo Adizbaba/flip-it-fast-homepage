@@ -20,10 +20,33 @@ const ResultItem = ({ item }: ResultItemProps) => {
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Ensure images is an array and get the first one or use placeholder
-  const itemImage = item.images && Array.isArray(item.images) && item.images.length > 0
-    ? item.images[0]
-    : "/placeholder.svg";
+  // Process item images to ensure we have a valid URL
+  const getItemImage = (): string => {
+    if (!item.images) return "/placeholder.svg";
+    
+    try {
+      // If it's an array
+      if (Array.isArray(item.images) && item.images.length > 0) {
+        return typeof item.images[0] === 'string' ? item.images[0] : "/placeholder.svg";
+      }
+      
+      // If it's a string
+      if (typeof item.images === 'string') {
+        return item.images;
+      }
+      
+      // If it's an object with a url property
+      if (typeof item.images === 'object' && item.images !== null && 'url' in item.images) {
+        return String(item.images.url);
+      }
+    } catch (e) {
+      console.error("Error processing image in ResultItem:", e);
+    }
+    
+    return "/placeholder.svg";
+  };
+
+  const itemImage = getItemImage();
 
   // Toggle saved status
   const toggleSaved = (itemId: string) => {

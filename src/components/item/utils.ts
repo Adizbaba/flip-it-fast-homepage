@@ -23,10 +23,17 @@ export const processImageData = (imageData: Json | null): SafeImageArray => {
             ? parsed.map(img => String(img || ""))
             : ["/placeholder.svg"];
         }
+        // If it's a single string URL
+        return [imageData];
       } catch (e) {
         // If it's not valid JSON, treat as a single string
         return [imageData];
       }
+    }
+    
+    // If it's an object with url property (from Supabase Storage)
+    if (imageData && typeof imageData === 'object' && 'url' in imageData) {
+      return [String(imageData.url)];
     }
     
     // If it's a single value, convert to string and wrap in array

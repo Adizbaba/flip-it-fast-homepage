@@ -120,6 +120,7 @@ const CreateListing = () => {
                 throw uploadError;
               }
               
+              // Get and use the full public URL to ensure proper access
               const { data: { publicUrl } } = supabase.storage
                 .from('auction_images')
                 .getPublicUrl(`public/${fileName}`);
