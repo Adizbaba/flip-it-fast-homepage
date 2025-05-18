@@ -116,6 +116,11 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
                     src={image}
                     alt={`${item.title} - Image ${index + 1}`}
                     className="w-full aspect-square object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                      target.onerror = null; // Prevent infinite error loop
+                    }}
                   />
                 </div>
               </CarouselItem>

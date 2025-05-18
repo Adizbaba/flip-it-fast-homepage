@@ -21,11 +21,18 @@ const RelatedItemsGrid = ({ title, items, onItemClick }: RelatedItemsGridProps) 
             className="border rounded-md p-2 cursor-pointer hover:border-primary transition-colors"
             onClick={() => onItemClick(item.id)}
           >
-            <img
-              src={item.images[0] || "/placeholder.svg"}
-              alt={item.title}
-              className="w-full aspect-square object-cover rounded-sm"
-            />
+            <div className="aspect-square relative overflow-hidden">
+              <img
+                src={item.images && item.images.length > 0 ? item.images[0] : "/placeholder.svg"}
+                alt={item.title || "Item image"}
+                className="w-full h-full object-cover rounded-sm"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/placeholder.svg";
+                  target.onerror = null; // Prevent infinite error loop
+                }}
+              />
+            </div>
             <p className="text-sm font-medium mt-1 truncate">{item.title}</p>
             <p className="text-xs text-muted-foreground">${item.starting_bid}</p>
           </div>

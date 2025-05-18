@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ const CreateListing = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [listingItem, setListingItem] = useState<any>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<ListingFormData>({
     resolver: zodResolver(listingFormSchema),
@@ -70,6 +72,7 @@ const CreateListing = () => {
     }
 
     setSubmissionError(null);
+    setUploading(true);
 
     try {
       // Validate dates
@@ -83,6 +86,7 @@ const CreateListing = () => {
           description: "End date must be after start date",
           variant: "destructive",
         });
+        setUploading(false);
         return;
       }
 
@@ -92,32 +96,45 @@ const CreateListing = () => {
           description: "End date must be in the future",
           variant: "destructive",
         });
+        setUploading(false);
         return;
       }
 
       // Upload images first
       let imageUrls: string[] = [];
       if (images.length > 0) {
-        const uploadedImages = await Promise.all(
-          images.map(async (file) => {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-            
-            const { error: uploadError, data: uploadData } = await supabase.storage
-              .from('auction_images')
-              .upload(`public/${fileName}`, file);
-
-            if (uploadError) throw uploadError;
-            
-            const { data: { publicUrl } } = supabase.storage
-              .from('auction_images')
-              .getPublicUrl(`public/${fileName}`);
+        try {
+          const uploadedImages = await Promise.all(
+            images.map(async (file) => {
+              const fileExt = file.name.split('.').pop();
+              const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
               
-            return publicUrl;
-          })
-        );
-        
-        imageUrls = uploadedImages;
+              console.log(`Uploading file ${fileName} to auction_images/public/`);
+              
+              const { error: uploadError, data: uploadData } = await supabase.storage
+                .from('auction_images')
+                .upload(`public/${fileName}`, file);
+
+              if (uploadError) {
+                console.error("Error uploading file:", uploadError);
+                throw uploadError;
+              }
+              
+              const { data: { publicUrl } } = supabase.storage
+                .from('auction_images')
+                .getPublicUrl(`public/${fileName}`);
+                
+              console.log("Uploaded file URL:", publicUrl);
+              return publicUrl;
+            })
+          );
+          
+          imageUrls = uploadedImages;
+          console.log("All images uploaded successfully:", imageUrls);
+        } catch (uploadError) {
+          console.error("Error during image upload:", uploadError);
+          throw new Error(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+        }
       }
 
       // Format dates for Postgres
@@ -191,6 +208,8 @@ const CreateListing = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -278,7 +297,16 @@ const CreateListing = () => {
                   categoriesLoading={categoriesLoading}
                 />
 
-                <Button type="submit" className="w-full">Create Listing</Button>
+                <Button type="submit" className="w-full" disabled={uploading}>
+                  {uploading ? (
+                    <>
+                      <span className="animate-spin mr-2">⭘</span> 
+                      Uploading Images...
+                    </>
+                  ) : (
+                    "Create Listing"
+                  )}
+                </Button>
               </form>
             </Form>
           </div>

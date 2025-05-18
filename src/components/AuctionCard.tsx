@@ -24,6 +24,9 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Make sure we have a valid image URL or fall back to placeholder
+  const safeImage = image || "/placeholder.svg";
+
   const handleWatchlistToggle = async () => {
     if (!user) {
       toast({
@@ -71,10 +74,15 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
         <div className="relative">
           <AspectRatio ratio={1/1} className="bg-muted">
             <img 
-              src={image} 
-              alt={title} 
+              src={safeImage} 
+              alt={title || "Auction item"} 
               className="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105" 
               onClick={handleOpenModal}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/placeholder.svg";
+                target.onerror = null; // Prevent infinite error loop
+              }}
             />
           </AspectRatio>
           <Button 
@@ -97,7 +105,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
           <h3 
             className="font-medium text-sm line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors" 
             onClick={handleOpenModal}
-          >{title}</h3>
+          >{title || "Untitled Item"}</h3>
           <div className="flex justify-between items-end">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Current Bid</p>

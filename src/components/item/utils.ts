@@ -4,12 +4,14 @@ import { ItemData, RelatedItemData, SafeImageArray, ItemProfile } from "./types"
 
 // Helper function to safely process image data
 export const processImageData = (imageData: Json | null): SafeImageArray => {
-  if (!imageData) return [];
+  if (!imageData) return ["/placeholder.svg"];
   
   try {
     // If it's already an array, map each item to string
     if (Array.isArray(imageData)) {
-      return imageData.map(img => String(img || ""));
+      return imageData.length > 0 
+        ? imageData.map(img => String(img || ""))
+        : ["/placeholder.svg"];
     }
     
     // If it's a JSON string that contains an array
@@ -17,7 +19,9 @@ export const processImageData = (imageData: Json | null): SafeImageArray => {
       try {
         const parsed = JSON.parse(imageData);
         if (Array.isArray(parsed)) {
-          return parsed.map(img => String(img || ""));
+          return parsed.length > 0 
+            ? parsed.map(img => String(img || ""))
+            : ["/placeholder.svg"];
         }
       } catch (e) {
         // If it's not valid JSON, treat as a single string
@@ -28,7 +32,7 @@ export const processImageData = (imageData: Json | null): SafeImageArray => {
     // If it's a single value, convert to string and wrap in array
     return [String(imageData)];
   } catch (error) {
-    console.error("Error processing image data:", error);
+    console.error("Error processing image data:", error, imageData);
     return ["/placeholder.svg"];
   }
 };
@@ -70,6 +74,7 @@ export const fetchItemDetails = async (supabase: any, itemId: string): Promise<I
   
   // Process the images to ensure they're a string array
   const safeImages = processImageData(data.images);
+  console.log("Processed images:", safeImages);
   
   // Handle the profiles separately to ensure proper typing
   const itemData: ItemData = {

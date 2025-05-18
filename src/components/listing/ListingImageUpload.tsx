@@ -12,18 +12,28 @@ interface ListingImageUploadProps {
 const ListingImageUpload = ({ images, setImages }: ListingImageUploadProps) => {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newImages = [...images, ...acceptedFiles].slice(0, 5);
-    setImages(newImages);
-    
-    // Create and update preview URLs
-    const newPreviewUrls = newImages.map(file => URL.createObjectURL(file));
-    
+  // Generate preview URLs when images change
+  const generatePreviews = useCallback((files: File[]) => {
     // Revoke old preview URLs to avoid memory leaks
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     
+    // Create preview URLs for new files
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
     setPreviewUrls(newPreviewUrls);
-  }, [images, previewUrls, setImages]);
+  }, [previewUrls]);
+
+  // Initialize previews when component mounts
+  useCallback(() => {
+    if (images.length > 0 && previewUrls.length === 0) {
+      generatePreviews(images);
+    }
+  }, [images, previewUrls.length, generatePreviews]);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newImages = [...images, ...acceptedFiles].slice(0, 5);
+    setImages(newImages);
+    generatePreviews(newImages);
+  }, [images, setImages, generatePreviews]);
 
   const removeImage = (index: number) => {
     const newImages = [...images];

@@ -21,7 +21,7 @@ const ResultItem = ({ item }: ResultItemProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   // Ensure images is an array and get the first one or use placeholder
-  const itemImage = item.images && item.images.length > 0
+  const itemImage = item.images && Array.isArray(item.images) && item.images.length > 0
     ? item.images[0]
     : "/placeholder.svg";
 
@@ -52,8 +52,13 @@ const ResultItem = ({ item }: ResultItemProps) => {
           <AspectRatio ratio={1/1} className="bg-muted">
             <img
               src={itemImage}
-              alt={item.title}
+              alt={item.title || "Auction item"}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/placeholder.svg";
+                target.onerror = null; // Prevent infinite error loop
+              }}
             />
           </AspectRatio>
           {user && (
@@ -78,12 +83,12 @@ const ResultItem = ({ item }: ResultItemProps) => {
           <h3 
             className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
             onClick={handleOpenModal}
-          >{item.title}</h3>
+          >{item.title || "Untitled Item"}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2 h-10">
-            {item.description}
+            {item.description || "No description available"}
           </p>
           <div className="mt-2 flex justify-between items-center">
-            <span className="font-bold">${item.starting_bid || item.price}</span>
+            <span className="font-bold">${item.starting_bid || item.price || 0}</span>
             <span className="text-sm text-muted-foreground">
               {item.profiles?.username || "Unknown seller"}
             </span>

@@ -14,11 +14,41 @@ type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
   profiles?: ProfilesResponse;
 };
 
+// Helper function to process images from various formats to array of strings
+const processImages = (images: any): string[] => {
+  if (!images) return ["/placeholder.svg"];
+  
+  // If it's already an array of strings
+  if (Array.isArray(images) && typeof images[0] === 'string') {
+    return images.length > 0 ? images : ["/placeholder.svg"];
+  }
+  
+  // If it's a JSON string that contains an array
+  if (typeof images === 'string') {
+    try {
+      const parsed = JSON.parse(images);
+      if (Array.isArray(parsed)) {
+        return parsed.length > 0 ? parsed.map(img => String(img)) : ["/placeholder.svg"];
+      }
+      // If it's a single string (URL)
+      return [images];
+    } catch (e) {
+      // If not valid JSON, treat as a single URL
+      return [images];
+    }
+  }
+  
+  // Default fallback
+  return ["/placeholder.svg"];
+};
+
 export const useItemDetail = (itemId: string | null) => {
   return useQuery({
     queryKey: ["item", itemId],
     queryFn: async (): Promise<ItemDetail | null> => {
       if (!itemId) return null;
+      
+      console.log("Fetching item detail for:", itemId);
 
       // First, let's fetch the item without trying to join the profiles table
       const { data: item, error } = await supabase
@@ -49,11 +79,17 @@ export const useItemDetail = (itemId: string | null) => {
         }
       }
       
-      // Combine item data with profile data
+      // Process the images to ensure they're in a consistent format
+      const processedImages = processImages(item.images);
+      
+      // Combine item data with profile data and processed images
       const itemWithProfiles: ItemDetail = {
         ...item,
+        images: processedImages,
         profiles: profileData
       };
+      
+      console.log("Processed item data:", itemWithProfiles);
       
       return itemWithProfiles;
     },
