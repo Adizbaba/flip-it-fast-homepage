@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 
 export interface SellerListing {
   id: string;
@@ -76,29 +77,43 @@ export const useSellerListings = () => {
       throw error;
     }
     
-    // Process images to ensure they're in a consistent format
+    // Process images to ensure they're in a consistent format and matching the SellerListing type
     const processedData = data.map(item => {
-      let images = item.images;
+      let processedImages: string[] = [];
       
       // Process images to ensure consistent format
-      if (!images) {
-        images = ["/placeholder.svg"];
-      } else if (typeof images === 'string') {
+      if (!item.images) {
+        processedImages = ["/placeholder.svg"];
+      } else if (typeof item.images === 'string') {
         try {
-          images = JSON.parse(images);
+          processedImages = JSON.parse(item.images);
         } catch (e) {
-          images = [images];
+          processedImages = [item.images as string];
         }
-      } else if (typeof images === 'object' && 'url' in images) {
-        images = [images.url];
+      } else if (Array.isArray(item.images)) {
+        // Convert each item in the Json array to string
+        processedImages = (item.images as Json[]).map(img => 
+          typeof img === 'string' ? img : String(img)
+        );
+      } else if (typeof item.images === 'object' && 'url' in (item.images as any)) {
+        processedImages = [(item.images as any).url];
       }
       
-      return {
-        ...item,
-        // Default edit_count to 0 if it's not present
+      // Create an object that matches the SellerListing interface
+      const listing: SellerListing = {
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        images: processedImages.length > 0 ? processedImages : ["/placeholder.svg"],
+        starting_bid: item.starting_bid,
+        status: item.status,
+        created_at: item.created_at,
+        buy_now_price: item.buy_now_price || undefined,
         edit_count: item.edit_count || 0,
-        images: Array.isArray(images) ? images : ["/placeholder.svg"]
+        reserve_price: item.reserve_price || undefined
       };
+      
+      return listing;
     });
     
     return { 
