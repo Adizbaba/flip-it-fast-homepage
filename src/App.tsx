@@ -49,6 +49,7 @@ import OrderDetail from "./pages/dashboard/OrderDetail";
 import Declutter from "./pages/declutter/Declutter";
 import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
 import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
+import EditListing from "./pages/dashboard/seller/EditListing";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -94,6 +95,7 @@ const App = () => {
                 {/* Seller Pages */}
                 <Route path="listings" element={<MyListingsPage />} />
                 <Route path="create-listing" element={<CreateListingPage />} />
+                <Route path="edit-listing/:id" element={<EditListing />} />
                 <Route path="declutter-listings" element={<DeclutterListingsPage />} />
                 <Route path="edit-declutter-listing/:id" element={<EditDeclutterListingPage />} />
                 <Route path="sold-items" element={<SoldItemsPage />} />
