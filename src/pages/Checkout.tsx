@@ -20,6 +20,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+// Import the constants instead of accessing protected properties
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
+
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -128,11 +131,11 @@ const Checkout = () => {
       const formValues = form.getValues();
       
       // Process payment with Supabase Edge Function
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/process-payment`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/process-payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabase.supabaseKey}`
+          "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
         },
         body: JSON.stringify({
           amount,
