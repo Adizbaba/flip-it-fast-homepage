@@ -1,366 +1,377 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import { useCart } from "@/contexts/CartContext";
-import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { supabase } from "@/integrations/supabase/client";
-import CheckoutLoading from "@/components/checkout/CheckoutLoading";
-import CheckoutError from "@/components/checkout/CheckoutError";
+import { Container } from "@/components/ui/container";
+import OrderSummary from "@/components/checkout/OrderSummary";
+import PaymentSection from "@/components/checkout/PaymentSection";
 import PaymentDialog from "@/components/checkout/PaymentDialog";
-import { Button } from "@/components/ui/button";
+import CheckoutError from "@/components/checkout/CheckoutError";
+import CheckoutLoading from "@/components/checkout/CheckoutLoading";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-const PAYMENT_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+const formSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  city: z.string().min(2, "City must be at least 2 characters"), 
+  state: z.string().min(2, "State must be at least 2 characters"),
+  zipCode: z.string().min(4, "Zip code must be at least 4 characters"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 characters")
+});
 
-type OrderItem = {
-  id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  image?: string;
-  itemType: string;
-};
-
-type OrderDetail = {
-  id: string;
-  totalAmount: number;
-  status: string;
-  items: OrderItem[];
-};
+type FormValues = z.infer<typeof formSchema>;
 
 const Checkout = () => {
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { clearCart } = useCart();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [order, setOrder] = useState<OrderDetail | null>(null);
+  
+  const itemId = searchParams.get("id");
+  const paymentType = searchParams.get("type") as "bid" | "purchase" | null;
+  
+  const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const [paymentTimeout, setPaymentTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const orderId = searchParams.get("id");
-    
-    if (!orderId) {
-      toast({
-        variant: "destructive",
-        title: "Invalid checkout request",
-        description: "Missing order ID. Please try again.",
-      });
-      navigate("/cart");
-      return;
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Form setup
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      phoneNumber: ""
     }
-
-    const fetchOrderDetails = async () => {
+  });
+  
+  useEffect(() => {
+    const fetchItemAndUserDetails = async () => {
+      if (!itemId || !paymentType) {
+        setError("Missing item details");
+        setLoading(false);
+        return;
+      }
+      
       try {
-        setLoading(true);
-        
-        // Fetch order details
-        const { data: orderData, error: orderError } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("id", orderId)
+        // Fetch item details
+        const { data: itemData, error: itemError } = await supabase
+          .from("auction_items")
+          .select("*, profiles:seller_id(username, avatar_url)")
+          .eq("id", itemId)
           .single();
-
-        if (orderError) throw orderError;
         
-        // Ensure user owns this order
-        if (orderData.user_id !== user?.id) {
-          throw new Error("You don't have permission to access this order");
+        if (itemError) throw itemError;
+        if (!itemData) throw new Error("Item not found");
+        
+        setItem(itemData);
+        
+        // If user is logged in, fetch their profile data
+        if (user) {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+            
+          if (profileData) {
+            form.setValue("fullName", profileData.full_name || "");
+            form.setValue("email", user.email || "");
+            form.setValue("address", profileData.shipping_address || "");
+            form.setValue("phoneNumber", profileData.contact_number || "");
+          }
         }
-
-        // Fetch order items
-        const { data: orderItems, error: itemsError } = await supabase
-          .from("order_items")
-          .select("*")
-          .eq("order_id", orderId);
-
-        if (itemsError) throw itemsError;
-        
-        // Transform data for display
-        const items = orderItems.map(item => {
-          const itemData = item.item_data as Record<string, any> || {}; // Cast to proper type
-          return {
-            id: item.id,
-            title: itemData.title || "Unknown item",
-            price: item.price,
-            quantity: item.quantity,
-            image: itemData.image,
-            itemType: item.item_type
-          };
-        });
-
-        setOrder({
-          id: orderData.id,
-          totalAmount: orderData.total_amount,
-          status: orderData.status,
-          items
-        });
-      } catch (error: any) {
-        console.error("Error fetching order:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load order details. Please try again.",
-        });
-        navigate("/cart");
+      } catch (err: any) {
+        console.error("Error fetching data:", err);
+        setError(err.message || "Failed to load checkout details");
       } finally {
         setLoading(false);
       }
     };
-
-    if (user) {
-      fetchOrderDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [location, navigate, toast, user]);
-
-  const handlePayment = async () => {
-    if (!user || !order) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Required",
-        description: "Please sign in to complete your purchase.",
-      });
-      navigate("/auth");
+    
+    fetchItemAndUserDetails();
+  }, [itemId, user, paymentType, form]);
+  
+  const handlePaymentClick = async () => {
+    if (!user || !item || !paymentType) return;
+    
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast.error("Please complete all required fields");
       return;
     }
-
+    
+    setProcessing(true);
+    
     try {
-      setProcessing(true);
-
-      const { data, error } = await supabase.functions.invoke("process-payment", {
-        body: {
-          amount: order.totalAmount,
-          email: user.email,
-          userId: user.id,
-          itemId: order.id,
-          paymentType: "purchase",
-          metadata: {
-            orderId: order.id
-          }
-        },
-      });
-
-      if (error) throw error;
+      // Prepare the payment data
+      const amount = paymentType === "purchase" 
+        ? (item.buy_now_price || item.starting_bid)
+        : item.starting_bid;
+        
+      const formValues = form.getValues();
       
-      if (data.status && data.data && data.data.authorization_url) {
-        setPaymentUrl(data.data.authorization_url);
-        setDialogOpen(true);
-        
-        // Set payment timeout
-        const timeout = setTimeout(() => {
-          setDialogOpen(false);
-          setPaymentUrl(null);
-          toast({
-            variant: "destructive",
-            title: "Payment Timeout",
-            description: "The payment session has expired. Please try again.",
-          });
-        }, PAYMENT_TIMEOUT);
-        
-        setPaymentTimeout(timeout);
-      } else {
-        throw new Error("Invalid payment response. Please try again.");
-      }
-    } catch (error: any) {
-      console.error("Payment error:", error);
-      toast({
-        variant: "destructive",
-        title: "Payment Error",
-        description: error.message || "Failed to process payment. Please try again.",
+      // Process payment with Supabase Edge Function
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/process-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabase.supabaseKey}`
+        },
+        body: JSON.stringify({
+          amount,
+          email: formValues.email,
+          userId: user.id,
+          itemId: item.id,
+          paymentType,
+          metadata: {
+            fullName: formValues.fullName,
+            address: formValues.address,
+            city: formValues.city,
+            state: formValues.state,
+            zipCode: formValues.zipCode,
+            phoneNumber: formValues.phoneNumber
+          }
+        })
       });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || "Payment initiation failed");
+      }
+      
+      // Show payment dialog with Paystack URL
+      if (result.data?.authorization_url) {
+        setPaymentUrl(result.data.authorization_url);
+        setDialogOpen(true);
+      } else {
+        throw new Error("Payment URL not received");
+      }
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      toast.error(err.message || "Failed to process payment");
     } finally {
       setProcessing(false);
     }
   };
-
-  const handleDialogClose = () => {
+  
+  const handlePaymentCancel = () => {
     setDialogOpen(false);
     setPaymentUrl(null);
-    if (paymentTimeout) {
-      clearTimeout(paymentTimeout);
-      setPaymentTimeout(null);
-    }
   };
-
-  // Handle post-payment confirmation
-  useEffect(() => {
-    const handlePaymentConfirmation = async () => {
-      const searchParams = new URLSearchParams(location.search);
-      const reference = searchParams.get("reference");
-      const success = searchParams.get("success");
-      
-      if (reference && success === "true") {
-        try {
-          // Call Verify Payment function
-          const { data, error } = await supabase.functions.invoke("verify-payment", {
-            body: { reference },
-          });
-
-          if (error) throw error;
-          
-          if (data.success) {
-            toast({
-              title: "Payment Successful",
-              description: "Your order has been completed successfully.",
-            });
-            
-            // Clear cart after successful payment
-            await clearCart();
-            
-            // Navigate to order confirmation
-            navigate(`/payment-confirmation?reference=${reference}`);
-          } else {
-            toast({
-              variant: "destructive",
-              title: "Payment Verification Failed",
-              description: "We couldn't verify your payment. Please contact support.",
-            });
-          }
-        } catch (error) {
-          console.error("Verification error:", error);
-          toast({
-            variant: "destructive",
-            title: "Verification Error",
-            description: "An error occurred while verifying your payment.",
-          });
-        }
-      }
-    };
-    
-    handlePaymentConfirmation();
-  }, [location, navigate, toast, clearCart]);
-
-  useEffect(() => {
-    return () => {
-      if (paymentTimeout) {
-        clearTimeout(paymentTimeout);
-      }
-    };
-  }, [paymentTimeout]);
-
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
-
+  
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 flex-1 flex items-center justify-center">
-          <CheckoutLoading />
-        </main>
-        <Footer />
-      </div>
-    );
+    return <CheckoutLoading />;
   }
-
-  if (!order) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 flex-1 flex items-center justify-center">
-          <CheckoutError />
-        </main>
-        <Footer />
-      </div>
-    );
+  
+  if (error || !item || !paymentType) {
+    return <CheckoutError />;
   }
-
+  
+  // Process the item image for display
+  const itemImage = (() => {
+    if (!item.images) return "/placeholder.svg";
+    
+    if (Array.isArray(item.images) && item.images.length > 0) {
+      return item.images[0];
+    }
+    
+    if (typeof item.images === 'string') {
+      try {
+        const parsedImages = JSON.parse(item.images);
+        return Array.isArray(parsedImages) && parsedImages.length > 0
+          ? parsedImages[0]
+          : "/placeholder.svg";
+      } catch {
+        return item.images;
+      }
+    }
+    
+    return "/placeholder.svg";
+  })();
+  
+  // Get price based on payment type
+  const itemPrice = paymentType === "purchase" 
+    ? (item.buy_now_price || item.starting_bid)
+    : item.starting_bid;
+  
+  // Prepare the item for OrderSummary component
+  const checkoutItem = {
+    id: item.id,
+    title: item.title,
+    image: itemImage,
+    amount: itemPrice,
+    type: paymentType
+  };
+  
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {order.items.map((item) => (
-                    <div key={item.id} className="flex items-center py-2">
-                      <div className="h-16 w-16 mr-4">
-                        <img
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.title}
-                          className="h-full w-full object-cover rounded"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {item.itemType === "auction" ? "Auction Item" : "Declutter Item"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">${item.price.toFixed(2)}</p>
-                        <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Separator className="my-4" />
-                  
-                  <div className="flex justify-between font-medium text-lg">
-                    <span>Total</span>
-                    <span>${order.totalAmount.toFixed(2)}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+      
+      <main className="flex-1 py-10">
+        <Container>
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6">Checkout</h1>
             
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Click the button below to complete your payment using Paystack secure payment.
-                  </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Left side - Order summary */}
+              <div className="md:col-span-1">
+                <OrderSummary item={checkoutItem} />
+              </div>
+              
+              {/* Right side - Customer info and payment */}
+              <div className="md:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Customer Information</CardTitle>
+                  </CardHeader>
                   
-                  <Button 
-                    onClick={handlePayment}
-                    disabled={processing || order.status !== "pending"}
-                    className="w-full"
-                  >
-                    {processing ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2"></div>
-                        Processing
-                      </>
-                    ) : (
-                      <>Pay ${order.totalAmount.toFixed(2)}</>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+                  <CardContent>
+                    <Form {...form}>
+                      <form className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="John Doe" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" placeholder="john@example.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123 Main St" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="New York" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="state"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="NY" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="zipCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>ZIP Code</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="10001" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="phoneNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone Number</FormLabel>
+                              <FormControl>
+                                <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+                
+                <Separator />
+                
+                <PaymentSection 
+                  amount={itemPrice}
+                  processing={processing}
+                  onPaymentClick={handlePaymentClick}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </Container>
       </main>
       
       <PaymentDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         paymentUrl={paymentUrl}
-        onCancel={handleDialogClose}
+        onCancel={handlePaymentCancel}
       />
-
+      
       <Footer />
     </div>
   );
