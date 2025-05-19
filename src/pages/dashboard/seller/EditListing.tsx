@@ -52,18 +52,27 @@ const EditListing = () => {
           return;
         }
         
+        // Default edit_count to 0 if it's null or undefined
+        const editCount = data.edit_count || 0;
+        
         // Check if max edits exceeded
-        if ((data.edit_count || 0) >= MAX_EDIT_COUNT) {
+        if (editCount >= MAX_EDIT_COUNT) {
           setError(`You've reached the maximum of ${MAX_EDIT_COUNT} edits for this item`);
           return;
         }
         
-        setItem(data);
+        // Update the item with default edit_count if needed
+        const updatedItem = {
+          ...data,
+          edit_count: editCount
+        };
+        
+        setItem(updatedItem);
         setFormValues({
-          title: data.title || "",
-          description: data.description || "",
-          starting_bid: data.starting_bid?.toString() || "",
-          buy_now_price: data.buy_now_price?.toString() || "",
+          title: updatedItem.title || "",
+          description: updatedItem.description || "",
+          starting_bid: updatedItem.starting_bid?.toString() || "",
+          buy_now_price: updatedItem.buy_now_price?.toString() || "",
         });
       } catch (err) {
         console.error("Error fetching item:", err);

@@ -95,6 +95,8 @@ export const useSellerListings = () => {
       
       return {
         ...item,
+        // Default edit_count to 0 if it's not present
+        edit_count: item.edit_count || 0,
         images: Array.isArray(images) ? images : ["/placeholder.svg"]
       };
     });

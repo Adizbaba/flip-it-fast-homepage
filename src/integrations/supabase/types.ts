@@ -92,6 +92,7 @@ export type Database = {
           condition: string
           created_at: string
           description: string
+          edit_count: number | null
           end_date: string
           id: string
           images: Json | null
@@ -115,6 +116,7 @@ export type Database = {
           condition: string
           created_at?: string
           description: string
+          edit_count?: number | null
           end_date: string
           id?: string
           images?: Json | null
@@ -138,6 +140,7 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string
+          edit_count?: number | null
           end_date?: string
           id?: string
           images?: Json | null
