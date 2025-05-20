@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, ShoppingCart, Package, MessageCircle } from "lucide-react";
+import { Loader2, ShoppingCart, Package, MessageCircle, ShoppingBag } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatCurrency } from "@/lib/utils";
@@ -66,10 +66,12 @@ const convertJsonToStringArray = (images: Json | null): string[] => {
 
 const DeclutterListingDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<DeclutterListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isProceedingToCheckout, setIsProceedingToCheckout] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
   const { toast } = useToast();
@@ -87,7 +89,8 @@ const DeclutterListingDetail = () => {
           .single();
 
         if (error) throw error;
-
+        if (!data) throw new Error("Item not found");
+        
         // Fetch category information if available
         let categoryName = "Uncategorized";
         if (data.category_id) {
@@ -107,9 +110,12 @@ const DeclutterListingDetail = () => {
           ...data,
           category_name: categoryName,
           seller_name: getSellerUsername(data.profiles),
-          // Convert JSON images to string array using our new helper function
+          // Convert JSON images to string array using our helper function
           images: convertJsonToStringArray(data.images)
         });
+        
+        // Set initial quantity to minimum purchase quantity
+        setQuantity(data.min_purchase_quantity);
       } catch (err) {
         console.error("Error fetching declutter listing:", err);
         toast({
@@ -134,6 +140,19 @@ const DeclutterListingDetail = () => {
       numValue <= listing.quantity
     ) {
       setQuantity(numValue);
+    }
+  };
+
+  const handleQuantityInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && listing) {
+      let validValue = value;
+      if (value < listing.min_purchase_quantity) {
+        validValue = listing.min_purchase_quantity;
+      } else if (value > listing.quantity) {
+        validValue = listing.quantity;
+      }
+      setQuantity(validValue);
     }
   };
 
@@ -201,6 +220,15 @@ const DeclutterListingDetail = () => {
     }
   };
 
+  const handleProceedToCheckout = () => {
+    if (!listing) return;
+    
+    setIsProceedingToCheckout(true);
+    
+    // Navigate to checkout with item data
+    navigate(`/checkout?id=${listing.id}&type=purchase`);
+  };
+
   const handleSendMessage = async () => {
     // Simplified - would be implemented with a real messaging system
     toast({
@@ -242,6 +270,8 @@ const DeclutterListingDetail = () => {
       </div>
     );
   }
+
+  const totalPrice = listing.bulk_price * quantity;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -294,11 +324,11 @@ const DeclutterListingDetail = () => {
               </div>
               <h1 className="text-3xl font-bold">{listing.title}</h1>
               <p className="text-2xl font-semibold text-primary mt-2">
-                ${formatCurrency(listing.bulk_price)}
+                ${formatCurrency(listing.bulk_price)} <span className="text-sm text-muted-foreground">per unit</span>
               </p>
               {listing.original_price > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Original value: ${formatCurrency(listing.original_price)}
+                  Original value: ${formatCurrency(listing.original_price)} per unit
                 </p>
               )}
             </div>
@@ -321,41 +351,73 @@ const DeclutterListingDetail = () => {
               </div>
             </div>
 
-            <Card>
+            <Card className="shadow-md">
               <CardHeader className="pb-3">
-                <CardTitle>Purchase Options</CardTitle>
+                <CardTitle>Buy in Bulk</CardTitle>
                 <CardDescription>
-                  {listing.is_negotiable ? "Price is negotiable" : "Fixed price"}
+                  {listing.is_negotiable ? "Price is negotiable" : "Fixed bulk price"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-end gap-4">
-                  <div className="space-y-1">
-                    <label htmlFor="quantity" className="text-sm font-medium">
-                      Quantity
-                    </label>
-                    <Select
-                      value={quantity.toString()}
-                      onValueChange={handleQuantityChange}
-                    >
-                      <SelectTrigger className="w-20">
-                        <SelectValue placeholder={listing.min_purchase_quantity.toString()} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from(
-                          { length: listing.quantity - listing.min_purchase_quantity + 1 },
-                          (_, i) => listing.min_purchase_quantity + i
-                        ).map((value) => (
-                          <SelectItem key={value} value={value.toString()}>
-                            {value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-4 items-end">
+                    <div className="space-y-1">
+                      <label htmlFor="quantity" className="text-sm font-medium">
+                        Quantity
+                      </label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        className="w-24"
+                        value={quantity}
+                        onChange={handleQuantityInput}
+                        min={listing.min_purchase_quantity}
+                        max={listing.quantity}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Min: {listing.min_purchase_quantity}, Max: {listing.quantity}
+                      </p>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="p-3 bg-secondary/40 rounded-md">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Price per unit:</span>
+                          <span>${formatCurrency(listing.bulk_price)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Quantity:</span>
+                          <span>{quantity} items</span>
+                        </div>
+                        <Separator className="my-2" />
+                        <div className="flex justify-between font-medium">
+                          <span>Total:</span>
+                          <span>${formatCurrency(totalPrice)}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
+                  
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <Button 
-                      className="w-full"
+                      className="flex-1"
+                      onClick={handleProceedToCheckout}
+                      disabled={isProceedingToCheckout}
+                    >
+                      {isProceedingToCheckout ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="mr-2 h-4 w-4" />
+                          Buy Now
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline"
                       onClick={handleAddToCart}
                       disabled={isAddingToCart}
                     >
@@ -378,9 +440,9 @@ const DeclutterListingDetail = () => {
                 {listing.is_negotiable && (
                   <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="ghost" className="w-full">
                         <MessageCircle className="mr-2 h-4 w-4" />
-                        Contact Seller
+                        Contact Seller for Custom Quote
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
@@ -444,5 +506,4 @@ const DeclutterListingDetail = () => {
   );
 };
 
-// Add the default export
 export default DeclutterListingDetail;
