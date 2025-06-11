@@ -1,13 +1,13 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Bell, Mail, Gavel, Heart, MessageSquare } from "lucide-react";
+import { UserPreferences } from "./types";
 
 interface NotificationSettingsProps {
-  preferences: any;
-  onUpdate: (key: string, value: any) => void;
+  preferences: UserPreferences;
+  onUpdate: (key: keyof UserPreferences, value: any) => void;
 }
 
 const NotificationSettings = ({ preferences, onUpdate }: NotificationSettingsProps) => {
@@ -81,8 +81,8 @@ const NotificationSettings = ({ preferences, onUpdate }: NotificationSettingsPro
               </div>
               <Switch
                 id={notification.key}
-                checked={preferences[notification.key]}
-                onCheckedChange={(checked) => onUpdate(notification.key, checked)}
+                checked={preferences[notification.key as keyof UserPreferences] as boolean}
+                onCheckedChange={(checked) => onUpdate(notification.key as keyof UserPreferences, checked)}
               />
             </div>
             {index < notificationTypes.length - 1 && <Separator className="mt-6" />}

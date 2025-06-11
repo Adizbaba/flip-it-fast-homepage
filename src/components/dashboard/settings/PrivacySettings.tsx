@@ -5,10 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Eye, EyeOff, Mail, User } from "lucide-react";
+import { UserPreferences } from "./types";
 
 interface PrivacySettingsProps {
-  preferences: any;
-  onUpdate: (key: string, value: any) => void;
+  preferences: UserPreferences;
+  onUpdate: (key: keyof UserPreferences, value: any) => void;
 }
 
 const PrivacySettings = ({ preferences, onUpdate }: PrivacySettingsProps) => {
