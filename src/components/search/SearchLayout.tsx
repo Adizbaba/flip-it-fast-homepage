@@ -2,31 +2,29 @@
 import { ReactNode } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SearchFilters from "@/components/search/SearchFilters";
-import SearchResults from "@/components/search/SearchResults";
-import { Separator } from "@/components/ui/separator";
-import { FilterState } from "@/components/search/filters/types";
-import { SearchResultItem } from "@/hooks/useSearch";
+import SearchFilters from "./SearchFilters";
+import SearchResults from "./SearchResults";
+import { FilterState } from "./filters/types";
 
 interface SearchLayoutProps {
   title: string;
   description?: string;
-  searchArea?: ReactNode;
-  results: SearchResultItem[];
+  results: any[];
   loading: boolean;
   totalCount: number;
   page: number;
   itemsPerPage: number;
   filters: FilterState;
-  onFilterChange: (newFilters: FilterState) => void;
+  onFilterChange: (filters: Record<string, string>) => void;
   onPageChange: (page: number) => void;
   searchQuery?: string;
+  searchArea?: ReactNode;
+  customHeader?: ReactNode;
 }
 
 const SearchLayout = ({
   title,
   description,
-  searchArea,
   results,
   loading,
   totalCount,
@@ -35,52 +33,47 @@ const SearchLayout = ({
   filters,
   onFilterChange,
   onPageChange,
-  searchQuery
+  searchQuery,
+  searchArea,
+  customHeader
 }: SearchLayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">{title}</h1>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="mb-8">
+          {customHeader ? (
+            <h1 className="text-4xl font-bold mb-4">{customHeader}</h1>
+          ) : (
+            <h1 className="text-4xl font-bold mb-4">{title}</h1>
+          )}
           {description && (
-            <p className="text-muted-foreground">{description}</p>
+            <p className="text-muted-foreground text-lg">{description}</p>
           )}
         </div>
 
         {searchArea && (
-          <div className="mb-6">
+          <div className="mb-8">
             {searchArea}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-bold mb-4">Filters</h2>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <aside className="lg:w-64 flex-shrink-0">
             <SearchFilters
-              selectedCategory={filters.category}
-              minPrice={filters.minPrice}
-              maxPrice={filters.maxPrice}
-              sortBy={filters.sortBy}
-              condition={filters.condition}
-              auctionType={filters.auctionType}
+              filters={filters}
               onFilterChange={onFilterChange}
             />
-          </div>
-          
-          <div className="lg:col-span-3">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
-                {loading ? "Loading..." : `${totalCount} ${searchQuery ? "results found" : "items available"}`}
-                {searchQuery && ` for "${searchQuery}"`}
-              </h2>
-            </div>
-            <Separator className="mb-6" />
-            <SearchResults 
-              results={results} 
+          </aside>
+
+          {/* Results */}
+          <div className="flex-1">
+            <SearchResults
+              results={results}
               loading={loading}
-              page={page}
               totalCount={totalCount}
+              page={page}
               itemsPerPage={itemsPerPage}
               onPageChange={onPageChange}
             />

@@ -161,14 +161,17 @@ const CategoryPage = () => {
 
   const IconComponent = getCategoryIcon(category.slug);
 
+  // Create a custom header component for the category
+  const CategoryHeader = () => (
+    <div className="flex items-center gap-3">
+      <IconComponent className="h-8 w-8 text-primary" />
+      <span>{category.name} Auctions</span>
+    </div>
+  );
+
   return (
     <SearchLayout
-      title={
-        <div className="flex items-center gap-3">
-          <IconComponent className="h-8 w-8 text-primary" />
-          <span>{category.name} Auctions</span>
-        </div>
-      }
+      title={`${category.name} Auctions`}
       description={
         category.description || 
         `Browse all ${category.name.toLowerCase()} auctions and find great deals on quality items.`
@@ -181,6 +184,7 @@ const CategoryPage = () => {
       filters={filters}
       onFilterChange={handleFilterChange}
       onPageChange={setPage}
+      customHeader={<CategoryHeader />}
     />
   );
 };
