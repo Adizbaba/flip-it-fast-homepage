@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +40,7 @@ interface UserPreferences {
   preferred_currency: string;
 }
 
-const SettingsPage = () => {
+const SettingsPageComponent = () => {
   const { user } = useAuth();
   const [preferences, setPreferences] = useState<UserPreferences>({
     email_notifications: true,
@@ -276,4 +277,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default SettingsPageComponent;
