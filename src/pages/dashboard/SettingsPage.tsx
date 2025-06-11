@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,9 +81,10 @@ const SettingsPage = () => {
         .single();
 
       if (profile) {
+        const visibility = profile.profile_visibility as 'public' | 'private';
         setPreferences(prev => ({
           ...prev,
-          profile_visibility: profile.profile_visibility || 'public'
+          profile_visibility: visibility || 'public'
         }));
       }
     } catch (error) {

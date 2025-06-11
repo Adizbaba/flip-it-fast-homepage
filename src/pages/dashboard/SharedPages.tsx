@@ -1,7 +1,7 @@
 
 import PlaceholderPage from "@/components/dashboard/PlaceholderPage";
 import ProfileManagement from "./ProfileManagement";
-import SettingsPage from "./SettingsPage";
+import SettingsPageComponent from "./SettingsPage";
 import { Bell } from "lucide-react";
 
 export const NotificationsPage = () => {
@@ -19,5 +19,5 @@ export const ProfilePage = () => {
 };
 
 export const SettingsPage = () => {
-  return <SettingsPage />;
+  return <SettingsPageComponent />;
 };
