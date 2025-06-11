@@ -37,6 +37,20 @@ const SearchLayout = ({
   searchArea,
   customHeader
 }: SearchLayoutProps) => {
+  // Convert FilterState object to individual props and handle the onFilterChange conversion
+  const handleFilterChange = (newFilters: FilterState) => {
+    // Convert FilterState to Record<string, string> format expected by parent
+    const filterRecord: Record<string, string> = {
+      category: newFilters.category,
+      minPrice: newFilters.minPrice,
+      maxPrice: newFilters.maxPrice,
+      sortBy: newFilters.sortBy,
+      condition: newFilters.condition,
+      auctionType: newFilters.auctionType,
+    };
+    onFilterChange(filterRecord);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -62,8 +76,13 @@ const SearchLayout = ({
           {/* Filters Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
             <SearchFilters
-              filters={filters}
-              onFilterChange={onFilterChange}
+              selectedCategory={filters.category}
+              minPrice={filters.minPrice}
+              maxPrice={filters.maxPrice}
+              sortBy={filters.sortBy}
+              condition={filters.condition}
+              auctionType={filters.auctionType}
+              onFilterChange={handleFilterChange}
             />
           </aside>
 
