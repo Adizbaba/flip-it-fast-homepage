@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query
+      // Start building the query - fix the profiles join
       let query = supabase
         .from('auction_items')
         .select(`
@@ -60,7 +60,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
             id,
             name
           ),
-          profiles:seller_id (
+          profiles!auction_items_seller_id_fkey (
             username,
             avatar_url
           )

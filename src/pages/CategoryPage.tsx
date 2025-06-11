@@ -47,21 +47,7 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Use search params state but override the category filter
-  const {
-    results,
-    loading: searchLoading,
-    totalCount,
-    page,
-    filters,
-    itemsPerPage,
-    setPage,
-    handleFilterChange,
-    handleSearch,
-  } = useSearchParamsState({
-    itemsPerPage: 12
-  });
+  const [categoryId, setCategoryId] = useState<string>("");
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -105,9 +91,7 @@ const CategoryPage = () => {
         };
 
         setCategory(categoryWithSlug);
-
-        // Set the category filter to this specific category
-        handleFilterChange({ category: categoryData.id });
+        setCategoryId(categoryData.id);
 
       } catch (err) {
         console.error("Error fetching category:", err);
@@ -118,7 +102,29 @@ const CategoryPage = () => {
     };
 
     fetchCategory();
-  }, [categorySlug, handleFilterChange]);
+  }, [categorySlug]);
+
+  // Use search params state with the category ID once it's loaded
+  const {
+    results,
+    loading: searchLoading,
+    totalCount,
+    page,
+    filters,
+    itemsPerPage,
+    setPage,
+    handleFilterChange,
+    handleSearch,
+  } = useSearchParamsState({
+    itemsPerPage: 12
+  });
+
+  // Set the category filter when categoryId is available
+  useEffect(() => {
+    if (categoryId && categoryId !== filters.category) {
+      handleFilterChange({ category: categoryId });
+    }
+  }, [categoryId, filters.category, handleFilterChange]);
 
   const getCategoryIcon = (slug: string) => {
     const IconComponent = categoryIcons[slug] || Gift;
