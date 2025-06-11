@@ -1,122 +1,77 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import { DashboardProvider } from "@/contexts/DashboardContext";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/auth/Auth";
-import CreateListing from "./pages/listing/CreateListing";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import WatchList from "./pages/WatchList";
-import Search from "./pages/Search";
-import ItemDetail from "./pages/item/ItemDetail";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import HowItWorks from "./pages/HowItWorks";
 import AllAuctions from "./pages/AllAuctions";
-import HowItWorksPage from "./pages/HowItWorks";
-import ContactPage from "./pages/Contact";
-import AboutPage from "./pages/About";
-import Checkout from "./pages/Checkout";
-import PaymentConfirmation from "./pages/PaymentConfirmation";
-import Cart from "./pages/Cart";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
-import Dashboard from "./pages/dashboard/Dashboard";
-import { 
-  MyBidsPage, 
-  WonAuctionsPage, 
-  FavoritesPage, 
-  PaymentHistoryPage 
-} from "./pages/dashboard/BuyerPages";
-import {
-  MyListingsPage,
-  CreateListingPage,
-  SoldItemsPage,
-  EarningsPage
-} from "./pages/dashboard/SellerPages";
-import {
-  NotificationsPage,
-  ProfilePage,
-  SettingsPage
-} from "./pages/dashboard/SharedPages";
-import {
-  DeclutterListingsPage,
-  EditDeclutterListingPage
-} from "./pages/dashboard/DeclutterPages";
-import OrdersPage from "./pages/dashboard/OrdersPage";
-import OrderDetail from "./pages/dashboard/OrderDetail";
-import Declutter from "./pages/declutter/Declutter";
-import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
-import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
-import EditListing from "./pages/dashboard/seller/EditListing";
 import BrowseCategories from "./pages/BrowseCategories";
 import CategoryPage from "./pages/CategoryPage";
+import Search from "./pages/Search";
+import ItemDetail from "./pages/item/ItemDetail";
+import CreateListing from "./pages/listing/CreateListing";
+import Auth from "./pages/auth/Auth";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import PaymentConfirmation from "./pages/PaymentConfirmation";
+import NotFound from "./pages/NotFound";
+import Declutter from "./pages/declutter/Declutter";
+import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
+import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
+import WatchList from "./pages/WatchList";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Careers from "./pages/Careers";
 
-const App = () => {
-  const [queryClient] = useState(() => new QueryClient());
-  
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/create-declutter-listing" element={<CreateDeclutterListing />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/watch-list" element={<WatchList />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/item/:itemId" element={<ItemDetail />} />
-              <Route path="/declutter" element={<Declutter />} />
-              <Route path="/declutter/:id" element={<DeclutterListingDetail />} />
-              <Route path="/auctions" element={<AllAuctions />} />
-              <Route path="/browse-categories" element={<BrowseCategories />} />
-              <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
-              <Route path="/how-it-works" element={<HowItWorksPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-              
-              {/* Dashboard Routes */}
-              <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
+    <QueryClientProvider client={new QueryClient()}>
+      <CartProvider>
+        <DashboardProvider>
+          <Router>
+            <div className="min-h-screen bg-background font-sans antialiased">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/auctions" element={<AllAuctions />} />
+                <Route path="/browse-categories" element={<BrowseCategories />} />
+                <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/search/:query" element={<Search />} />
+                <Route path="/item/:itemId" element={<ItemDetail />} />
+                <Route path="/create-listing" element={<CreateListing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/:path" element={<Dashboard />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+                <Route path="/declutter" element={<Declutter />} />
+                <Route path="/declutter/create-listing" element={<CreateDeclutterListing />} />
+                <Route path="/declutter/listing/:listingId" element={<DeclutterListingDetail />} />
+                <Route path="/watchlist" element={<WatchList />} />
                 
-                {/* Buyer Pages */}
-                <Route path="bids" element={<MyBidsPage />} />
-                <Route path="won-auctions" element={<WonAuctionsPage />} />
-                <Route path="favorites" element={<FavoritesPage />} />
-                <Route path="payment-history" element={<PaymentHistoryPage />} />
-                <Route path="orders" element={<OrdersPage />} />
-                <Route path="orders/:orderId" element={<OrderDetail />} />
+                {/* Add new routes for the legal pages */}
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/careers" element={<Careers />} />
                 
-                {/* Seller Pages */}
-                <Route path="listings" element={<MyListingsPage />} />
-                <Route path="create-listing" element={<CreateListingPage />} />
-                <Route path="edit-listing/:id" element={<EditListing />} />
-                <Route path="declutter-listings" element={<DeclutterListingsPage />} />
-                <Route path="edit-declutter-listing/:id" element={<EditDeclutterListingPage />} />
-                <Route path="sold-items" element={<SoldItemsPage />} />
-                <Route path="earnings" element={<EarningsPage />} />
-                
-                {/* Shared Pages */}
-                <Route path="notifications" element={<NotificationsPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
-      </TooltipProvider>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </div>
+          </Router>
+        </DashboardProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

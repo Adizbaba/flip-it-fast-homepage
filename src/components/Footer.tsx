@@ -75,9 +75,9 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">About FastFlip</h3>
             <ul className="space-y-2">
               <li><a href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+              <li><a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="/terms-of-service" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/careers" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
             </ul>
           </div>
         </div>
