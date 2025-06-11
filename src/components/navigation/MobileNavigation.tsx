@@ -50,7 +50,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
       case "collectibles":
         return <Trophy className="h-5 w-5" />;
       case "jewelry":
-        return <Gem className="h-5 w-5" />; // Changed from Ring to Gem
+        return <Gem className="h-5 w-5" />;
       case "motors":
         return <Car className="h-5 w-5" />;
       default:
@@ -86,6 +86,14 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             >
               <Gavel className="h-5 w-5" />
               <span>All Auctions</span>
+            </Link>
+            <Link
+              to="/browse-categories"
+              className="flex items-center space-x-2 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-md p-2 transition-colors"
+              onClick={closeMobileMenu}
+            >
+              <Tag className="h-5 w-5" />
+              <span>Browse Categories</span>
             </Link>
             {auctionCategories.map((category) => (
               <Link

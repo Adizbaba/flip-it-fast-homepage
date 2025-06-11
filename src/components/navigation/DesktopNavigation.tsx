@@ -38,7 +38,7 @@ const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => 
       case "collectibles":
         return <Trophy className="h-4 w-4" />;
       case "jewelry":
-        return <Gem className="h-4 w-4" />; // Changed from Ring to Gem
+        return <Gem className="h-4 w-4" />;
       case "motors":
         return <Car className="h-4 w-4" />;
       default:
@@ -80,6 +80,15 @@ const DesktopNavigation = ({ onCreateListingClick }: DesktopNavigationProps) => 
                   >
                     <Gavel className="h-4 w-4" />
                     <span>All Auctions</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link 
+                    to="/browse-categories" 
+                    className="flex items-center gap-2 cursor-pointer transition-colors hover:text-auction-purple"
+                  >
+                    <Tag className="h-4 w-4" />
+                    <span>Browse Categories</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

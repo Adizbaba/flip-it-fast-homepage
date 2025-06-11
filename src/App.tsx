@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -50,6 +49,8 @@ import Declutter from "./pages/declutter/Declutter";
 import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
 import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
 import EditListing from "./pages/dashboard/seller/EditListing";
+import BrowseCategories from "./pages/BrowseCategories";
+import CategoryPage from "./pages/CategoryPage";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -73,6 +74,8 @@ const App = () => {
               <Route path="/declutter" element={<Declutter />} />
               <Route path="/declutter/:id" element={<DeclutterListingDetail />} />
               <Route path="/auctions" element={<AllAuctions />} />
+              <Route path="/browse-categories" element={<BrowseCategories />} />
+              <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />

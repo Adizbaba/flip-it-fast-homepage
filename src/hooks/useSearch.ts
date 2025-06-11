@@ -54,16 +54,40 @@ export const useSearch = (initialFilters: SearchFilters) => {
       // Start building the query
       let query = supabase
         .from('auction_items')
-        .select('*, categories(*)', { count: 'exact' })
+        .select(`
+          *,
+          categories (
+            id,
+            name
+          ),
+          profiles:seller_id (
+            username,
+            avatar_url
+          )
+        `, { count: 'exact' })
         .eq('status', 'Active'); // Only get active items
       
       // Apply filters
       if (filters.query) {
-        query = query.ilike('title', `%${filters.query}%`);
+        query = query.or(`title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`);
       }
       
       if (filters.category && filters.category !== 'all') {
-        query = query.eq('category_id', filters.category);
+        // Check if it's a UUID (category ID) or category name
+        if (filters.category.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          query = query.eq('category_id', filters.category);
+        } else {
+          // If it's not a UUID, lookup the category by name
+          const { data: categoryData } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('name', filters.category)
+            .single();
+          
+          if (categoryData) {
+            query = query.eq('category_id', categoryData.id);
+          }
+        }
       }
       
       if (filters.minPrice) {
@@ -106,7 +130,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       }
       
       // Apply pagination (items per page is set in the component)
-      const itemsPerPage = 10;
+      const itemsPerPage = 12;
       const start = (page - 1) * itemsPerPage;
       query = query.range(start, start + itemsPerPage - 1);
       
@@ -161,7 +185,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       image: item.images && item.images.length > 0 ? item.images[0] : null,
       images: item.images,
       category: item.categories?.name || 'Uncategorized',
-      endDate: item.end_date || new Date(),
+      endDate: item.end_date ? new Date(item.end_date) : new Date(),
       description: item.description || '',
       status: item.status || 'unknown',
       condition: item.condition || 'Unknown',
