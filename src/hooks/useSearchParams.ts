@@ -27,6 +27,7 @@ export const useSearchParamsState = ({
   const {
     results,
     loading,
+    error, // Add error from useSearch
     totalCount,
     page,
     setPage,
@@ -90,6 +91,7 @@ export const useSearchParamsState = ({
   return {
     results,
     loading,
+    error, // Return error
     totalCount,
     page,
     filters,

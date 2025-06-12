@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import SearchFilters from "./SearchFilters";
 import SearchResults from "./SearchResults";
 import { FilterState } from "./filters/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SearchLayoutProps {
   title: string;
@@ -20,6 +21,7 @@ interface SearchLayoutProps {
   searchQuery?: string;
   searchArea?: ReactNode;
   customHeader?: ReactNode;
+  error?: Error | null;
 }
 
 const SearchLayout = ({
@@ -35,7 +37,8 @@ const SearchLayout = ({
   onPageChange,
   searchQuery,
   searchArea,
-  customHeader
+  customHeader,
+  error
 }: SearchLayoutProps) => {
   // Convert FilterState object to individual props and handle the onFilterChange conversion
   const handleFilterChange = (newFilters: FilterState) => {
@@ -65,6 +68,15 @@ const SearchLayout = ({
             <p className="text-muted-foreground text-lg">{description}</p>
           )}
         </div>
+
+        {/* Show error message if there's a database error */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>
+              Database connection error: {error.message}. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {searchArea && (
           <div className="mb-8">

@@ -7,6 +7,7 @@ const Search = () => {
   const {
     results,
     loading,
+    error,
     totalCount,
     page,
     filters,
@@ -33,6 +34,7 @@ const Search = () => {
           onSearch={handleSearch}
         />
       }
+      error={error}
     />
   );
 };

@@ -14,10 +14,11 @@ const AllAuctions = () => {
     filters,
     setPage,
     handleFilterChange,
-    refreshResults // Add this to allow manual refresh of results
+    refreshResults,
+    error // Add error from the hook
   } = useSearchParamsState({ 
     initialQuery: "",
-    itemsPerPage: 10
+    itemsPerPage: 12 // Increased from 10 to 12 for better grid layout
   });
 
   // Show toast notification when new items are added
@@ -81,10 +82,11 @@ const AllAuctions = () => {
       loading={loading}
       totalCount={totalCount}
       page={page}
-      itemsPerPage={10}
+      itemsPerPage={12}
       filters={filters}
       onFilterChange={handleFilterChange}
       onPageChange={setPage}
+      error={error}
     />
   );
 };

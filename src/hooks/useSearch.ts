@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query with proper joins
+      // Start building the query - Fixed the join syntax to use proper foreign key relationship
       let query = supabase
         .from('auction_items')
         .select(`
@@ -60,43 +60,46 @@ export const useSearch = (initialFilters: SearchFilters) => {
             id,
             name
           ),
-          profiles (
+          profiles!auction_items_seller_id_fkey (
             username,
             avatar_url
           )
         `, { count: 'exact' })
         .eq('status', 'Active'); // Only get active items
       
-      // Apply filters
-      if (filters.query) {
+      // Apply search query filter
+      if (filters.query && filters.query.trim()) {
         query = query.or(`title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`);
       }
       
-      if (filters.category && filters.category !== 'all') {
+      // Apply category filter - handle both "all" and actual category IDs
+      if (filters.category && filters.category !== 'all' && filters.category.trim()) {
         console.log("Applying category filter:", filters.category);
-        // Always treat it as a category ID since we're setting it properly in CategoryPage
         query = query.eq('category_id', filters.category);
       }
       
-      if (filters.minPrice) {
+      // Apply price filters
+      if (filters.minPrice && filters.minPrice.trim()) {
         const minPrice = parseFloat(filters.minPrice);
-        if (!isNaN(minPrice)) {
+        if (!isNaN(minPrice) && minPrice > 0) {
           query = query.gte('starting_bid', minPrice);
         }
       }
       
-      if (filters.maxPrice) {
+      if (filters.maxPrice && filters.maxPrice.trim()) {
         const maxPrice = parseFloat(filters.maxPrice);
-        if (!isNaN(maxPrice)) {
+        if (!isNaN(maxPrice) && maxPrice > 0) {
           query = query.lte('starting_bid', maxPrice);
         }
       }
       
-      if (filters.condition && filters.condition !== 'all') {
+      // Apply condition filter
+      if (filters.condition && filters.condition !== 'all' && filters.condition.trim()) {
         query = query.eq('condition', filters.condition);
       }
       
-      if (filters.auctionType && filters.auctionType !== 'all') {
+      // Apply auction type filter
+      if (filters.auctionType && filters.auctionType !== 'all' && filters.auctionType.trim()) {
         query = query.eq('auction_type', filters.auctionType);
       }
       
@@ -117,7 +120,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
           break;
       }
       
-      // Apply pagination (items per page is set in the component)
+      // Apply pagination
       const itemsPerPage = 12;
       const start = (page - 1) * itemsPerPage;
       query = query.range(start, start + itemsPerPage - 1);
@@ -125,9 +128,12 @@ export const useSearch = (initialFilters: SearchFilters) => {
       // Execute the query
       const { data, error, count } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase query error:", error);
+        throw error;
+      }
       
-      console.log("Results:", data);
+      console.log("Query successful - Results:", data);
       console.log("Total count:", count);
       
       // Update state with results

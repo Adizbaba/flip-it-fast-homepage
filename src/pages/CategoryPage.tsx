@@ -48,7 +48,22 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string>("");
+
+  // Use search params state without initial category filter
+  const {
+    results,
+    loading: searchLoading,
+    error: searchError,
+    totalCount,
+    page,
+    filters,
+    itemsPerPage,
+    setPage,
+    handleFilterChange,
+    handleSearch,
+  } = useSearchParamsState({
+    itemsPerPage: 12
+  });
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -61,15 +76,19 @@ const CategoryPage = () => {
       try {
         console.log("Looking for category with slug:", categorySlug);
 
-        // First try to find by exact slug match in description or a custom slug field
-        let { data: categoryData, error: categoryError } = await supabase
+        // Enhanced category lookup with better matching
+        let categoryData = null;
+
+        // Try exact name match first (case insensitive)
+        const { data: exactMatch, error: exactError } = await supabase
           .from('categories')
           .select('*')
           .ilike('name', categorySlug.replace(/-/g, ' '))
           .single();
 
-        // If not found, try different variations
-        if (categoryError || !categoryData) {
+        if (!exactError && exactMatch) {
+          categoryData = exactMatch;
+        } else {
           // Try with proper case conversion
           const categoryName = categorySlug
             .split('-')
@@ -78,20 +97,24 @@ const CategoryPage = () => {
 
           console.log("Trying category name:", categoryName);
 
-          const { data: categoryData2, error: categoryError2 } = await supabase
+          const { data: caseMatch, error: caseError } = await supabase
             .from('categories')
             .select('*')
             .ilike('name', categoryName)
             .single();
 
-          if (categoryError2 || !categoryData2) {
-            // Try some common variations
+          if (!caseError && caseMatch) {
+            categoryData = caseMatch;
+          } else {
+            // Try variations and partial matches
             const variations = [
               categorySlug.replace(/-/g, ' '),
               categorySlug.replace(/-/g, ' & '),
               categorySlug === 'motors' ? 'vehicles' : categorySlug,
               categorySlug === 'jewelry' ? 'jewellery' : categorySlug,
               categorySlug === 'jewellery' ? 'jewelry' : categorySlug,
+              categorySlug === 'real-estate' ? 'real estate' : categorySlug,
+              categorySlug === 'home-garden' ? 'home & garden' : categorySlug,
             ];
 
             for (const variation of variations) {
@@ -99,7 +122,7 @@ const CategoryPage = () => {
               const { data: varData, error: varError } = await supabase
                 .from('categories')
                 .select('*')
-                .ilike('name', `%${variation}%`)
+                .or(`name.ilike.%${variation}%,name.ilike.%${variation.charAt(0).toUpperCase() + variation.slice(1)}%`)
                 .single();
 
               if (!varError && varData) {
@@ -107,8 +130,6 @@ const CategoryPage = () => {
                 break;
               }
             }
-          } else {
-            categoryData = categoryData2;
           }
         }
 
@@ -127,7 +148,12 @@ const CategoryPage = () => {
         };
 
         setCategory(categoryWithSlug);
-        setCategoryId(categoryData.id);
+        
+        // Set the category filter after we have the category ID
+        if (categoryData.id !== filters.category) {
+          console.log("Setting category filter to:", categoryData.id);
+          handleFilterChange({ category: categoryData.id });
+        }
 
       } catch (err) {
         console.error("Error fetching category:", err);
@@ -138,30 +164,7 @@ const CategoryPage = () => {
     };
 
     fetchCategory();
-  }, [categorySlug]);
-
-  // Use search params state with the category ID once it's loaded
-  const {
-    results,
-    loading: searchLoading,
-    totalCount,
-    page,
-    filters,
-    itemsPerPage,
-    setPage,
-    handleFilterChange,
-    handleSearch,
-  } = useSearchParamsState({
-    itemsPerPage: 12
-  });
-
-  // Set the category filter when categoryId is available
-  useEffect(() => {
-    if (categoryId && categoryId !== filters.category) {
-      console.log("Setting category filter to:", categoryId);
-      handleFilterChange({ category: categoryId });
-    }
-  }, [categoryId, filters.category, handleFilterChange]);
+  }, [categorySlug, handleFilterChange, filters.category]);
 
   const getCategoryIcon = (slug: string) => {
     const IconComponent = categoryIcons[slug] || Gift;
@@ -181,6 +184,7 @@ const CategoryPage = () => {
         filters={filters}
         onFilterChange={handleFilterChange}
         onPageChange={setPage}
+        error={searchError}
       />
     );
   }
@@ -198,6 +202,7 @@ const CategoryPage = () => {
         filters={filters}
         onFilterChange={handleFilterChange}
         onPageChange={setPage}
+        error={searchError}
       />
     );
   }
@@ -228,6 +233,7 @@ const CategoryPage = () => {
       onFilterChange={handleFilterChange}
       onPageChange={setPage}
       customHeader={<CategoryHeader />}
+      error={searchError}
     />
   );
 };
