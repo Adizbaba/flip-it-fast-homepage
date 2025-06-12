@@ -30,6 +30,7 @@ const categoryIcons: Record<string, any> = {
   electronics: Laptop,
   cameras: Camera,
   vehicles: Car,
+  motors: Car,
   "real-estate": Home,
   fashion: ShoppingBag,
   watches: Watch,
@@ -38,7 +39,7 @@ const categoryIcons: Record<string, any> = {
   clothing: Shirt,
   "home-garden": Home,
   jewelry: Gem,
-  motors: Car,
+  jewellery: Gem,
 };
 
 const CategoryPage = () => {
@@ -58,32 +59,67 @@ const CategoryPage = () => {
       }
 
       try {
-        // Convert slug back to category name for lookup
-        const categoryName = categorySlug
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
+        console.log("Looking for category with slug:", categorySlug);
 
-        console.log("Looking for category:", categoryName, "with slug:", categorySlug);
-
-        const { data: categoryData, error: categoryError } = await supabase
+        // First try to find by exact slug match in description or a custom slug field
+        let { data: categoryData, error: categoryError } = await supabase
           .from('categories')
           .select('*')
-          .ilike('name', categoryName)
+          .ilike('name', categorySlug.replace(/-/g, ' '))
           .single();
 
-        if (categoryError) {
-          console.error("Category lookup error:", categoryError);
-          setError("Category not found");
-          setLoading(false);
-          return;
+        // If not found, try different variations
+        if (categoryError || !categoryData) {
+          // Try with proper case conversion
+          const categoryName = categorySlug
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+          console.log("Trying category name:", categoryName);
+
+          const { data: categoryData2, error: categoryError2 } = await supabase
+            .from('categories')
+            .select('*')
+            .ilike('name', categoryName)
+            .single();
+
+          if (categoryError2 || !categoryData2) {
+            // Try some common variations
+            const variations = [
+              categorySlug.replace(/-/g, ' '),
+              categorySlug.replace(/-/g, ' & '),
+              categorySlug === 'motors' ? 'vehicles' : categorySlug,
+              categorySlug === 'jewelry' ? 'jewellery' : categorySlug,
+              categorySlug === 'jewellery' ? 'jewelry' : categorySlug,
+            ];
+
+            for (const variation of variations) {
+              console.log("Trying variation:", variation);
+              const { data: varData, error: varError } = await supabase
+                .from('categories')
+                .select('*')
+                .ilike('name', `%${variation}%`)
+                .single();
+
+              if (!varError && varData) {
+                categoryData = varData;
+                break;
+              }
+            }
+          } else {
+            categoryData = categoryData2;
+          }
         }
 
         if (!categoryData) {
+          console.error("Category not found for slug:", categorySlug);
           setError("Category not found");
           setLoading(false);
           return;
         }
+
+        console.log("Found category:", categoryData);
 
         const categoryWithSlug: Category = {
           ...categoryData,
@@ -122,6 +158,7 @@ const CategoryPage = () => {
   // Set the category filter when categoryId is available
   useEffect(() => {
     if (categoryId && categoryId !== filters.category) {
+      console.log("Setting category filter to:", categoryId);
       handleFilterChange({ category: categoryId });
     }
   }, [categoryId, filters.category, handleFilterChange]);

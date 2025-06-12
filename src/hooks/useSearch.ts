@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query - fix the profiles join
+      // Start building the query with proper joins
       let query = supabase
         .from('auction_items')
         .select(`
@@ -60,7 +60,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
             id,
             name
           ),
-          profiles!auction_items_seller_id_fkey (
+          profiles (
             username,
             avatar_url
           )
@@ -73,21 +73,9 @@ export const useSearch = (initialFilters: SearchFilters) => {
       }
       
       if (filters.category && filters.category !== 'all') {
-        // Check if it's a UUID (category ID) or category name
-        if (filters.category.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-          query = query.eq('category_id', filters.category);
-        } else {
-          // If it's not a UUID, lookup the category by name
-          const { data: categoryData } = await supabase
-            .from('categories')
-            .select('id')
-            .eq('name', filters.category)
-            .single();
-          
-          if (categoryData) {
-            query = query.eq('category_id', categoryData.id);
-          }
-        }
+        console.log("Applying category filter:", filters.category);
+        // Always treat it as a category ID since we're setting it properly in CategoryPage
+        query = query.eq('category_id', filters.category);
       }
       
       if (filters.minPrice) {
