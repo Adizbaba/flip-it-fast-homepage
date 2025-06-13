@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query - Fixed the join syntax to use proper foreign key relationship
+      // Start building the query - Simplified without the problematic foreign key join
       let query = supabase
         .from('auction_items')
         .select(`
@@ -59,10 +59,6 @@ export const useSearch = (initialFilters: SearchFilters) => {
           categories (
             id,
             name
-          ),
-          profiles!auction_items_seller_id_fkey (
-            username,
-            avatar_url
           )
         `, { count: 'exact' })
         .eq('status', 'Active'); // Only get active items
@@ -187,7 +183,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       sellerId: item.seller_id || '',
       auctionType: item.auction_type || 'standard',
       starting_bid: item.starting_bid || 0,
-      profiles: item.profiles,
+      profiles: undefined, // Remove profiles since we're not joining with profiles table
     };
   });
 
