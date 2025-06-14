@@ -96,8 +96,8 @@ export const useBidding = () => {
       
       // If we got bids, try to get usernames separately
       if (data && data.length > 0) {
-        const bidsWithProfiles = await Promise.all(
-          data.map(async (bid: any) => {
+        const bidsWithProfiles: Bid[] = await Promise.all(
+          data.map(async (bid: any): Promise<Bid> => {
             try {
               const { data: profile } = await supabase
                 .from('profiles')
@@ -106,12 +106,20 @@ export const useBidding = () => {
                 .single();
               
               return {
-                ...bid,
+                id: bid.id,
+                auction_item_id: bid.auction_item_id,
+                bidder_id: bid.bidder_id,
+                amount: bid.amount,
+                created_at: bid.created_at,
                 profiles: profile ? { username: profile.username } : undefined
               };
             } catch {
               return {
-                ...bid,
+                id: bid.id,
+                auction_item_id: bid.auction_item_id,
+                bidder_id: bid.bidder_id,
+                amount: bid.amount,
+                created_at: bid.created_at,
                 profiles: undefined
               };
             }
@@ -120,7 +128,7 @@ export const useBidding = () => {
         return bidsWithProfiles;
       }
       
-      return data || [];
+      return [];
     } catch (error) {
       console.error('Error fetching bids:', error);
       return [];
