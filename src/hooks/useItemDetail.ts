@@ -101,10 +101,11 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        // Restructure the null check to make TypeScript happy
-        if (bidData !== null) {
-          if (typeof bidData === 'object' && 'amount' in bidData && typeof bidData.amount === 'number') {
-            highestBid = bidData.amount;
+        // Check if bidData exists and has the expected structure
+        if (bidData && typeof bidData === 'object' && 'amount' in bidData) {
+          const amount = (bidData as { amount: number }).amount;
+          if (typeof amount === 'number') {
+            highestBid = amount;
           }
         }
       } catch (bidError) {
