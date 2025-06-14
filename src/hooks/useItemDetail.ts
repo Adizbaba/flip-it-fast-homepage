@@ -101,8 +101,11 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        if (bidData !== null && typeof bidData === 'object' && 'amount' in bidData && typeof bidData.amount === 'number') {
-          highestBid = bidData.amount;
+        // Restructure the null check to make TypeScript happy
+        if (bidData !== null) {
+          if (typeof bidData === 'object' && 'amount' in bidData && typeof bidData.amount === 'number') {
+            highestBid = bidData.amount;
+          }
         }
       } catch (bidError) {
         console.log("Bids not available yet:", bidError);
