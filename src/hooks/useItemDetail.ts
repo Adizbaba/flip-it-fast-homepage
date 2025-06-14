@@ -9,9 +9,10 @@ type ProfilesResponse = {
   avatar_url: string | null;
 } | null;
 
-// Define the main item type including the profiles property
+// Define the main item type including the profiles property and highest_bid
 type ItemDetail = Database["public"]["Tables"]["auction_items"]["Row"] & {
   profiles?: ProfilesResponse;
+  highest_bid?: number; // Add this as optional until types are updated
 };
 
 // Helper function to process images from various formats to array of strings
@@ -88,6 +89,25 @@ export const useItemDetail = (itemId: string | null) => {
           profileData = profile;
         }
       }
+
+      // Try to get highest bid if available
+      let highestBid = item.starting_bid;
+      try {
+        const { data: bidData } = await supabase
+          .from('bids' as any)
+          .select('amount')
+          .eq('auction_item_id', itemId)
+          .order('amount', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (bidData?.amount) {
+          highestBid = bidData.amount;
+        }
+      } catch (bidError) {
+        console.log("Bids not available yet:", bidError);
+        // Use starting_bid as fallback
+      }
       
       // Process the images to ensure they're in a consistent format
       const processedImages = processImages(item.images);
@@ -96,7 +116,8 @@ export const useItemDetail = (itemId: string | null) => {
       const itemWithProfiles: ItemDetail = {
         ...item,
         images: processedImages,
-        profiles: profileData
+        profiles: profileData,
+        highest_bid: highestBid
       };
       
       console.log("Processed item data:", itemWithProfiles);

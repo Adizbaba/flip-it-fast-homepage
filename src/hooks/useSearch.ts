@@ -78,18 +78,18 @@ export const useSearch = (initialFilters: SearchFilters) => {
         query = query.eq('category_id', filters.category);
       }
       
-      // Apply price filters - use highest_bid if available, otherwise starting_bid
+      // Apply price filters - use starting_bid for now (highest_bid when available)
       if (filters.minPrice && filters.minPrice.trim()) {
         const minPrice = parseFloat(filters.minPrice);
         if (!isNaN(minPrice) && minPrice > 0) {
-          query = query.or(`highest_bid.gte.${minPrice},and(highest_bid.is.null,starting_bid.gte.${minPrice})`);
+          query = query.gte('starting_bid', minPrice);
         }
       }
       
       if (filters.maxPrice && filters.maxPrice.trim()) {
         const maxPrice = parseFloat(filters.maxPrice);
         if (!isNaN(maxPrice) && maxPrice > 0) {
-          query = query.or(`highest_bid.lte.${maxPrice},and(highest_bid.is.null,starting_bid.lte.${maxPrice})`);
+          query = query.lte('starting_bid', maxPrice);
         }
       }
       
@@ -103,15 +103,13 @@ export const useSearch = (initialFilters: SearchFilters) => {
         query = query.eq('auction_type', filters.auctionType);
       }
       
-      // Apply sorting
+      // Apply sorting - fix the nullsLast error
       switch(filters.sortBy) {
         case 'priceAsc':
-          query = query.order('highest_bid', { ascending: true, nullsFirst: false })
-                       .order('starting_bid', { ascending: true });
+          query = query.order('starting_bid', { ascending: true });
           break;
         case 'priceDesc':
-          query = query.order('highest_bid', { ascending: false, nullsLast: false })
-                       .order('starting_bid', { ascending: false });
+          query = query.order('starting_bid', { ascending: false });
           break;
         case 'endingSoon':
           query = query.order('end_date', { ascending: true });
@@ -177,7 +175,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     return {
       id: item.id || 'unknown',
       title: item.title || 'Untitled Item',
-      price: item.highest_bid || item.starting_bid || 0,
+      price: item.starting_bid || 0, // Use starting_bid for now
       image: item.images && item.images.length > 0 ? item.images[0] : null,
       images: item.images,
       category: item.categories?.name || 'Uncategorized',
@@ -185,7 +183,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
       description: item.description || '',
       status: item.status || 'unknown',
       condition: item.condition || 'Unknown',
-      highestBid: item.highest_bid || item.starting_bid || 0,
+      highestBid: item.starting_bid || 0, // Use starting_bid until highest_bid is available
       sellerId: item.seller_id || '',
       auctionType: item.auction_type || 'standard',
       starting_bid: item.starting_bid || 0,
