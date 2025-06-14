@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useItemDetail } from "@/hooks/useItemDetail";
@@ -8,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import AddToCartButton from "@/components/AddToCartButton";
+import BiddingSection from "@/components/BiddingSection";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Carousel,
@@ -62,20 +64,6 @@ const ItemDetail = () => {
     );
   }
 
-  const handleBid = () => {
-    if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to place a bid",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setPaymentType("bid");
-    setDialogOpen(true);
-  };
-  
   const handleBuyNow = () => {
     if (!user) {
       toast({
@@ -101,14 +89,15 @@ const ItemDetail = () => {
   const timeRemaining = new Date(item.end_date).getTime() - Date.now();
   const isEnded = timeRemaining <= 0;
   const hasBuyNowOption = !!item.buy_now_price;
+  const currentBid = item.highest_bid || item.starting_bid;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Image Gallery */}
-          <div className="space-y-4">
+          <div className="lg:col-span-2 space-y-4">
             <Card className="p-4">
               <Carousel>
                 <CarouselContent>
@@ -118,7 +107,7 @@ const ItemDetail = () => {
                         <img
                           src={image}
                           alt={`${item.title} - Image ${index + 1}`}
-                          className="object-cover rounded-lg"
+                          className="w-full h-full object-cover rounded-lg"
                         />
                       </div>
                     </CarouselItem>
@@ -128,82 +117,16 @@ const ItemDetail = () => {
                 <CarouselNext />
               </Carousel>
             </Card>
-          </div>
 
-          {/* Item Details */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">{item.title}</h1>
-              <p className="text-muted-foreground">Condition: {item.condition}</p>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Current Bid</p>
-                  <p className="text-2xl font-bold">${item.starting_bid}</p>
-                </div>
-                <div className="space-y-1 text-right">
-                  <p className="text-sm text-muted-foreground">Time Remaining</p>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{isEnded ? "Auction ended" : "Ending soon"}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col space-y-2">
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handleBid}
-                  disabled={isEnded || user?.id === item.seller_id}
-                >
-                  <DollarSign className="mr-2 h-4 w-4" />
-                  Place Bid
-                </Button>
-                
-                {hasBuyNowOption && (
-                  <div className="flex space-x-2 w-full">
-                    <Button 
-                      className="flex-1" 
-                      size="lg"
-                      variant="outline"
-                      onClick={handleBuyNow}
-                      disabled={isEnded || user?.id === item.seller_id}
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Buy Now ${item.buy_now_price}
-                    </Button>
-                    
-                    <AddToCartButton 
-                      itemId={item.id}
-                      itemType="auction"
-                      title={item.title}
-                      price={item.buy_now_price || item.starting_bid}
-                      image={(item.images as string[])?.[0]}
-                      className="flex-1"
-                      size="lg"
-                      disabled={isEnded || user?.id === item.seller_id}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Item Description</h2>
+            {/* Item Description */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Item Description</h2>
               <p className="text-muted-foreground whitespace-pre-wrap">{item.description}</p>
-            </div>
+            </Card>
 
-            <Separator />
-
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Seller Information</h2>
+            {/* Seller Information */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Seller Information</h2>
               <div className="flex items-center space-x-4">
                 <Avatar>
                   <AvatarImage src={item.profiles && typeof item.profiles === 'object' ? 
@@ -218,7 +141,59 @@ const ItemDetail = () => {
                   <p className="text-sm text-muted-foreground">Member since {new Date(item.created_at).getFullYear()}</p>
                 </div>
               </div>
+            </Card>
+          </div>
+
+          {/* Bidding and Purchase Section */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold">{item.title}</h1>
+              <p className="text-muted-foreground">Condition: {item.condition}</p>
             </div>
+
+            <Separator />
+
+            {/* Bidding Section */}
+            <BiddingSection
+              itemId={item.id}
+              currentBid={currentBid}
+              startingBid={item.starting_bid}
+              endDate={new Date(item.end_date)}
+              sellerId={item.seller_id}
+            />
+
+            {/* Buy Now Option */}
+            {hasBuyNowOption && !isEnded && user?.id !== item.seller_id && (
+              <Card className="p-4">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">Skip the bidding</p>
+                    <p className="text-xl font-bold">${item.buy_now_price}</p>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Button 
+                      className="flex-1" 
+                      size="lg"
+                      onClick={handleBuyNow}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Buy Now
+                    </Button>
+                    
+                    <AddToCartButton 
+                      itemId={item.id}
+                      itemType="auction"
+                      title={item.title}
+                      price={item.buy_now_price}
+                      image={(item.images as string[])?.[0]}
+                      className="flex-1"
+                      size="lg"
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </main>
@@ -226,26 +201,23 @@ const ItemDetail = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{paymentType === "bid" ? "Place a Bid" : "Complete Purchase"}</DialogTitle>
+            <DialogTitle>Complete Purchase</DialogTitle>
             <DialogDescription>
-              {paymentType === "bid" 
-                ? "You're about to place a bid on this item"
-                : "You're about to purchase this item at the buy now price"
-              }
+              You're about to purchase this item at the buy now price
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
             <p className="font-medium">Item: {item.title}</p>
             <p className="mt-2">
-              Amount: ${paymentType === "bid" ? item.starting_bid : item.buy_now_price}
+              Amount: ${item.buy_now_price}
             </p>
           </div>
           
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handlePaymentConfirm}>
-              {paymentType === "bid" ? "Continue to Bid" : "Continue to Checkout"}
+              Continue to Checkout
             </Button>
           </div>
         </DialogContent>

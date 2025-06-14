@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query - Simplified without the problematic foreign key join
+      // Start building the query with proper joins
       let query = supabase
         .from('auction_items')
         .select(`
@@ -59,6 +59,10 @@ export const useSearch = (initialFilters: SearchFilters) => {
           categories (
             id,
             name
+          ),
+          profiles:seller_id (
+            username,
+            avatar_url
           )
         `, { count: 'exact' })
         .eq('status', 'Active'); // Only get active items
@@ -74,18 +78,18 @@ export const useSearch = (initialFilters: SearchFilters) => {
         query = query.eq('category_id', filters.category);
       }
       
-      // Apply price filters
+      // Apply price filters - use highest_bid if available, otherwise starting_bid
       if (filters.minPrice && filters.minPrice.trim()) {
         const minPrice = parseFloat(filters.minPrice);
         if (!isNaN(minPrice) && minPrice > 0) {
-          query = query.gte('starting_bid', minPrice);
+          query = query.or(`highest_bid.gte.${minPrice},and(highest_bid.is.null,starting_bid.gte.${minPrice})`);
         }
       }
       
       if (filters.maxPrice && filters.maxPrice.trim()) {
         const maxPrice = parseFloat(filters.maxPrice);
         if (!isNaN(maxPrice) && maxPrice > 0) {
-          query = query.lte('starting_bid', maxPrice);
+          query = query.or(`highest_bid.lte.${maxPrice},and(highest_bid.is.null,starting_bid.lte.${maxPrice})`);
         }
       }
       
@@ -102,10 +106,12 @@ export const useSearch = (initialFilters: SearchFilters) => {
       // Apply sorting
       switch(filters.sortBy) {
         case 'priceAsc':
-          query = query.order('starting_bid', { ascending: true });
+          query = query.order('highest_bid', { ascending: true, nullsFirst: false })
+                       .order('starting_bid', { ascending: true });
           break;
         case 'priceDesc':
-          query = query.order('starting_bid', { ascending: false });
+          query = query.order('highest_bid', { ascending: false, nullsLast: false })
+                       .order('starting_bid', { ascending: false });
           break;
         case 'endingSoon':
           query = query.order('end_date', { ascending: true });
@@ -171,7 +177,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     return {
       id: item.id || 'unknown',
       title: item.title || 'Untitled Item',
-      price: item.starting_bid || 0,
+      price: item.highest_bid || item.starting_bid || 0,
       image: item.images && item.images.length > 0 ? item.images[0] : null,
       images: item.images,
       category: item.categories?.name || 'Uncategorized',
@@ -183,7 +189,9 @@ export const useSearch = (initialFilters: SearchFilters) => {
       sellerId: item.seller_id || '',
       auctionType: item.auction_type || 'standard',
       starting_bid: item.starting_bid || 0,
-      profiles: undefined, // Remove profiles since we're not joining with profiles table
+      profiles: item.profiles ? {
+        username: item.profiles.username || 'Unknown seller'
+      } : undefined,
     };
   });
 

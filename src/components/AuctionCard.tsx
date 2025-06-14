@@ -1,6 +1,7 @@
 
-import { Heart, Clock } from "lucide-react";
+import { Heart, Clock, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { toast } from "@/components/ui/use-toast";
@@ -16,9 +17,22 @@ interface AuctionCardProps {
   currentBid: number;
   timeRemaining: string;
   bids: number;
+  startingBid?: number;
+  buyNowPrice?: number;
+  condition?: string;
 }
 
-const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: AuctionCardProps) => {
+const AuctionCard = ({ 
+  id, 
+  title, 
+  image, 
+  currentBid, 
+  timeRemaining, 
+  bids, 
+  startingBid = 0,
+  buyNowPrice,
+  condition
+}: AuctionCardProps) => {
   const { user } = useAuth();
   const { addToSavedItems, removeFromSavedItems, isSaved } = useSavedItems(user);
   const navigate = useNavigate();
@@ -26,6 +40,9 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
 
   // Make sure we have a valid image URL or fall back to placeholder
   const safeImage = image || "/placeholder.svg";
+
+  // Calculate if there's been bidding activity
+  const hasBids = currentBid > startingBid;
 
   const handleWatchlistToggle = async () => {
     if (!user) {
@@ -85,6 +102,7 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
               }}
             />
           </AspectRatio>
+          
           <Button 
             variant="ghost" 
             size="icon" 
@@ -94,25 +112,50 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
           >
             <Heart className={`h-4 w-4 ${isSaved(id) ? 'fill-red-500' : ''}`} />
           </Button>
+          
           <div className="absolute bottom-2 left-2">
             <div className="countdown-badge flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-full text-xs">
               <Clock className="h-3 w-3" />
               <span>{timeRemaining}</span>
             </div>
           </div>
+
+          {buyNowPrice && (
+            <div className="absolute top-2 left-2">
+              <Badge variant="secondary" className="text-xs">
+                Buy Now Available
+              </Badge>
+            </div>
+          )}
         </div>
+        
         <div className="p-4">
           <h3 
             className="font-medium text-sm line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors" 
             onClick={handleOpenModal}
           >{title || "Untitled Item"}</h3>
+          
+          {condition && (
+            <p className="text-xs text-muted-foreground mb-2">Condition: {condition}</p>
+          )}
+          
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Current Bid</p>
-              <p className="font-bold text-lg">${currentBid.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {hasBids ? 'Current Bid' : 'Starting Bid'}
+              </p>
+              <p className="font-bold text-lg flex items-center gap-1">
+                ${currentBid.toLocaleString()}
+                {hasBids && <TrendingUp className="h-3 w-3 text-green-500" />}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-xs text-muted-foreground">{bids} bids</p>
+              {buyNowPrice && (
+                <p className="text-xs text-blue-600 font-medium">
+                  Buy: ${buyNowPrice.toLocaleString()}
+                </p>
+              )}
               <Button 
                 size="sm" 
                 className="mt-1"
