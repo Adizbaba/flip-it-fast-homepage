@@ -101,13 +101,11 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        // More explicit null and type checking
-        if (bidData !== null && bidData !== undefined) {
-          if (typeof bidData === 'object' && 'amount' in bidData) {
-            const amount = (bidData as { amount: number }).amount;
-            if (typeof amount === 'number') {
-              highestBid = amount;
-            }
+        // Combined null and type checking in a single condition
+        if (bidData !== null && bidData !== undefined && typeof bidData === 'object' && 'amount' in bidData) {
+          const amount = (bidData as { amount: number }).amount;
+          if (typeof amount === 'number') {
+            highestBid = amount;
           }
         }
       } catch (bidError) {
