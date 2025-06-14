@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -101,12 +100,9 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        // More explicit null check and type assertion
-        if (bidData != null && typeof bidData === 'object' && 'amount' in bidData) {
-          const amount = (bidData as { amount: number }).amount;
-          if (typeof amount === 'number') {
-            highestBid = amount;
-          }
+        // Fix: All checks on one line for strict TypeScript narrowing
+        if (bidData && typeof bidData === 'object' && 'amount' in bidData && typeof bidData.amount === 'number') {
+          highestBid = bidData.amount;
         }
       } catch (bidError) {
         console.log("Bids not available yet:", bidError);
