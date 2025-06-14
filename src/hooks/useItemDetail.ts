@@ -101,9 +101,9 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        // Use explicit type guard function to check bidData
-        if (bidData && typeof bidData === 'object' && 'amount' in bidData) {
-          const amount = bidData.amount;
+        // More explicit null check and type assertion
+        if (bidData != null && typeof bidData === 'object' && 'amount' in bidData) {
+          const amount = (bidData as { amount: number }).amount;
           if (typeof amount === 'number') {
             highestBid = amount;
           }
