@@ -101,7 +101,7 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
         
-        if (bidData?.amount) {
+        if (bidData && typeof bidData === 'object' && 'amount' in bidData) {
           highestBid = bidData.amount;
         }
       } catch (bidError) {

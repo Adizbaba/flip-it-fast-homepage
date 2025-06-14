@@ -55,23 +55,18 @@ export const useBidding = () => {
         return false;
       }
 
-      // Use raw SQL to insert bid since the bids table might not be in types yet
-      const { error } = await supabase.rpc('exec_sql', {
-        sql: `INSERT INTO bids (auction_item_id, bidder_id, amount) VALUES ($1, $2, $3)`,
-        params: [auctionItemId, user.id, amount]
-      });
-
-      if (error) {
-        // Fallback: try direct insert (this will work once types are updated)
-        const { error: insertError } = await supabase
-          .from('bids' as any)
-          .insert({
-            auction_item_id: auctionItemId,
-            bidder_id: user.id,
-            amount: amount
-          });
+      // Try direct insert into bids table
+      const { error } = await supabase
+        .from('bids' as any)
+        .insert({
+          auction_item_id: auctionItemId,
+          bidder_id: user.id,
+          amount: amount
+        });
         
-        if (insertError) throw insertError;
+      if (error) {
+        console.error('Error placing bid:', error);
+        throw error;
       }
 
       toast.success('Bid placed successfully!');
@@ -87,21 +82,42 @@ export const useBidding = () => {
 
   const getBids = async (auctionItemId: string): Promise<Bid[]> => {
     try {
-      // Try to fetch bids with a fallback
+      // Try to fetch bids with a simple query first
       const { data, error } = await supabase
         .from('bids' as any)
-        .select(`
-          *,
-          profiles:bidder_id (
-            username
-          )
-        `)
+        .select('*')
         .eq('auction_item_id', auctionItemId)
         .order('amount', { ascending: false });
 
       if (error) {
         console.log('Bids table not ready yet:', error);
         return [];
+      }
+      
+      // If we got bids, try to get usernames separately
+      if (data && data.length > 0) {
+        const bidsWithProfiles = await Promise.all(
+          data.map(async (bid: any) => {
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', bid.bidder_id)
+                .single();
+              
+              return {
+                ...bid,
+                profiles: profile ? { username: profile.username } : undefined
+              };
+            } catch {
+              return {
+                ...bid,
+                profiles: undefined
+              };
+            }
+          })
+        );
+        return bidsWithProfiles;
       }
       
       return data || [];
