@@ -101,8 +101,8 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
 
-        // Check if bidData exists and has the expected structure
-        if (bidData && typeof bidData === 'object' && 'amount' in bidData) {
+        // Explicit null check first, then type and property checks
+        if (bidData !== null && bidData !== undefined && typeof bidData === 'object' && 'amount' in bidData) {
           const amount = (bidData as Record<string, any>).amount;
           if (typeof amount === 'number') {
             highestBid = amount;
