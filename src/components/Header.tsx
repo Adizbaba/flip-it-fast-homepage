@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -7,6 +6,7 @@ import MobileNavigation from "@/components/navigation/MobileNavigation";
 import UserMenuSection from "@/components/navigation/UserMenuSection";
 import { useAuth } from "@/lib/auth";
 import { CreateListingModal } from "@/components/CreateListingModal";
+import FastFlipLogo from "@/components/FastFlipLogo";
 
 // Mock categories data - in a real app, this would come from an API
 export const auctionCategories = [
@@ -78,11 +78,7 @@ const Header = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
-          <img 
-            src="/lovable-uploads/440a9b3f-f502-457a-9c31-af487096144e.png" 
-            alt="FastFlip"
-            className="h-8 w-auto"
-          />
+          <FastFlipLogo size={32} textSize="text-2xl" />
         </Link>
 
         {/* Desktop Navigation */}

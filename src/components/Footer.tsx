@@ -1,6 +1,7 @@
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import FastFlipLogo from "@/components/FastFlipLogo";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -20,11 +21,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="mb-4">
-              <img 
-                src="/lovable-uploads/440a9b3f-f502-457a-9c31-af487096144e.png" 
-                alt="FastFlip"
-                className="h-10 w-auto brightness-0 invert"
-              />
+              <FastFlipLogo size={40} textSize="text-2xl" withText />
             </div>
             <p className="text-gray-400 mb-4">
               The fastest way to buy and sell in online auctions. Find great deals or sell your items today!
