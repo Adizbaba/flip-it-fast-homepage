@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Clock, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, XCircle, Package, Truck, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,26 +35,34 @@ interface Order {
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'completed':
-      return 'bg-green-100 text-green-800';
+    case 'delivered':
+      return 'bg-green-100 text-green-800 border-green-200';
     case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
+    case 'processing':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'shipped':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
     case 'cancelled':
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-100 text-red-800 border-red-200';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status.toLowerCase()) {
     case 'completed':
+    case 'delivered':
       return <CheckCircle className="h-4 w-4" />;
     case 'pending':
+    case 'processing':
       return <Clock className="h-4 w-4" />;
+    case 'shipped':
+      return <Truck className="h-4 w-4" />;
     case 'cancelled':
       return <XCircle className="h-4 w-4" />;
     default:
-      return null;
+      return <Package className="h-4 w-4" />;
   }
 };
 
@@ -96,8 +104,8 @@ const OrderDetail = () => {
         if (itemsError) throw itemsError;
         
         // Transform items for display
-        const transformedItems = orderItems.map(item => {
-          const itemData = item.item_data as Record<string, any> || {}; // Cast to proper type
+        const transformedItems = orderItems?.map(item => {
+          const itemData = item.item_data as Record<string, any> || {};
           return {
             id: item.id,
             item_id: item.item_id,
@@ -107,7 +115,7 @@ const OrderDetail = () => {
             quantity: item.quantity,
             image: itemData.image,
           };
-        });
+        }) || [];
         
         setOrder({
           ...orderData,
@@ -124,6 +132,13 @@ const OrderDetail = () => {
     
     fetchOrderDetails();
   }, [orderId, user, navigate]);
+
+  const copyOrderId = () => {
+    if (order) {
+      navigator.clipboard.writeText(order.id);
+      toast.success('Order ID copied to clipboard');
+    }
+  };
   
   if (loading) {
     return (
@@ -151,13 +166,26 @@ const OrderDetail = () => {
         </Button>
       </div>
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Order Details</h1>
-          <p className="text-muted-foreground mt-1">Order #{order.id.substring(0, 8)}</p>
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-muted-foreground">Order #{order.id.substring(0, 8)}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyOrderId}
+              className="h-6 w-6 p-0"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
         
-        <Badge variant="outline" className={`${getStatusColor(order.status)} flex items-center gap-1 px-3 py-1 text-sm`}>
+        <Badge 
+          variant="outline" 
+          className={`${getStatusColor(order.status)} flex items-center gap-1 px-3 py-1 text-sm`}
+        >
           {getStatusIcon(order.status)}
           {order.status}
         </Badge>
@@ -167,21 +195,21 @@ const OrderDetail = () => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Items</CardTitle>
+              <CardTitle>Items Ordered</CardTitle>
             </CardHeader>
             <CardContent>
               {order.items.map((item, idx) => (
                 <div key={idx}>
                   <div className="flex items-center gap-4 py-4">
-                    <div className="h-20 w-20">
+                    <div className="h-20 w-20 flex-shrink-0">
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.title}
-                        className="h-full w-full object-cover rounded"
+                        className="h-full w-full object-cover rounded border"
                       />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{item.title}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{item.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {item.item_type === 'auction' ? 'Auction Item' : 'Declutter Item'}
                       </p>
@@ -190,10 +218,10 @@ const OrderDetail = () => {
                         className="p-0 h-auto text-sm"
                         onClick={() => navigate(`/${item.item_type === 'auction' ? 'item' : 'declutter'}/${item.item_id}`)}
                       >
-                        View Item
+                        View Item →
                       </Button>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <p className="font-medium">${item.price.toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       <p className="font-medium mt-1">${(item.price * item.quantity).toFixed(2)}</p>
@@ -203,7 +231,8 @@ const OrderDetail = () => {
                 </div>
               ))}
               
-              <div className="flex justify-between items-center mt-6 pt-4 border-t">
+              <Separator className="my-4" />
+              <div className="flex justify-between items-center">
                 <span className="font-medium">Order Total</span>
                 <span className="font-bold text-lg">${order.total_amount.toFixed(2)}</span>
               </div>
@@ -211,7 +240,7 @@ const OrderDetail = () => {
           </Card>
         </div>
         
-        <div>
+        <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Order Information</CardTitle>
@@ -227,19 +256,38 @@ const OrderDetail = () => {
                 <p>{format(new Date(order.updated_at), "PPP 'at' p")}</p>
               </div>
               
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Order Status</h3>
+                <Badge variant="outline" className={`${getStatusColor(order.status)} mt-1 flex items-center gap-1 w-fit`}>
+                  {getStatusIcon(order.status)}
+                  {order.status}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {order.payment_reference && (
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Payment Reference</h3>
-                  <p className="font-mono">{order.payment_reference}</p>
+                  <p className="font-mono text-sm bg-muted p-2 rounded">{order.payment_reference}</p>
                 </div>
               )}
               
               <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
-                <Badge variant="outline" className={`${getStatusColor(order.status)} mt-1 flex items-center gap-1`}>
-                  {getStatusIcon(order.status)}
-                  {order.status}
+                <h3 className="font-medium text-sm text-muted-foreground">Payment Status</h3>
+                <Badge variant={order.payment_reference ? "default" : "secondary"} className="mt-1">
+                  {order.payment_reference ? "Paid" : "Pending"}
                 </Badge>
+              </div>
+
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Total Amount</h3>
+                <p className="font-bold text-lg">${order.total_amount.toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>
