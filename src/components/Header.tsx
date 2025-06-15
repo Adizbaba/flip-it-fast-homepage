@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gavel } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
@@ -78,9 +77,12 @@ const Header = () => {
     <header className="bg-white border-b py-4 sticky top-0 z-40 shadow-sm">
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-          <Gavel className="h-6 w-6 text-auction-purple" />
-          <span className="font-bold text-lg text-auction-purple">FastFlip</span>
+        <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
+          <img 
+            src="/lovable-uploads/440a9b3f-f502-457a-9c31-af487096144e.png" 
+            alt="FastFlip"
+            className="h-8 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}
