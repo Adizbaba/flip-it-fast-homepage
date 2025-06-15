@@ -23,6 +23,30 @@ export const listingFormSchema = z.object({
   shippingOptions: z.string(),
   returnPolicy: z.string(),
   auctionType: z.string().min(1, "Please select an auction type.")
-});
+}).refine(
+  (data) => {
+    // Convert dates to make sure we're comparing properly
+    const startDate = new Date(data.startDate);
+    const endDate = new Date(data.endDate);
+    
+    // Return true if end date is after start date
+    return endDate > startDate;
+  },
+  {
+    message: "End date must be after start date",
+    path: ["endDate"]
+  }
+).refine(
+  (data) => {
+    if (data.buyNowPrice) {
+      return data.buyNowPrice > data.startingBid;
+    }
+    return true;
+  },
+  {
+    message: "Buy now price must be greater than starting bid",
+    path: ["buyNowPrice"]
+  }
+);
 
 export type ListingFormData = z.infer<typeof listingFormSchema>;

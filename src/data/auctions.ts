@@ -63,6 +63,14 @@ export const featuredAuctions = [
     currentBid: 420,
     timeRemaining: "6h 17m",
     bids: 19
+  },
+  {
+    id: 13,
+    title: "2022 BMW X5 M Competition - Low Miles, Fully Loaded",
+    image: "https://picsum.photos/id/111/600/400",
+    currentBid: 68500,
+    timeRemaining: "2d 14h",
+    bids: 7
   }
 ];
 
@@ -98,5 +106,13 @@ export const endingSoonAuctions = [
     currentBid: 780,
     timeRemaining: "3h 25m",
     bids: 31
+  },
+  {
+    id: 14,
+    title: "2023 Ducati Panigale V4 R - Track Ready",
+    image: "https://picsum.photos/id/164/600/400",
+    currentBid: 28900,
+    timeRemaining: "59m",
+    bids: 12
   }
 ];

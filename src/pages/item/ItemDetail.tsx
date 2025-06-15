@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useItemDetail } from "@/hooks/useItemDetail";
@@ -7,7 +6,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import AddToCartButton from "@/components/AddToCartButton";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Carousel,
@@ -166,16 +166,29 @@ const ItemDetail = () => {
                 </Button>
                 
                 {hasBuyNowOption && (
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    variant="outline"
-                    onClick={handleBuyNow}
-                    disabled={isEnded || user?.id === item.seller_id}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Buy Now ${item.buy_now_price}
-                  </Button>
+                  <div className="flex space-x-2 w-full">
+                    <Button 
+                      className="flex-1" 
+                      size="lg"
+                      variant="outline"
+                      onClick={handleBuyNow}
+                      disabled={isEnded || user?.id === item.seller_id}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Buy Now ${item.buy_now_price}
+                    </Button>
+                    
+                    <AddToCartButton 
+                      itemId={item.id}
+                      itemType="auction"
+                      title={item.title}
+                      price={item.buy_now_price || item.starting_bid}
+                      image={(item.images as string[])?.[0]}
+                      className="flex-1"
+                      size="lg"
+                      disabled={isEnded || user?.id === item.seller_id}
+                    />
+                  </div>
                 )}
               </div>
             </div>

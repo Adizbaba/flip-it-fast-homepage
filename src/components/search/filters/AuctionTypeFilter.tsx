@@ -34,7 +34,7 @@ const AuctionTypeFilter = ({
           <SelectValue placeholder="All Types" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
+          <SelectItem value="all">All Types</SelectItem> {/* Make sure this isn't an empty string */}
           {auctionTypes.map((type) => (
             <SelectItem key={type.value} value={type.value}>
               {type.label}

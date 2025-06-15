@@ -6,6 +6,7 @@ import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 // Activity type definition for the activity log
 interface ActivityItem {
@@ -62,14 +63,28 @@ const Dashboard = () => {
 
           if (transactionsError) throw transactionsError;
 
-          activities = (transactions || []).map(tx => ({
-            id: tx.id,
-            type: 'transaction',
-            description: `Payment ${tx.status}: ${tx.metadata?.item_title || 'Item'}`,
-            timestamp: tx.created_at,
-            amount: Number(tx.amount),
-            status: tx.status
-          }));
+          activities = (transactions || []).map(tx => {
+            // Safely extract item_title from metadata
+            let itemTitle = "Item";
+            if (tx.metadata) {
+              // Check if metadata is an object and has item_title property
+              if (typeof tx.metadata === 'object' && tx.metadata !== null) {
+                const metadata = tx.metadata as Record<string, unknown>;
+                if ('item_title' in metadata && typeof metadata.item_title === 'string') {
+                  itemTitle = metadata.item_title;
+                }
+              }
+            }
+
+            return {
+              id: tx.id,
+              type: 'transaction',
+              description: `Payment ${tx.status}: ${itemTitle}`,
+              timestamp: tx.created_at,
+              amount: Number(tx.amount),
+              status: tx.status
+            };
+          });
         }
 
         setRecentActivity(activities);

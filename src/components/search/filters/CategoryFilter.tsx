@@ -53,7 +53,7 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }: CategoryFilterPr
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem>
+          <SelectItem value="all">All Categories</SelectItem> {/* Make sure this isn't an empty string */}
           {categories.map((category) => (
             <SelectItem key={category.id} value={category.id}>
               {category.name}

@@ -1,216 +1,119 @@
 
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, Bell, ShoppingCart, Heart, Laptop, Camera, Car, Home, ShoppingBag, Watch, Palette, Gift, LayoutDashboard } from "lucide-react";
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/lib/auth';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Gavel } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import DesktopNavigation from "@/components/navigation/DesktopNavigation";
+import MobileNavigation from "@/components/navigation/MobileNavigation";
+import UserMenuSection from "@/components/navigation/UserMenuSection";
+import { useAuth } from "@/lib/auth";
+import { CreateListingModal } from "@/components/CreateListingModal";
 
-const categories = [
-  { id: 1, name: 'Electronics', icon: Laptop, href: '/search?category=electronics' },
-  { id: 2, name: 'Cameras', icon: Camera, href: '/search?category=cameras' },
-  { id: 3, name: 'Vehicles', icon: Car, href: '/search?category=vehicles' },
-  { id: 4, name: 'Real Estate', icon: Home, href: '/search?category=real-estate' },
-  { id: 5, name: 'Fashion', icon: ShoppingBag, href: '/search?category=fashion' },
-  { id: 6, name: 'Watches', icon: Watch, href: '/search?category=watches' },
-  { id: 7, name: 'Art', icon: Palette, href: '/search?category=art' },
-  { id: 8, name: 'Collectibles', icon: Gift, href: '/search?category=collectibles' },
+// Mock categories data - in a real app, this would come from an API
+export const auctionCategories = [
+  { id: 1, name: "Electronics", slug: "electronics" },
+  { id: 2, name: "Clothing", slug: "clothing" },
+  { id: 3, name: "Home & Garden", slug: "home-garden" },
+  { id: 4, name: "Collectibles", slug: "collectibles" },
+  { id: 5, name: "Jewelry", slug: "jewelry" },
+  { id: 6, name: "Motors", slug: "motors" },
+];
+
+export const navItems = [
+  { name: "Auctions", href: "#", isDropdown: true },
+  { name: "Declutter", href: "/declutter" },
+  { name: "How it Works", href: "/how-it-works" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
 ];
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [createListingModalOpen, setCreateListingModalOpen] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  useEffect(() => {
+    setMounted(true);
+    
+    // Close mobile menu when resizing to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileMenuOpen]);
 
-  const handleAuthClick = () => {
-    if (user) {
-      signOut();
-    } else {
-      navigate('/auth');
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const handleCreateListingClick = () => {
+    setCreateListingModalOpen(true);
+  };
+
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobile) {
+      if (mobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
     }
-  };
-  
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/search');
-    }
-    setIsMenuOpen(false); // Close mobile menu when searching
-  };
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [mobileMenuOpen, isMobile]);
 
-  const handleSearchClick = () => {
-    // Always navigate to search page when clicking the search bar
-    navigate('/search');
-    setIsMenuOpen(false); // Close mobile menu when clicking search bar
-  };
+  return mounted ? (
+    <header className="bg-white border-b py-4 sticky top-0 z-40 shadow-sm">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
+          <Gavel className="h-6 w-6 text-auction-purple" />
+          <span className="font-bold text-lg text-auction-purple">FastFlip</span>
+        </Link>
 
-  return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-auction-purple to-auction-magenta bg-clip-text text-transparent">
-                Fast<span className="text-auction-orange">Flip</span>
-              </span>
-            </Link>
-          </div>
+        {/* Desktop Navigation */}
+        <DesktopNavigation onCreateListingClick={handleCreateListingClick} />
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/auctions" className="text-sm font-medium hover:text-auction-purple transition-colors">
-              All Auctions
-            </Link>
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-sm font-medium hover:text-auction-purple transition-colors">
-                    Categories
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid grid-cols-2 gap-2 p-4 w-[400px]">
-                      {categories.map((category) => (
-                        <Link
-                          key={category.id}
-                          to={category.href}
-                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-                        >
-                          <category.icon className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium">{category.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-            <Link to="/how-it-works" className="text-sm font-medium hover:text-auction-purple transition-colors">
-              How It Works
-            </Link>
-            {user && (
-              <Link to="/create-listing" className="text-sm font-medium hover:text-auction-purple transition-colors">
-                Create Listing
-              </Link>
-            )}
-          </nav>
-
-          {/* Search, notification and profile (Desktop) */}
-          <div className="hidden md:flex items-center space-x-4">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search auctions..."
-                className="w-[200px] pl-8 rounded-full bg-muted/50 border-0 focus-visible:ring-auction-purple"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onClick={handleSearchClick}
-              />
-            </form>
-            <Button variant="ghost" size="icon" aria-label="Notifications">
-              <Bell className="h-5 w-5" />
-            </Button>
-            {user && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                aria-label="Saved Items"
-                onClick={() => navigate('/watch-list')}
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
-            </Button>
-            {user ? (
-              <>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  aria-label="Dashboard"
-                  onClick={() => navigate('/dashboard')}
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" onClick={handleAuthClick} className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={handleAuthClick} className="gap-2">
-                <User className="h-4 w-4" />
-                <span>Sign In</span>
-              </Button>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-md"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
+        {/* Right Side Actions */}
+        <UserMenuSection 
+          user={user} 
+          isMobile={isMobile} 
+          toggleMobileMenu={toggleMobileMenu} 
+          mobileMenuOpen={mobileMenuOpen} 
+        />
       </div>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t py-4">
-          <div className="container mx-auto px-4 flex flex-col space-y-4">
-            <form onSubmit={handleSearchSubmit} className="relative mb-2">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search auctions..."
-                className="w-full pl-8 rounded-full bg-muted/50 border-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onClick={handleSearchClick}
-              />
-            </form>
-            <Link to="/auctions" className="block py-2 text-sm font-medium">All Auctions</Link>
-            <Link to="#" className="block py-2 text-sm font-medium">Categories</Link>
-            <Link to="/how-it-works" className="block py-2 text-sm font-medium">How It Works</Link>
-            {user && (
-              <>
-                <Link to="/create-listing" className="block py-2 text-sm font-medium">Create Listing</Link>
-                <Link to="/watch-list" className="block py-2 text-sm font-medium">Saved Items</Link>
-                <Link to="/dashboard" className="block py-2 text-sm font-medium">Dashboard</Link>
-              </>
-            )}
-            <div className="flex space-x-3 pt-2 border-t">
-              <Button 
-                variant="outline" 
-                className="flex-1 gap-2"
-                onClick={handleAuthClick}
-              >
-                <User className="h-4 w-4" />
-                <span>{user ? 'Sign Out' : 'Sign In'}</span>
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Mobile Navigation */}
+      {isMobile && mobileMenuOpen && (
+        <MobileNavigation 
+          user={user} 
+          closeMobileMenu={closeMobileMenu} 
+          onCreateListing={() => {
+            setCreateListingModalOpen(true);
+            closeMobileMenu();
+          }}
+        />
       )}
+
+      {/* Create Listing Modal */}
+      <CreateListingModal 
+        open={createListingModalOpen} 
+        onOpenChange={setCreateListingModalOpen} 
+      />
     </header>
-  );
+  ) : null;
 };
 
 export default Header;
