@@ -13,17 +13,14 @@ const AllAuctions = () => {
     page,
     filters,
     setPage,
-    handleFilterChange,
-    refreshResults,
-    error // Add error from the hook
+    handleFilterChange
   } = useSearchParamsState({ 
     initialQuery: "",
-    itemsPerPage: 12 // Increased from 10 to 12 for better grid layout
+    itemsPerPage: 10
   });
 
   // Show toast notification when new items are added
   useEffect(() => {
-    // Set up real-time subscription for new auction items
     const channel = supabase
       .channel('public:auction_items')
       .on(
@@ -34,45 +31,20 @@ const AllAuctions = () => {
           table: 'auction_items'
         },
         (payload) => {
-          console.log("Real-time update received:", payload);
           if (payload.new && payload.new.status === 'Active') {
             toast.info('New auction listing added!', {
               description: payload.new.title || 'Check it out!',
               duration: 5000,
             });
-            // Refresh results to show the new item
-            refreshResults();
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'auction_items',
-          filter: 'status=eq.Active'
-        },
-        (payload) => {
-          console.log("Listing updated:", payload);
-          if (payload.new && payload.old.status !== 'Active' && payload.new.status === 'Active') {
-            toast.info('New auction listing published!', {
-              description: payload.new.title || 'Check it out!',
-              duration: 5000,
-            });
-            // Refresh results when a draft is published
-            refreshResults();
           }
         }
       )
       .subscribe();
 
-    console.log("Real-time subscription set up for auction_items");
-    
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refreshResults]);
+  }, []);
 
   return (
     <SearchLayout
@@ -82,11 +54,10 @@ const AllAuctions = () => {
       loading={loading}
       totalCount={totalCount}
       page={page}
-      itemsPerPage={12}
+      itemsPerPage={10}
       filters={filters}
       onFilterChange={handleFilterChange}
       onPageChange={setPage}
-      error={error}
     />
   );
 };

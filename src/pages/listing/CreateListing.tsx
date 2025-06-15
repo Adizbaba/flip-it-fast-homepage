@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Form } from "@/components/ui/form";
+import { AlertCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { listingFormSchema, type ListingFormData } from "@/components/listing/schemas";
 import { BasicDetails } from "@/components/listing/BasicDetails";
@@ -22,10 +22,8 @@ const CreateListing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [images, setImages] = useState<File[]>([]);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [listingItem, setListingItem] = useState<any>(null);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const form = useForm<ListingFormData>({
     resolver: zodResolver(listingFormSchema),
@@ -43,9 +41,7 @@ const CreateListing = () => {
         international: "Not available" 
       }),
       returnPolicy: "No returns accepted",
-      auctionType: "standard",
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default to 7 days from now
+      auctionType: "standard" // This matches the database constraint now
     },
   });
 
@@ -71,97 +67,34 @@ const CreateListing = () => {
       return;
     }
 
-    setSubmissionError(null);
-    setUploading(true);
-
     try {
-      // Validate dates
-      const now = new Date();
-      const startDate = new Date(data.startDate);
-      const endDate = new Date(data.endDate);
-      
-      if (endDate <= startDate) {
-        toast({
-          title: "Error",
-          description: "End date must be after start date",
-          variant: "destructive",
-        });
-        setUploading(false);
-        return;
-      }
-
-      if (endDate <= now) {
-        toast({
-          title: "Error",
-          description: "End date must be in the future",
-          variant: "destructive",
-        });
-        setUploading(false);
-        return;
-      }
-
       // Upload images first
       let imageUrls: string[] = [];
       if (images.length > 0) {
-        try {
-          const uploadedImages = await Promise.all(
-            images.map(async (file) => {
-              const fileExt = file.name.split('.').pop();
-              const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-              
-              console.log(`Uploading file ${fileName} to auction_images/public/`);
-              
-              const { error: uploadError, data: uploadData } = await supabase.storage
-                .from('auction_images')
-                .upload(`public/${fileName}`, file);
+        const uploadedImages = await Promise.all(
+          images.map(async (file) => {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            
+            const { error: uploadError, data: uploadData } = await supabase.storage
+              .from('auction_images')
+              .upload(`public/${fileName}`, file);
 
-              if (uploadError) {
-                console.error("Error uploading file:", uploadError);
-                throw uploadError;
-              }
+            if (uploadError) throw uploadError;
+            
+            const { data: { publicUrl } } = supabase.storage
+              .from('auction_images')
+              .getPublicUrl(`public/${fileName}`);
               
-              // Get and use the full public URL to ensure proper access
-              const { data: { publicUrl } } = supabase.storage
-                .from('auction_images')
-                .getPublicUrl(`public/${fileName}`);
-                
-              console.log("Uploaded file URL:", publicUrl);
-              return publicUrl;
-            })
-          );
-          
-          imageUrls = uploadedImages;
-          console.log("All images uploaded successfully:", imageUrls);
-        } catch (uploadError) {
-          console.error("Error during image upload:", uploadError);
-          throw new Error(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
-        }
+            return publicUrl;
+          })
+        );
+        
+        imageUrls = uploadedImages;
       }
 
-      // Format dates for Postgres
-      const formattedStartDate = startDate.toISOString();
-      const formattedEndDate = endDate.toISOString();
-
-      // Log the formatted data for debugging
-      console.log("Submitting data to Supabase:", {
-        seller_id: user.id,
-        title: data.title,
-        description: data.description,
-        condition: data.condition,
-        category_id: data.categoryId,
-        starting_bid: data.startingBid,
-        bid_increment: data.bidIncrement,
-        reserve_price: data.reservePrice || null,
-        buy_now_price: data.buyNowPrice || null,
-        quantity: data.quantity,
-        shipping_options: JSON.parse(data.shippingOptions || '{}'),
-        return_policy: data.returnPolicy,
-        auction_type: data.auctionType,
-        start_date: formattedStartDate,
-        end_date: formattedEndDate,
-        status: 'Draft',
-        images: imageUrls.length > 0 ? imageUrls : null
-      });
+      // Calculate listing fee (5% of starting bid, minimum $5)
+      const listingFee = Math.max(5, data.startingBid * 0.05);
 
       // Properly format the data to match the database schema
       const { data: item, error } = await supabase
@@ -180,83 +113,46 @@ const CreateListing = () => {
           shipping_options: JSON.parse(data.shippingOptions || '{}'),
           return_policy: data.returnPolicy,
           auction_type: data.auctionType,
-          start_date: formattedStartDate,
-          end_date: formattedEndDate,
-          status: 'Draft', // Starts as draft until published
+          start_date: data.startDate.toISOString(),
+          end_date: data.endDate.toISOString(),
+          status: 'Draft', // Starts as draft until payment is complete
           images: imageUrls.length > 0 ? imageUrls : null
         })
         .select()
         .single();
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("Item created successfully:", item);
-
-      // Store the listing item for the confirmation dialog
+      // Store the listing item for the payment process
       setListingItem({
         id: item.id,
-        title: item.title
+        title: item.title,
+        startingBid: item.starting_bid,
+        fee: listingFee
       });
       
-      setShowConfirmDialog(true);
+      setShowPaymentDialog(true);
     } catch (error: any) {
-      setSubmissionError(error.message);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setUploading(false);
     }
   };
 
-  const handlePublishListing = async () => {
-    setShowConfirmDialog(false);
-    
+  const handleProceedToPayment = () => {
+    setShowPaymentDialog(false);
     if (listingItem) {
-      try {
-        console.log("Publishing listing:", listingItem.id);
-        
-        // Update the listing status to Active
-        const { error } = await supabase
-          .from('auction_items')
-          .update({ status: 'Active' })
-          .eq('id', listingItem.id);
-          
-        if (error) {
-          console.error("Error publishing listing:", error);
-          throw error;
-        }
-        
-        console.log("Listing published successfully");
-        
-        toast({
-          title: "Success",
-          description: "Your listing has been published successfully",
-        });
-        
-        navigate("/auctions");
-      } catch (error: any) {
-        console.error("Error in handlePublishListing:", error);
-        
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      navigate(`/checkout?id=${listingItem.id}&type=listing`);
     }
   };
 
-  const handleSaveAsDraft = async () => {
-    setShowConfirmDialog(false);
+  const handleSkipPayment = async () => {
+    setShowPaymentDialog(false);
     toast({
       title: "Listing Created",
-      description: "Your listing has been saved as a draft. You can publish it later.",
+      description: "Your listing has been saved as a draft. To publish it, you'll need to pay the listing fee.",
     });
     navigate("/watch-list");
   };
@@ -274,20 +170,13 @@ const CreateListing = () => {
           <div className="bg-white rounded-xl shadow-md p-8 md:p-12 space-y-6">
             <h1 className="text-3xl font-bold text-center mb-6">Create New Listing</h1>
             
-            {submissionError && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-                <p className="text-red-800 font-medium">Error: {submissionError}</p>
-                <p className="text-sm text-red-600 mt-1">Please check your form values and try again.</p>
-              </div>
-            )}
-            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <BasicDetails control={form.control} />
                 
                 <div className="p-4 border rounded-md bg-muted/30">
                   <h3 className="font-medium mb-4">Upload Images</h3>
-                  <ListingImageUpload images={images} setImages={setImages} />
+                  <ListingImageUpload />
                 </div>
 
                 <PricingDetails control={form.control} />
@@ -298,26 +187,27 @@ const CreateListing = () => {
                   categoriesLoading={categoriesLoading}
                 />
 
-                <Button type="submit" className="w-full" disabled={uploading}>
-                  {uploading ? (
-                    <>
-                      <span className="animate-spin mr-2">⭘</span> 
-                      Uploading Images...
-                    </>
-                  ) : (
-                    "Create Listing"
-                  )}
-                </Button>
+                <div className="bg-blue-50 p-4 rounded-md flex items-start space-x-3">
+                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-blue-700">
+                      A listing fee of 5% of your starting bid (minimum $5) will be charged to publish this listing.
+                      You can still save as draft and pay later.
+                    </p>
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">Create Listing</Button>
               </form>
             </Form>
           </div>
           
           <PaymentInfoDialog
-            open={showConfirmDialog}
-            onOpenChange={setShowConfirmDialog}
+            open={showPaymentDialog}
+            onOpenChange={setShowPaymentDialog}
             listingItem={listingItem}
-            onSkip={handleSaveAsDraft}
-            onProceed={handlePublishListing}
+            onSkip={handleSkipPayment}
+            onProceed={handleProceedToPayment}
           />
         </div>
       </main>

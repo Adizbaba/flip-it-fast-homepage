@@ -1,7 +1,7 @@
+
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import FastFlipLogo from "@/components/FastFlipLogo";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -20,9 +20,11 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <div className="mb-4">
-              <FastFlipLogo size={40} textSize="text-2xl" withText />
-            </div>
+            <h3 className="text-xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-auction-purple to-auction-magenta bg-clip-text text-transparent">
+                Fast<span className="text-auction-orange">Flip</span>
+              </span>
+            </h3>
             <p className="text-gray-400 mb-4">
               The fastest way to buy and sell in online auctions. Find great deals or sell your items today!
             </p>
@@ -73,9 +75,9 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">About FastFlip</h3>
             <ul className="space-y-2">
               <li><a href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="/terms-of-service" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="/careers" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
             </ul>
           </div>
         </div>

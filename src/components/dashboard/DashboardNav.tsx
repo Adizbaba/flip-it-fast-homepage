@@ -1,182 +1,157 @@
 
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Gavel,
-  ShoppingBag,
-  Heart,
-  CreditCard,
-  ListFilter,
-  Store,
-  DollarSign,
-  Bell,
-  UserRound,
-  Settings,
-  PackageOpen,
-  Receipt,
+import { useLocation, useNavigate } from "react-router-dom";
+import { 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarGroupLabel, 
+  SidebarMenu, 
+  SidebarMenuButton, 
+  SidebarMenuItem 
+} from "@/components/ui/sidebar";
+import { 
+  ShoppingBag, 
+  Store, 
+  ListFilter, 
+  Plus, 
+  DollarSign, 
+  Gavel, 
+  Heart, 
+  CreditCard, 
+  Activity, 
+  Bell, 
+  UserRound, 
+  Settings 
 } from "lucide-react";
 import { useDashboard } from "@/contexts/DashboardContext";
 
-export function DashboardNav() {
-  const { pathname } = useLocation();
+const DashboardNav = () => {
   const { activeRole } = useDashboard();
-  const [activeGroups, setActiveGroups] = useState<string[]>([]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Buyer Links
-  const buyerLinks = [
-    {
-      title: "My Bids",
-      href: "/dashboard/bids",
-      icon: Gavel,
-    },
-    {
-      title: "Won Auctions",
-      href: "/dashboard/won-auctions",
-      icon: ShoppingBag,
-    },
-    {
-      title: "My Orders",
-      href: "/dashboard/orders",
-      icon: Receipt,
-    },
-    {
-      title: "Favorites",
-      href: "/dashboard/favorites",
-      icon: Heart,
-    },
-    {
-      title: "Payment History",
-      href: "/dashboard/payment-history",
-      icon: CreditCard,
-    },
-  ];
-
-  // Seller Links
-  const sellerLinks = [
-    {
-      title: "My Listings",
-      href: "/dashboard/listings",
-      icon: ListFilter,
-    },
-    {
-      title: "Declutter Listings",
-      href: "/dashboard/declutter-listings",
-      icon: PackageOpen,
-    },
-    {
-      title: "Sold Items",
-      href: "/dashboard/sold-items",
-      icon: Store,
-    },
-    {
-      title: "Earnings",
-      href: "/dashboard/earnings",
-      icon: DollarSign,
-    },
-  ];
-
-  // Common Links
-  const commonLinks = [
-    {
-      title: "Notifications",
-      href: "/dashboard/notifications",
-      icon: Bell,
-    },
-    {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: UserRound,
-    },
-    {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings,
-    },
-  ];
-
-  const navGroups = [
-    {
-      id: "buyer",
-      title: "Buyer",
-      links: buyerLinks,
-      visible: activeRole === "buyer" || activeRole === "both",
-    },
-    {
-      id: "seller",
-      title: "Seller",
-      links: sellerLinks,
-      visible: activeRole === "seller" || activeRole === "both",
-    },
-    {
-      id: "account",
-      title: "Account",
-      links: commonLinks,
-      visible: true,
-    },
-  ];
-
-  // Auto-expand the group containing the active link
-  useEffect(() => {
-    navGroups.forEach(group => {
-      const isActive = group.links.some(link => pathname === link.href || pathname.startsWith(link.href + '/'));
-      if (isActive && !activeGroups.includes(group.id)) {
-        setActiveGroups(prev => [...prev, group.id]);
-      }
-    });
-  }, [pathname]);
-
-  // Toggle group expansion
-  const toggleGroup = (groupId: string) => {
-    if (activeGroups.includes(groupId)) {
-      setActiveGroups(activeGroups.filter(id => id !== groupId));
-    } else {
-      setActiveGroups([...activeGroups, groupId]);
-    }
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
+  const buyerMenuItems = [
+    {
+      label: "Dashboard",
+      icon: <Activity className="h-4 w-4" />,
+      path: "/dashboard",
+    },
+    {
+      label: "My Bids",
+      icon: <Gavel className="h-4 w-4" />,
+      path: "/dashboard/bids",
+    },
+    {
+      label: "Won Auctions",
+      icon: <ShoppingBag className="h-4 w-4" />,
+      path: "/dashboard/won-auctions",
+    },
+    {
+      label: "Favorites",
+      icon: <Heart className="h-4 w-4" />,
+      path: "/dashboard/favorites",
+    },
+    {
+      label: "Payment History",
+      icon: <CreditCard className="h-4 w-4" />,
+      path: "/dashboard/payment-history",
+    },
+  ];
+
+  const sellerMenuItems = [
+    {
+      label: "Dashboard",
+      icon: <Activity className="h-4 w-4" />,
+      path: "/dashboard",
+    },
+    {
+      label: "My Listings",
+      icon: <ListFilter className="h-4 w-4" />,
+      path: "/dashboard/listings",
+    },
+    {
+      label: "Create Listing",
+      icon: <Plus className="h-4 w-4" />,
+      path: "/dashboard/create-listing",
+    },
+    {
+      label: "Sold Items",
+      icon: <Store className="h-4 w-4" />,
+      path: "/dashboard/sold-items",
+    },
+    {
+      label: "Earnings",
+      icon: <DollarSign className="h-4 w-4" />,
+      path: "/dashboard/earnings",
+    },
+  ];
+
+  const sharedMenuItems = [
+    {
+      label: "Notifications",
+      icon: <Bell className="h-4 w-4" />,
+      path: "/dashboard/notifications",
+    },
+    {
+      label: "Profile",
+      icon: <UserRound className="h-4 w-4" />,
+      path: "/dashboard/profile",
+    },
+    {
+      label: "Settings",
+      icon: <Settings className="h-4 w-4" />,
+      path: "/dashboard/settings",
+    },
+  ];
+
+  const menuItems = activeRole === "buyer" ? buyerMenuItems : sellerMenuItems;
+
   return (
-    <nav className="grid gap-2 px-2">
-      {navGroups.map(group => (
-        group.visible && (
-          <div key={group.id} className="mb-2">
-            <h3
-              className="cursor-pointer flex items-center justify-between py-2 px-3 mb-1 text-sm font-medium text-muted-foreground"
-              onClick={() => toggleGroup(group.id)}
-            >
-              {group.title}
-              <span className={`transition-transform ${activeGroups.includes(group.id) ? 'rotate-90' : ''}`}>
-                ❯
-              </span>
-            </h3>
-            {activeGroups.includes(group.id) && (
-              <div className="grid gap-1">
-                {group.links.map(link => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                  >
-                    <Button
-                      variant={pathname === link.href || pathname.startsWith(link.href + '/') ? "secondary" : "ghost"}
-                      className={cn(
-                        "w-full justify-start gap-2",
-                        (pathname === link.href || pathname.startsWith(link.href + '/')) &&
-                          "bg-muted font-medium"
-                      )}
-                    >
-                      <link.icon className="h-4 w-4" />
-                      {link.title}
-                    </Button>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      ))}
-    </nav>
+    <>
+      <SidebarGroup>
+        <SidebarGroupLabel>
+          {activeRole === "buyer" ? "Buyer Dashboard" : "Seller Dashboard"}
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {menuItems.map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  isActive={isActive(item.path)}
+                  onClick={() => navigate(item.path)}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel>Account</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {sharedMenuItems.map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  isActive={isActive(item.path)}
+                  onClick={() => navigate(item.path)}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </>
   );
-}
+};
 
 export default DashboardNav;

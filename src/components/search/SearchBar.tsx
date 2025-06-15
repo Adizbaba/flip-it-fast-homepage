@@ -14,15 +14,13 @@ interface SearchBarProps {
   recentSearches: string[];
   popularSearches: string[];
   onSearch: (query: string) => void;
-  placeholder?: string; // Add placeholder prop
 }
 
 const SearchBar = ({ 
   initialQuery, 
   recentSearches, 
-  popularSearches,
-  onSearch,
-  placeholder = "Search..."  // Default value
+  popularSearches, 
+  onSearch 
 }: SearchBarProps) => {
   const [query, setQuery] = useState(initialQuery);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -64,7 +62,7 @@ const SearchBar = ({
               <Input
                 ref={inputRef}
                 type="search"
-                placeholder={placeholder}
+                placeholder="Search for items, categories, or sellers..."
                 className="pl-10 pr-20 h-12 text-base"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}

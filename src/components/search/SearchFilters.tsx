@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
   Card,
   CardContent,
@@ -19,7 +19,6 @@ interface SearchFiltersProps {
   minPrice: string;
   maxPrice: string;
   sortBy: string;
-  condition?: string;
   auctionType?: string;
   onFilterChange: (filters: FilterState) => void;
 }
@@ -29,30 +28,17 @@ const SearchFilters = ({
   minPrice,
   maxPrice,
   sortBy,
-  condition = "all",
   auctionType = "all",
   onFilterChange,
 }: SearchFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
-    category: selectedCategory || "all",
-    minPrice: minPrice || "",
-    maxPrice: maxPrice || "",
+    category: selectedCategory,
+    minPrice: minPrice,
+    maxPrice: maxPrice,
     sortBy: sortBy || "newest",
-    condition: condition || "all",
+    condition: "",
     auctionType: auctionType || "all",
   });
-
-  // Update local state when props change
-  useEffect(() => {
-    setFilters({
-      category: selectedCategory || "all",
-      minPrice: minPrice || "",
-      maxPrice: maxPrice || "",
-      sortBy: sortBy || "newest",
-      condition: condition || "all",
-      auctionType: auctionType || "all",
-    });
-  }, [selectedCategory, minPrice, maxPrice, sortBy, condition, auctionType]);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -67,11 +53,11 @@ const SearchFilters = ({
   // Reset filters
   const resetFilters = () => {
     const resetState = {
-      category: "all",
+      category: "",
       minPrice: "",
       maxPrice: "",
       sortBy: "newest",
-      condition: "all",
+      condition: "",
       auctionType: "all",
     };
     setFilters(resetState);
@@ -98,7 +84,7 @@ const SearchFilters = ({
 
         {/* Condition Filter */}
         <ConditionFilter 
-          selectedCondition={filters.condition || "all"} 
+          selectedCondition={filters.condition || ""} 
           onConditionChange={(value) => handleFilterChange("condition", value)} 
         />
 
@@ -128,3 +114,5 @@ const SearchFilters = ({
 
 export default SearchFilters;
 
+// Export the FilterState type from the new location
+export type { FilterState } from "./filters/types";

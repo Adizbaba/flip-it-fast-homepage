@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams as useRouterSearchParams } from "react-router-dom";
 import { useSearch, SearchFilters } from "@/hooks/useSearch";
 
@@ -27,13 +27,11 @@ export const useSearchParamsState = ({
   const {
     results,
     loading,
-    error, // Add error from useSearch
     totalCount,
     page,
     setPage,
     filters,
-    setFilters,
-    refreshResults
+    setFilters
   } = useSearch(initialFilters);
 
   // Update search params whenever filters change
@@ -91,14 +89,12 @@ export const useSearchParamsState = ({
   return {
     results,
     loading,
-    error, // Return error
     totalCount,
     page,
     filters,
     itemsPerPage,
     setPage,
     handleFilterChange,
-    handleSearch,
-    refreshResults
+    handleSearch
   };
 };

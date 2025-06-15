@@ -92,7 +92,6 @@ export type Database = {
           condition: string
           created_at: string
           description: string
-          edit_count: number | null
           end_date: string
           id: string
           images: Json | null
@@ -116,7 +115,6 @@ export type Database = {
           condition: string
           created_at?: string
           description: string
-          edit_count?: number | null
           end_date: string
           id?: string
           images?: Json | null
@@ -140,7 +138,6 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string
-          edit_count?: number | null
           end_date?: string
           id?: string
           images?: Json | null
@@ -166,33 +163,6 @@ export type Database = {
           },
         ]
       }
-      cart_items: {
-        Row: {
-          added_at: string
-          id: string
-          item_id: string
-          item_type: string
-          quantity: number
-          user_id: string
-        }
-        Insert: {
-          added_at?: string
-          id?: string
-          item_id: string
-          item_type: string
-          quantity?: number
-          user_id: string
-        }
-        Update: {
-          added_at?: string
-          id?: string
-          item_id?: string
-          item_type?: string
-          quantity?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       categories: {
         Row: {
           created_at: string
@@ -211,151 +181,6 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-        }
-        Relationships: []
-      }
-      declutter_listings: {
-        Row: {
-          bulk_price: number
-          category_id: string | null
-          condition: string
-          created_at: string
-          description: string
-          edit_count: number
-          id: string
-          images: Json | null
-          is_negotiable: boolean | null
-          location: string | null
-          min_purchase_quantity: number
-          original_price: number
-          quantity: number
-          seller_id: string
-          shipping_options: Json | null
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          bulk_price: number
-          category_id?: string | null
-          condition: string
-          created_at?: string
-          description: string
-          edit_count?: number
-          id?: string
-          images?: Json | null
-          is_negotiable?: boolean | null
-          location?: string | null
-          min_purchase_quantity?: number
-          original_price: number
-          quantity: number
-          seller_id: string
-          shipping_options?: Json | null
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          bulk_price?: number
-          category_id?: string | null
-          condition?: string
-          created_at?: string
-          description?: string
-          edit_count?: number
-          id?: string
-          images?: Json | null
-          is_negotiable?: boolean | null
-          location?: string | null
-          min_purchase_quantity?: number
-          original_price?: number
-          quantity?: number
-          seller_id?: string
-          shipping_options?: Json | null
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "declutter_listings_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      order_items: {
-        Row: {
-          created_at: string
-          id: string
-          item_data: Json | null
-          item_id: string
-          item_type: string
-          order_id: string
-          price: number
-          quantity: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_data?: Json | null
-          item_id: string
-          item_type: string
-          order_id: string
-          price: number
-          quantity?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_data?: Json | null
-          item_id?: string
-          item_type?: string
-          order_id?: string
-          price?: number
-          quantity?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orders: {
-        Row: {
-          created_at: string
-          id: string
-          payment_details: Json | null
-          payment_reference: string | null
-          status: string
-          total_amount: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          payment_details?: Json | null
-          payment_reference?: string | null
-          status?: string
-          total_amount: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          payment_details?: Json | null
-          payment_reference?: string | null
-          status?: string
-          total_amount?: number
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }

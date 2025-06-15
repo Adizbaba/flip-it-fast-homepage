@@ -1,8 +1,6 @@
 
 import PlaceholderPage from "@/components/dashboard/PlaceholderPage";
-import ProfileManagement from "./ProfileManagement";
-import SettingsPageComponent from "./SettingsPage";
-import { Bell } from "lucide-react";
+import { Bell, UserRound, Settings } from "lucide-react";
 
 export const NotificationsPage = () => {
   return (
@@ -15,9 +13,21 @@ export const NotificationsPage = () => {
 };
 
 export const ProfilePage = () => {
-  return <ProfileManagement />;
+  return (
+    <PlaceholderPage
+      title="Profile"
+      description="Manage your personal information"
+      icon={<UserRound className="h-6 w-6" />}
+    />
+  );
 };
 
 export const SettingsPage = () => {
-  return <SettingsPageComponent />;
+  return (
+    <PlaceholderPage
+      title="Settings"
+      description="Configure your account preferences"
+      icon={<Settings className="h-6 w-6" />}
+    />
+  );
 };

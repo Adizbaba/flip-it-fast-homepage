@@ -6,6 +6,3 @@ verify_jwt = true
 
 [functions.verify-payment]
 verify_jwt = true
-
-[functions.create-auction]
-verify_jwt = true

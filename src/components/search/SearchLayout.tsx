@@ -2,31 +2,31 @@
 import { ReactNode } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SearchFilters from "./SearchFilters";
-import SearchResults from "./SearchResults";
-import { FilterState } from "./filters/types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import SearchFilters from "@/components/search/SearchFilters";
+import SearchResults from "@/components/search/SearchResults";
+import { Separator } from "@/components/ui/separator";
+import { FilterState } from "@/components/search/filters/types";
+import { SearchResultItem } from "@/hooks/useSearch";
 
 interface SearchLayoutProps {
   title: string;
   description?: string;
-  results: any[];
+  searchArea?: ReactNode;
+  results: SearchResultItem[];
   loading: boolean;
   totalCount: number;
   page: number;
   itemsPerPage: number;
   filters: FilterState;
-  onFilterChange: (filters: Record<string, string>) => void;
+  onFilterChange: (newFilters: FilterState) => void;
   onPageChange: (page: number) => void;
   searchQuery?: string;
-  searchArea?: ReactNode;
-  customHeader?: ReactNode;
-  error?: Error | null;
 }
 
 const SearchLayout = ({
   title,
   description,
+  searchArea,
   results,
   loading,
   totalCount,
@@ -35,76 +35,50 @@ const SearchLayout = ({
   filters,
   onFilterChange,
   onPageChange,
-  searchQuery,
-  searchArea,
-  customHeader,
-  error
+  searchQuery
 }: SearchLayoutProps) => {
-  // Convert FilterState object to individual props and handle the onFilterChange conversion
-  const handleFilterChange = (newFilters: FilterState) => {
-    // Convert FilterState to Record<string, string> format expected by parent
-    const filterRecord: Record<string, string> = {
-      category: newFilters.category,
-      minPrice: newFilters.minPrice,
-      maxPrice: newFilters.maxPrice,
-      sortBy: newFilters.sortBy,
-      condition: newFilters.condition,
-      auctionType: newFilters.auctionType,
-    };
-    onFilterChange(filterRecord);
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="mb-8">
-          {customHeader ? (
-            <h1 className="text-4xl font-bold mb-4">{customHeader}</h1>
-          ) : (
-            <h1 className="text-4xl font-bold mb-4">{title}</h1>
-          )}
+      <main className="container mx-auto px-4 py-6 flex-1">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">{title}</h1>
           {description && (
-            <p className="text-muted-foreground text-lg">{description}</p>
+            <p className="text-muted-foreground">{description}</p>
           )}
         </div>
 
-        {/* Show error message if there's a database error */}
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertDescription>
-              Database connection error: {error.message}. Please try refreshing the page.
-            </AlertDescription>
-          </Alert>
-        )}
-
         {searchArea && (
-          <div className="mb-8">
+          <div className="mb-6">
             {searchArea}
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-1">
+            <h2 className="text-xl font-bold mb-4">Filters</h2>
             <SearchFilters
               selectedCategory={filters.category}
               minPrice={filters.minPrice}
               maxPrice={filters.maxPrice}
               sortBy={filters.sortBy}
-              condition={filters.condition}
-              auctionType={filters.auctionType}
-              onFilterChange={handleFilterChange}
+              onFilterChange={onFilterChange}
             />
-          </aside>
-
-          {/* Results */}
-          <div className="flex-1">
-            <SearchResults
-              results={results}
+          </div>
+          
+          <div className="lg:col-span-3">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                {loading ? "Loading..." : `${totalCount} ${searchQuery ? "results found" : "items available"}`}
+                {searchQuery && ` for "${searchQuery}"`}
+              </h2>
+            </div>
+            <Separator className="mb-6" />
+            <SearchResults 
+              results={results} 
               loading={loading}
-              totalCount={totalCount}
               page={page}
+              totalCount={totalCount}
               itemsPerPage={itemsPerPage}
               onPageChange={onPageChange}
             />

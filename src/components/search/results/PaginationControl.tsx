@@ -1,7 +1,12 @@
 
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Pagination } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 interface PaginationControlProps {
   currentPage: number;
@@ -19,39 +24,38 @@ const PaginationControl = ({
   // Generate pagination items
   const generatePaginationItems = () => {
     const items = [];
+    const maxVisiblePages = 5;
     
     // Always show first page
     items.push(
-      <Button 
-        key="1"
-        variant={currentPage === 1 ? "default" : "outline"}
-        size="sm"
-        onClick={() => onPageChange(1)}
-        className={currentPage === 1 ? "pointer-events-none" : ""}
-      >
-        1
-      </Button>
+      <PaginationItem key="1">
+        <PaginationLink 
+          isActive={currentPage === 1} 
+          onClick={() => onPageChange(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
     );
 
-    if (totalPages <= 5) {
+    if (totalPages <= maxVisiblePages) {
       // Show all pages if totalPages is small
       for (let i = 2; i <= totalPages; i++) {
         items.push(
-          <Button
-            key={i}
-            variant={currentPage === i ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPageChange(i)}
-            className={currentPage === i ? "pointer-events-none" : ""}
-          >
-            {i}
-          </Button>
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i} 
+              onClick={() => onPageChange(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
         );
       }
     } else {
       // Handle ellipsis logic for many pages
       if (currentPage > 3) {
-        items.push(<span key="ellipsis1" className="px-2 text-muted-foreground">...</span>);
+        items.push(<PaginationItem key="ellipsis1">...</PaginationItem>);
       }
 
       // Show current page and neighbors
@@ -60,34 +64,32 @@ const PaginationControl = ({
 
       for (let i = startPage; i <= endPage; i++) {
         items.push(
-          <Button
-            key={i}
-            variant={currentPage === i ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPageChange(i)}
-            className={currentPage === i ? "pointer-events-none" : ""}
-          >
-            {i}
-          </Button>
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i} 
+              onClick={() => onPageChange(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
         );
       }
 
       if (currentPage < totalPages - 2) {
-        items.push(<span key="ellipsis2" className="px-2 text-muted-foreground">...</span>);
+        items.push(<PaginationItem key="ellipsis2">...</PaginationItem>);
       }
 
       // Always show last page
       if (totalPages > 1) {
         items.push(
-          <Button
-            key={totalPages}
-            variant={currentPage === totalPages ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPageChange(totalPages)}
-            className={currentPage === totalPages ? "pointer-events-none" : ""}
-          >
-            {totalPages}
-          </Button>
+          <PaginationItem key={totalPages}>
+            <PaginationLink 
+              isActive={currentPage === totalPages} 
+              onClick={() => onPageChange(totalPages)}
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
         );
       }
     }
@@ -96,29 +98,25 @@ const PaginationControl = ({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-8">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        aria-label="Previous page"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      
-      {generatePaginationItems()}
-      
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        aria-label="Next page"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-    </div>
+    <Pagination className="mt-8">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious 
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)} 
+            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+          />
+        </PaginationItem>
+        
+        {generatePaginationItems()}
+        
+        <PaginationItem>
+          <PaginationNext 
+            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)} 
+            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 };
 
