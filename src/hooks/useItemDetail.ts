@@ -101,9 +101,10 @@ export const useItemDetail = (itemId: string | null) => {
           .limit(1)
           .single();
 
-        // Check if we have valid bid data with amount property
-        if (bidData && typeof bidData === 'object' && bidData.hasOwnProperty('amount')) {
-          const amount = (bidData as Record<string, any>).amount;
+        // Use optional chaining and safe property access
+        if (bidData && typeof bidData === 'object') {
+          // Use optional chaining to safely access the amount property
+          const amount = (bidData as any)?.amount;
           if (typeof amount === 'number') {
             highestBid = amount;
           }
