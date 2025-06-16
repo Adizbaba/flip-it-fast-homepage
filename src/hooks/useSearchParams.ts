@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams as useRouterSearchParams } from "react-router-dom";
 import { useSearch, SearchFilters } from "@/hooks/useSearch";
 
@@ -13,6 +13,7 @@ export const useSearchParamsState = ({
   itemsPerPage = 12 
 }: UseSearchParamsOptions = {}) => {
   const [searchParams, setSearchParams] = useRouterSearchParams();
+  const lastFiltersRef = useRef<string>("");
 
   const initialFilters: SearchFilters = {
     query: searchParams.get("q") || initialQuery,
@@ -36,7 +37,7 @@ export const useSearchParamsState = ({
   } = useSearch(initialFilters);
 
   // Update search params whenever filters change
-  const updateSearchParams = (params: Record<string, string>) => {
+  const updateSearchParams = useCallback((params: Record<string, string>) => {
     const newSearchParams = new URLSearchParams(searchParams);
     
     Object.entries(params).forEach(([key, value]) => {
@@ -49,22 +50,31 @@ export const useSearchParamsState = ({
     });
     
     setSearchParams(newSearchParams);
-  };
+  }, [searchParams, setSearchParams]);
 
-  // When a filter changes
-  const handleFilterChange = (newFilters: Record<string, string>) => {
+  // When a filter changes - prevent duplicate updates
+  const handleFilterChange = useCallback((newFilters: Record<string, string>) => {
+    const filtersString = JSON.stringify(newFilters);
+    
+    // Prevent duplicate filter changes
+    if (filtersString === lastFiltersRef.current) {
+      return;
+    }
+    
+    lastFiltersRef.current = filtersString;
     console.log("Filter change:", newFilters);
+    
     updateSearchParams(newFilters);
     setFilters({ ...filters, ...newFilters });
     setPage(1); // Reset to first page when filters change
-  };
+  }, [filters, setFilters, setPage, updateSearchParams]);
 
   // When search query changes
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setFilters({ ...filters, query });
     updateSearchParams({ q: query });
     setPage(1);
-  };
+  }, [filters, setFilters, setPage, updateSearchParams]);
 
   // Get current page from URL
   useEffect(() => {
@@ -87,7 +97,7 @@ export const useSearchParamsState = ({
       newSearchParams.delete("page");
       setSearchParams(newSearchParams);
     }
-  }, [page]);
+  }, [page, updateSearchParams, searchParams, setSearchParams]);
 
   return {
     results,

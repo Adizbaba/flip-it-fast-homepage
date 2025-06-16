@@ -1,7 +1,8 @@
 
-import { Heart } from "lucide-react";
+import { Heart, Clock, DollarSign } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { SearchResultItem } from "@/hooks/useSearch";
@@ -65,25 +66,47 @@ const ResultItem = ({ item }: ResultItemProps) => {
     setModalOpen(false);
   };
 
+  const handleViewFullDetails = () => {
+    navigate(`/item/${item.id}`);
+  };
+
+  // Calculate time remaining
+  const timeRemaining = item.endDate ? item.endDate.getTime() - Date.now() : 0;
+  const isEnded = timeRemaining <= 0;
+
   return (
     <>
-      <Card key={item.id} className="overflow-hidden h-full">
+      <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
         <div 
-          className="relative h-48 overflow-hidden cursor-pointer"
+          className="relative h-48 overflow-hidden cursor-pointer group"
           onClick={handleOpenModal}
         >
           <AspectRatio ratio={1/1} className="bg-muted">
             <img
               src={itemImage}
               alt={item.title || "Auction item"}
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "/placeholder.svg";
-                target.onerror = null; // Prevent infinite error loop
+                target.onerror = null;
               }}
             />
           </AspectRatio>
+          
+          {/* Auction status badge */}
+          <div className="absolute top-2 left-2">
+            {isEnded ? (
+              <Badge variant="destructive">Ended</Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-green-500 text-white">
+                <Clock className="h-3 w-3 mr-1" />
+                Live
+              </Badge>
+            )}
+          </div>
+
+          {/* Save button */}
           {user && (
             <Button
               variant="ghost"
@@ -102,27 +125,67 @@ const ResultItem = ({ item }: ResultItemProps) => {
             </Button>
           )}
         </div>
+
         <CardContent className="p-4">
-          <h3 
-            className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
-            onClick={handleOpenModal}
-          >{item.title || "Untitled Item"}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 h-10">
-            {item.description || "No description available"}
-          </p>
-          <div className="mt-2 flex justify-between items-center">
-            <span className="font-bold">${item.starting_bid || item.price || 0}</span>
-            <span className="text-sm text-muted-foreground">
-              {item.profiles?.username || "Unknown seller"}
-            </span>
+          <div className="space-y-3">
+            <div>
+              <h3 
+                className="font-semibold truncate cursor-pointer hover:text-primary transition-colors text-lg"
+                onClick={handleOpenModal}
+              >
+                {item.title || "Untitled Item"}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2 h-10">
+                {item.description || "No description available"}
+              </p>
+            </div>
+
+            {/* Price and bid info */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-muted-foreground">Current Bid</p>
+                  <p className="text-xl font-bold text-green-600">
+                    ${item.starting_bid || item.price || 0}
+                  </p>
+                </div>
+                {item.auctionType === 'buy_it_now' && (
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Buy Now</p>
+                    <p className="text-lg font-semibold text-blue-600">
+                      ${item.highestBid || item.starting_bid || 0}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Auction type and condition */}
+              <div className="flex justify-between items-center text-sm">
+                <Badge variant="outline">{item.condition || "Good"}</Badge>
+                <span className="text-muted-foreground">
+                  {item.profiles?.username || "Unknown seller"}
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleOpenModal}
+              >
+                Quick View
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleViewFullDetails}
+              >
+                <DollarSign className="h-4 w-4 mr-1" />
+                {item.auctionType === 'buy_it_now' ? 'Buy Now' : 'Bid Now'}
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            className="w-full mt-3"
-            onClick={handleOpenModal}
-          >
-            View Item
-          </Button>
         </CardContent>
       </Card>
       

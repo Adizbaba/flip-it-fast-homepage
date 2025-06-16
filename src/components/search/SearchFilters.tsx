@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Card,
   CardContent,
@@ -54,12 +54,25 @@ const SearchFilters = ({
     });
   }, [selectedCategory, minPrice, maxPrice, sortBy, condition, auctionType]);
 
-  // Handle filter changes - apply immediately for better UX
+  // Debounced filter change to prevent rapid updates
+  const debouncedFilterChange = useCallback(
+    debounce((newFilters: FilterState) => {
+      onFilterChange(newFilters);
+    }, 300),
+    [onFilterChange]
+  );
+
+  // Handle filter changes with debouncing for price fields
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    // Apply filters immediately instead of waiting for Apply button
-    onFilterChange(newFilters);
+    
+    // Apply immediately for non-price filters, debounce for price filters
+    if (key === 'minPrice' || key === 'maxPrice') {
+      debouncedFilterChange(newFilters);
+    } else {
+      onFilterChange(newFilters);
+    }
   };
 
   // Apply filters
@@ -128,5 +141,17 @@ const SearchFilters = ({
     </Card>
   );
 };
+
+// Simple debounce function
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export default SearchFilters;

@@ -20,14 +20,6 @@ const AllAuctions = () => {
     itemsPerPage: 10
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log("AllAuctions - Results:", results);
-    console.log("AllAuctions - Loading:", loading);
-    console.log("AllAuctions - Total count:", totalCount);
-    console.log("AllAuctions - Filters:", filters);
-  }, [results, loading, totalCount, filters]);
-
   // Show toast notification when new items are added
   useEffect(() => {
     // Set up real-time subscription for new auction items
@@ -41,13 +33,11 @@ const AllAuctions = () => {
           table: 'auction_items'
         },
         (payload) => {
-          console.log("Real-time update received:", payload);
           if (payload.new && payload.new.status === 'Active') {
             toast.info('New auction listing added!', {
               description: payload.new.title || 'Check it out!',
               duration: 5000,
             });
-            // Refresh results to show the new item
             refreshResults();
           }
         }
@@ -61,21 +51,17 @@ const AllAuctions = () => {
           filter: 'status=eq.Active'
         },
         (payload) => {
-          console.log("Listing updated:", payload);
           if (payload.new && payload.old.status !== 'Active' && payload.new.status === 'Active') {
             toast.info('New auction listing published!', {
               description: payload.new.title || 'Check it out!',
               duration: 5000,
             });
-            // Refresh results when a draft is published
             refreshResults();
           }
         }
       )
       .subscribe();
 
-    console.log("Real-time subscription set up for auction_items");
-    
     return () => {
       supabase.removeChannel(channel);
     };

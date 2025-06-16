@@ -47,6 +47,7 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categorySet, setCategorySet] = useState(false);
 
   // Use search params state but override the category filter
   const {
@@ -106,8 +107,11 @@ const CategoryPage = () => {
 
         setCategory(categoryWithSlug);
 
-        // Set the category filter to this specific category
-        handleFilterChange({ category: categoryData.id });
+        // Only set the category filter if it hasn't been set yet
+        if (!categorySet) {
+          handleFilterChange({ category: categoryData.id });
+          setCategorySet(true);
+        }
 
       } catch (err) {
         console.error("Error fetching category:", err);
@@ -118,7 +122,7 @@ const CategoryPage = () => {
     };
 
     fetchCategory();
-  }, [categorySlug, handleFilterChange]);
+  }, [categorySlug]); // Remove handleFilterChange from dependencies to prevent loops
 
   const getCategoryIcon = (slug: string) => {
     const IconComponent = categoryIcons[slug] || Gift;
@@ -127,35 +131,33 @@ const CategoryPage = () => {
 
   if (loading) {
     return (
-      <SearchLayout
-        title="Loading..."
-        description="Loading category information..."
-        results={[]}
-        loading={true}
-        totalCount={0}
-        page={1}
-        itemsPerPage={12}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onPageChange={setPage}
-      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
+            <div className="h-64 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (error || !category) {
     return (
-      <SearchLayout
-        title="Category Not Found"
-        description={error || "The requested category could not be found."}
-        results={[]}
-        loading={false}
-        totalCount={0}
-        page={1}
-        itemsPerPage={12}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onPageChange={setPage}
-      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-500">Category Not Found</h1>
+            <p className="text-gray-600 mt-2">{error || "The requested category could not be found."}</p>
+            <button 
+              onClick={() => navigate('/auctions')}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+            >
+              Back to All Auctions
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
