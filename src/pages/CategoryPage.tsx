@@ -162,26 +162,30 @@ const CategoryPage = () => {
   const IconComponent = getCategoryIcon(category.slug);
 
   return (
-    <SearchLayout
-      title={
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-3 mb-6">
           <IconComponent className="h-8 w-8 text-primary" />
-          <span>{category.name} Auctions</span>
+          <h1 className="text-3xl font-bold">{category.name} Auctions</h1>
         </div>
-      }
-      description={
-        category.description || 
-        `Browse all ${category.name.toLowerCase()} auctions and find great deals on quality items.`
-      }
-      results={results}
-      loading={searchLoading}
-      totalCount={totalCount}
-      page={page}
-      itemsPerPage={itemsPerPage}
-      filters={filters}
-      onFilterChange={handleFilterChange}
-      onPageChange={setPage}
-    />
+        
+        <SearchLayout
+          title={`${category.name} Auctions`}
+          description={
+            category.description || 
+            `Browse all ${category.name.toLowerCase()} auctions and find great deals on quality items.`
+          }
+          results={results}
+          loading={searchLoading}
+          totalCount={totalCount}
+          page={page}
+          itemsPerPage={itemsPerPage}
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onPageChange={setPage}
+        />
+      </div>
+    </div>
   );
 };
 
