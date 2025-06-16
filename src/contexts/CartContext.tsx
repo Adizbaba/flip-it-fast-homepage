@@ -13,6 +13,7 @@ interface CartItem {
   quantity: number;
   image?: string;
   itemType: 'auction' | 'declutter';
+  variations?: Record<string, string>; // For size, color, etc.
 }
 
 // Define the cart context type
@@ -98,7 +99,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     price: itemPrice || 0,
                     quantity: cartItem.quantity,
                     image: itemData?.images?.[0] || undefined,
-                    itemType: cartItem.item_type as 'auction' | 'declutter'
+                    itemType: cartItem.item_type as 'auction' | 'declutter',
+                    variations: {} // Add variations support here if needed
                   };
                 } catch (error) {
                   console.error('Error fetching item details:', error);
@@ -108,7 +110,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                     title: 'Unknown Item',
                     price: 0,
                     quantity: cartItem.quantity,
-                    itemType: cartItem.item_type as 'auction' | 'declutter'
+                    itemType: cartItem.item_type as 'auction' | 'declutter',
+                    variations: {}
                   };
                 }
               })
@@ -120,7 +123,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           // If no user, check local storage
           const localCart = localStorage.getItem('fastflip_cart');
           if (localCart) {
-            setItems(JSON.parse(localCart));
+            try {
+              const parsedCart = JSON.parse(localCart);
+              setItems(parsedCart);
+            } catch (error) {
+              console.error('Error parsing local cart:', error);
+              localStorage.removeItem('fastflip_cart');
+              setItems([]);
+            }
           } else {
             setItems([]);
           }
@@ -235,6 +245,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setItems(items.map(item => 
         item.id === id ? { ...item, quantity } : item
       ));
+      toast.success('Quantity updated');
     } catch (error) {
       console.error('Error updating quantity:', error);
       toast.error('Failed to update quantity');
