@@ -14,11 +14,19 @@ const AllAuctions = () => {
     filters,
     setPage,
     handleFilterChange,
-    refreshResults // Add this to allow manual refresh of results
+    refreshResults
   } = useSearchParamsState({ 
     initialQuery: "",
     itemsPerPage: 10
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log("AllAuctions - Results:", results);
+    console.log("AllAuctions - Loading:", loading);
+    console.log("AllAuctions - Total count:", totalCount);
+    console.log("AllAuctions - Filters:", filters);
+  }, [results, loading, totalCount, filters]);
 
   // Show toast notification when new items are added
   useEffect(() => {

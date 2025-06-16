@@ -40,7 +40,8 @@ export const useSearchParamsState = ({
     const newSearchParams = new URLSearchParams(searchParams);
     
     Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== "all") {
+      // Only set params that have meaningful values
+      if (value && value !== "all" && value !== "") {
         newSearchParams.set(key, value);
       } else {
         newSearchParams.delete(key);
@@ -52,6 +53,7 @@ export const useSearchParamsState = ({
 
   // When a filter changes
   const handleFilterChange = (newFilters: Record<string, string>) => {
+    console.log("Filter change:", newFilters);
     updateSearchParams(newFilters);
     setFilters({ ...filters, ...newFilters });
     setPage(1); // Reset to first page when filters change

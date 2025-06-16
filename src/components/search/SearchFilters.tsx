@@ -54,9 +54,12 @@ const SearchFilters = ({
     });
   }, [selectedCategory, minPrice, maxPrice, sortBy, condition, auctionType]);
 
-  // Handle filter changes
+  // Handle filter changes - apply immediately for better UX
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    // Apply filters immediately instead of waiting for Apply button
+    onFilterChange(newFilters);
   };
 
   // Apply filters
@@ -127,4 +130,3 @@ const SearchFilters = ({
 };
 
 export default SearchFilters;
-

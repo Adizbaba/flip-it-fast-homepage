@@ -33,6 +33,7 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }: CategoryFilterPr
           .order("name");
 
         if (error) throw error;
+        console.log("Categories fetched:", data);
         setCategories(data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -46,14 +47,14 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }: CategoryFilterPr
     <div className="space-y-2">
       <Label htmlFor="category">Category</Label>
       <Select
-        value={selectedCategory || "all"}
+        value={selectedCategory === "" ? "all" : selectedCategory}
         onValueChange={onCategoryChange}
       >
         <SelectTrigger id="category">
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem> {/* Make sure this isn't an empty string */}
+          <SelectItem value="all">All Categories</SelectItem>
           {categories.map((category) => (
             <SelectItem key={category.id} value={category.id}>
               {category.name}

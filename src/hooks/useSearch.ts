@@ -51,7 +51,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
     try {
       console.log("Fetching with filters:", filters);
       
-      // Start building the query
+      // Start building the query - simplified to avoid the relationship issue
       let query = supabase
         .from('auction_items')
         .select(`
@@ -59,10 +59,6 @@ export const useSearch = (initialFilters: SearchFilters) => {
           categories (
             id,
             name
-          ),
-          profiles:seller_id (
-            username,
-            avatar_url
           )
         `, { count: 'exact' })
         .eq('status', 'Active'); // Only get active items
@@ -141,9 +137,28 @@ export const useSearch = (initialFilters: SearchFilters) => {
       
       console.log("Results:", data);
       console.log("Total count:", count);
+
+      // Now fetch seller profiles separately for the items we got
+      let resultsWithProfiles = data || [];
+      if (data && data.length > 0) {
+        const sellerIds = [...new Set(data.map(item => item.seller_id).filter(Boolean))];
+        
+        if (sellerIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .in('id', sellerIds);
+
+          // Map profiles to results
+          resultsWithProfiles = data.map(item => ({
+            ...item,
+            profiles: profiles?.find(profile => profile.id === item.seller_id) || null
+          }));
+        }
+      }
       
       // Update state with results
-      setResults(data || []);
+      setResults(resultsWithProfiles);
       setTotalCount(count || 0);
     } catch (err) {
       console.error("Error fetching search results:", err);
