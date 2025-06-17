@@ -20,7 +20,7 @@ import AboutPage from "./pages/About";
 import Checkout from "./pages/Checkout";
 import PaymentConfirmation from "./pages/PaymentConfirmation";
 import Cart from "./pages/Cart";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import { 
   MyBidsPage, 
@@ -51,6 +51,8 @@ import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
 import EditListing from "./pages/dashboard/seller/EditListing";
 import BrowseCategories from "./pages/BrowseCategories";
 import CategoryPage from "./pages/CategoryPage";
+import CheckoutFlow from "./pages/CheckoutFlow";
+import OrderConfirmation from "./pages/OrderConfirmation";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -80,6 +82,8 @@ const App = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout-flow" element={<CheckoutFlow />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
               

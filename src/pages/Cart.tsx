@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash, Minus, Plus, ArrowRight, ShoppingCart, ShoppingBag } from "lucide-react";
@@ -43,52 +42,8 @@ const Cart = () => {
       return;
     }
 
-    try {
-      setProcessing(true);
-
-      // Calculate total amount including shipping
-      const totalAmount = grandTotal;
-
-      // Create order with status "pending"
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          total_amount: totalAmount,
-          status: "pending"
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = items.map(item => ({
-        order_id: order.id,
-        item_id: item.itemId,
-        item_type: item.itemType,
-        quantity: item.quantity,
-        price: item.price,
-        item_data: {
-          title: item.title,
-          image: item.image,
-          price: item.price
-        }
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Navigate to checkout page with the order ID
-      navigate(`/checkout?id=${order.id}`);
-    } catch (error) {
-      console.error("Error creating order:", error);
-      toast.error("Failed to process checkout");
-      setProcessing(false);
-    }
+    // Navigate to the new step-by-step checkout flow
+    navigate("/checkout-flow");
   };
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
