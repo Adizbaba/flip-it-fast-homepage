@@ -189,25 +189,28 @@ const CheckoutFlow = () => {
       // Generate 5-digit order number
       const orderNumber = Math.floor(10000 + Math.random() * 90000).toString();
       
-      // Create order
+      // Prepare the payment details object with proper JSON serialization
+      const paymentDetails = {
+        orderNumber,
+        checkoutData: JSON.parse(JSON.stringify(checkoutData)), // Ensure JSON compatibility
+        items: items.map(item => ({
+          id: item.id,
+          itemId: item.itemId,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          itemType: item.itemType
+        }))
+      };
+      
+      // Create order with nullable user_id handling
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: user?.id || null,
           total_amount: calculateTotal(),
           status: "pending",
-          payment_details: {
-            orderNumber,
-            checkoutData,
-            items: items.map(item => ({
-              id: item.id,
-              itemId: item.itemId,
-              title: item.title,
-              price: item.price,
-              quantity: item.quantity,
-              itemType: item.itemType
-            }))
-          }
+          payment_details: paymentDetails
         })
         .select()
         .single();

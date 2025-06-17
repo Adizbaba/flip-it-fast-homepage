@@ -39,6 +39,10 @@ const ReviewOrderStep = ({
     onPlaceOrder();
   };
 
+  const handleTermsChange = (checked: boolean | "indeterminate") => {
+    setAgreeToTerms(checked === true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Order Items */}
@@ -219,7 +223,7 @@ const ReviewOrderStep = ({
             <Checkbox
               id="terms"
               checked={agreeToTerms}
-              onCheckedChange={setAgreeToTerms}
+              onCheckedChange={handleTermsChange}
             />
             <Label htmlFor="terms" className="text-sm leading-relaxed">
               I agree to the{" "}
