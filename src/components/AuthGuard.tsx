@@ -13,11 +13,13 @@ const AuthGuard = ({ children, requireAuth = false }: AuthGuardProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading && requireAuth && !user) {
+    // Only redirect if we're not loading and auth is required but user is not present
+    if (!loading && requireAuth && !user && location.pathname !== '/auth') {
       redirectToAuth(location.pathname);
     }
   }, [user, loading, requireAuth, location.pathname, redirectToAuth]);
 
+  // Show loading spinner while checking auth state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,8 +28,9 @@ const AuthGuard = ({ children, requireAuth = false }: AuthGuardProps) => {
     );
   }
 
+  // If auth is required but user is not logged in, don't render anything (will redirect)
   if (requireAuth && !user) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   return <>{children}</>;

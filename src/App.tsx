@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import { CartProvider } from "@/contexts/CartContext";
+import AuthGuard from "@/components/AuthGuard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/auth/Auth";
@@ -67,10 +69,30 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/create-declutter-listing" element={<CreateDeclutterListing />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/watch-list" element={<WatchList />} />
+              
+              {/* Protected Routes */}
+              <Route path="/create-listing" element={
+                <AuthGuard requireAuth>
+                  <CreateListing />
+                </AuthGuard>
+              } />
+              <Route path="/create-declutter-listing" element={
+                <AuthGuard requireAuth>
+                  <CreateDeclutterListing />
+                </AuthGuard>
+              } />
+              <Route path="/admin" element={
+                <AuthGuard requireAuth>
+                  <AdminDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/watch-list" element={
+                <AuthGuard requireAuth>
+                  <WatchList />
+                </AuthGuard>
+              } />
+              
+              {/* Public Routes */}
               <Route path="/search" element={<Search />} />
               <Route path="/item/:itemId" element={<ItemDetail />} />
               <Route path="/declutter" element={<Declutter />} />
@@ -81,14 +103,20 @@ const App = () => {
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />
+              
+              {/* Cart and Checkout Routes */}
+              <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout-flow" element={<CheckoutFlow />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route path="/cart" element={<Cart />} />
               <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
               
-              {/* Dashboard Routes */}
-              <Route path="/dashboard" element={<DashboardLayout />}>
+              {/* Dashboard Routes - All Protected */}
+              <Route path="/dashboard" element={
+                <AuthGuard requireAuth>
+                  <DashboardLayout />
+                </AuthGuard>
+              }>
                 <Route index element={<Dashboard />} />
                 
                 {/* Buyer Pages */}
