@@ -1,11 +1,12 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { Mail, Key, User } from "lucide-react";
+import { Mail, Key, User, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -31,12 +32,14 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
     fullName?: string;
   }>({});
   const navigate = useNavigate();
+  const location = useLocation();
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -82,6 +85,8 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
+        const redirectUrl = `${window.location.origin}/`;
+        
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -89,6 +94,7 @@ const Auth = () => {
             data: {
               full_name: fullName,
             },
+            emailRedirectTo: redirectUrl
           },
         });
         if (error) throw error;
@@ -102,9 +108,15 @@ const Auth = () => {
           password,
         });
         if (error) throw error;
-        navigate("/");
+        
+        // Redirect will be handled by the auth state change listener
+        toast({
+          title: "Welcome back!",
+          description: "You have been successfully signed in.",
+        });
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -113,6 +125,10 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -132,6 +148,7 @@ const Auth = () => {
                   onClick={() => {
                     setIsSignUp(!isSignUp);
                     setErrors({});
+                    setShowPassword(false);
                   }}
                   className="font-medium text-auction-purple hover:text-auction-magenta transition-colors"
                 >
@@ -197,9 +214,9 @@ const Auth = () => {
                   <Key className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    className={`pl-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => {
@@ -209,6 +226,14 @@ const Auth = () => {
                       }
                     }}
                   />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={togglePasswordVisibility}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password}</p>

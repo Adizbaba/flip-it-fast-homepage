@@ -62,23 +62,33 @@ const Header = () => {
 
   // Prevent body scrolling when mobile menu is open
   useEffect(() => {
-    if (isMobile) {
-      if (mobileMenuOpen) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = 'auto';
-      }
+    if (isMobile && mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
+    
+    // Cleanup on unmount
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [mobileMenuOpen, isMobile]);
 
   return mounted ? (
-    <header className="bg-white border-b py-4 sticky top-0 z-40 shadow-sm">
+    <header className="bg-white border-b py-4 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
+        <Link 
+          to="/" 
+          className="flex items-center space-x-2 hover:opacity-80 transition-opacity" 
+          onClick={closeMobileMenu}
+        >
           <Gavel className="h-6 w-6 text-auction-purple" />
           <span className="font-bold text-lg text-auction-purple">FastFlip</span>
         </Link>
@@ -95,7 +105,7 @@ const Header = () => {
         />
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation Overlay */}
       {isMobile && mobileMenuOpen && (
         <MobileNavigation 
           user={user} 
