@@ -9,7 +9,7 @@ import { FilterState } from "@/components/search/filters/types";
 import { SearchResultItem } from "@/hooks/useSearch";
 
 interface SearchLayoutProps {
-  title: string;
+  title: string | ReactNode;
   description?: string;
   searchArea?: ReactNode;
   results: SearchResultItem[];
@@ -42,7 +42,11 @@ const SearchLayout = ({
       <Header />
       <main className="container mx-auto px-4 py-6 flex-1">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">{title}</h1>
+          {typeof title === 'string' ? (
+            <h1 className="text-3xl font-bold mb-2">{title}</h1>
+          ) : (
+            <h1 className="text-3xl font-bold mb-2">{title}</h1>
+          )}
           {description && (
             <p className="text-muted-foreground">{description}</p>
           )}
