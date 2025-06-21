@@ -62,6 +62,16 @@ const CategoryPage = () => {
     itemsPerPage: 12
   });
 
+  // Create default filter state for loading and error states
+  const defaultFilters = {
+    category: "all",
+    minPrice: "",
+    maxPrice: "",
+    sortBy: "newest",
+    condition: "all",
+    auctionType: "all",
+  };
+
   useEffect(() => {
     const fetchCategory = async () => {
       if (!categorySlug) {
@@ -136,7 +146,7 @@ const CategoryPage = () => {
         totalCount={0}
         page={1}
         itemsPerPage={12}
-        filters={{}}
+        filters={defaultFilters}
         onFilterChange={() => {}}
         onPageChange={() => {}}
       />
@@ -153,7 +163,7 @@ const CategoryPage = () => {
         totalCount={0}
         page={1}
         itemsPerPage={12}
-        filters={{}}
+        filters={defaultFilters}
         onFilterChange={() => {}}
         onPageChange={() => {}}
       />
