@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Outlet } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import DashboardNav from "./DashboardNav";
 import RoleToggle from "./RoleToggle";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
@@ -45,11 +47,15 @@ export const DashboardContent = () => {
   }
 
   return (
-    <div className="h-full min-h-screen w-full">
-      <RoleToggle />
-      <div className="container mx-auto py-6">
-        <Outlet />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1">
+        <RoleToggle />
+        <div className="container mx-auto py-6">
+          <Outlet />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };
