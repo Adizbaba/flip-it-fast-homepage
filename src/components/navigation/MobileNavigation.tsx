@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Gavel, 
@@ -34,7 +33,7 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
   };
 
   const handleSignUp = () => {
-    navigate("/auth");
+    navigate("/auth?mode=signup");
     closeMobileMenu();
   };
 
@@ -44,7 +43,6 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
     closeMobileMenu();
   };
 
-  // Function to get the appropriate icon for each category
   const getCategoryIcon = (slug: string) => {
     switch (slug) {
       case "electronics":
@@ -79,7 +77,6 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             Create Listing
           </Button>
           
-          {/* Auctions dropdown for mobile */}
           <div className="space-y-2">
             <div className="flex items-center justify-between py-3 border-b border-gray-200">
               <span className="font-semibold text-gray-800 text-lg">Auctions</span>
@@ -115,7 +112,6 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             </div>
           </div>
 
-          {/* Other nav items for mobile */}
           <div className="border-t border-gray-200 pt-4">
             {navItems.filter(item => !item.isDropdown).map((item) => (
               <Link

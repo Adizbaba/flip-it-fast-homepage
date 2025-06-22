@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ const nameSchema = z
   .regex(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces");
 
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +38,16 @@ const Auth = () => {
   }>({});
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Check URL params to determine if we should show signup mode
+  const searchParams = new URLSearchParams(location.search);
+  const [isSignUp, setIsSignUp] = useState(searchParams.get('mode') === 'signup');
+
+  // Update isSignUp when URL changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    setIsSignUp(searchParams.get('mode') === 'signup');
+  }, [location.search]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -131,6 +139,19 @@ const Auth = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleToggleMode = () => {
+    const newMode = !isSignUp;
+    setIsSignUp(newMode);
+    setErrors({});
+    setShowPassword(false);
+    // Update URL to reflect the current mode
+    const searchParams = new URLSearchParams();
+    if (newMode) {
+      searchParams.set('mode', 'signup');
+    }
+    navigate(`/auth${searchParams.toString() ? `?${searchParams.toString()}` : ''}`, { replace: true });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -145,11 +166,7 @@ const Auth = () => {
               <p className="mt-2 text-sm text-gray-600">
                 {isSignUp ? "Already have an account? " : "Don't have an account? "}
                 <button
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setErrors({});
-                    setShowPassword(false);
-                  }}
+                  onClick={handleToggleMode}
                   className="font-medium text-auction-purple hover:text-auction-magenta transition-colors"
                 >
                   {isSignUp ? "Sign in" : "Sign up"}

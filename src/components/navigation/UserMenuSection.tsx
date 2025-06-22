@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Menu, X, User, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +34,7 @@ const UserMenuSection = ({
   };
 
   const handleSignUp = () => {
-    navigate("/auth");
+    navigate("/auth?mode=signup");
   };
 
   const handleLogout = async () => {
