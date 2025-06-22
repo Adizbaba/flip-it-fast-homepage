@@ -4,9 +4,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFilters from "@/components/search/SearchFilters";
 import SearchResults from "@/components/search/SearchResults";
+import MobileFilterModal from "@/components/search/MobileFilterModal";
 import { Separator } from "@/components/ui/separator";
 import { FilterState } from "@/components/search/filters/types";
 import { SearchResultItem } from "@/hooks/useSearch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SearchLayoutProps {
   title: string | ReactNode;
@@ -37,6 +39,8 @@ const SearchLayout = ({
   onPageChange,
   searchQuery
 }: SearchLayoutProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -59,25 +63,41 @@ const SearchLayout = ({
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1">
-            <h2 className="text-xl font-bold mb-4">Filters</h2>
-            <SearchFilters
-              selectedCategory={filters.category}
-              minPrice={filters.minPrice}
-              maxPrice={filters.maxPrice}
-              sortBy={filters.sortBy}
-              condition={filters.condition}
-              auctionType={filters.auctionType}
-              onFilterChange={onFilterChange}
-            />
-          </div>
+          {/* Desktop Filters */}
+          {!isMobile && (
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-bold mb-4">Filters</h2>
+              <SearchFilters
+                selectedCategory={filters.category}
+                minPrice={filters.minPrice}
+                maxPrice={filters.maxPrice}
+                sortBy={filters.sortBy}
+                condition={filters.condition}
+                auctionType={filters.auctionType}
+                onFilterChange={onFilterChange}
+              />
+            </div>
+          )}
           
-          <div className="lg:col-span-3">
+          <div className={`${isMobile ? 'col-span-1' : 'lg:col-span-3'}`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {loading ? "Loading..." : `${totalCount} ${searchQuery ? "results found" : "items available"}`}
                 {searchQuery && ` for "${searchQuery}"`}
               </h2>
+              
+              {/* Mobile Filter Button */}
+              {isMobile && (
+                <MobileFilterModal
+                  selectedCategory={filters.category}
+                  minPrice={filters.minPrice}
+                  maxPrice={filters.maxPrice}
+                  sortBy={filters.sortBy}
+                  condition={filters.condition}
+                  auctionType={filters.auctionType}
+                  onFilterChange={onFilterChange}
+                />
+              )}
             </div>
             <Separator className="mb-6" />
             <SearchResults 

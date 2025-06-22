@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Gavel, 
@@ -28,6 +29,11 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
   const { signOut } = useAuth();
 
   const handleLogin = () => {
+    navigate("/auth");
+    closeMobileMenu();
+  };
+
+  const handleSignUp = () => {
     navigate("/auth");
     closeMobileMenu();
   };
@@ -173,12 +179,21 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
             </div>
           ) : (
             <div className="border-t border-gray-200 pt-4 mt-4">
-              <Button 
-                onClick={handleLogin} 
-                className="w-full h-12 text-base font-medium bg-auction-purple hover:bg-purple-700"
-              >
-                Sign In
-              </Button>
+              <div className="flex flex-col space-y-3">
+                <Button 
+                  onClick={handleLogin} 
+                  className="w-full h-12 text-base font-medium bg-auction-purple hover:bg-purple-700"
+                >
+                  Log In
+                </Button>
+                <Button 
+                  onClick={handleSignUp} 
+                  variant="outline"
+                  className="w-full h-12 text-base font-medium border-auction-purple text-auction-purple hover:bg-auction-purple hover:text-white"
+                >
+                  Sign Up
+                </Button>
+              </div>
             </div>
           )}
         </nav>

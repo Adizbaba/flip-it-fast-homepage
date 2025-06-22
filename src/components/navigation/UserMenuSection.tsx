@@ -34,6 +34,10 @@ const UserMenuSection = ({
     navigate("/auth");
   };
 
+  const handleSignUp = () => {
+    navigate("/auth");
+  };
+
   const handleLogout = async () => {
     await signOut();
     navigate("/");
@@ -74,9 +78,15 @@ const UserMenuSection = ({
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button onClick={handleLogin} variant="ghost" className="hover:bg-gray-100 hover:text-auction-purple transition-colors">
-              Sign In
-            </Button>
+            <div className="flex items-center space-x-1">
+              <Button onClick={handleLogin} variant="ghost" className="hover:bg-gray-100 hover:text-auction-purple transition-colors">
+                Log In
+              </Button>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <Button onClick={handleSignUp} variant="ghost" className="hover:bg-gray-100 hover:text-auction-purple transition-colors">
+                Sign Up
+              </Button>
+            </div>
           )}
         </>
       )}
