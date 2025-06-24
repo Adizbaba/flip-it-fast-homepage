@@ -3,15 +3,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import AuctionSection from "@/components/AuctionSection";
 import CategorySection from "@/components/CategorySection";
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
+import FeaturedAuctionsSection from "@/components/FeaturedAuctionsSection";
+import AuctionSection from "@/components/AuctionSection";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, PackageOpen } from "lucide-react";
-import { featuredAuctions, endingSoonAuctions } from "@/data/auctions";
+import { endingSoonAuctions } from "@/data/auctions";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
@@ -27,7 +28,6 @@ const Index = () => {
     }
   };
 
-  // Function to handle direct navigation to search page for popular searches
   const handleSearchClick = (query: string) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);
   };
@@ -128,7 +128,7 @@ const Index = () => {
         </section>
         
         <CategorySection />
-        <AuctionSection title="Featured Auctions" auctions={featuredAuctions} />
+        <FeaturedAuctionsSection />
         <AuctionSection title="Ending Soon" auctions={endingSoonAuctions} />
         <HowItWorks />
         <Testimonials />
