@@ -31,7 +31,8 @@ export const useFeaturedAuctions = (limit: number = 8) => {
           starting_bid,
           end_date,
           created_at,
-          profiles:seller_id (
+          seller_id,
+          profiles!inner (
             username
           )
         `)
