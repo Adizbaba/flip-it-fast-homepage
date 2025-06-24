@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Gavel, 
@@ -10,12 +11,15 @@ import {
   Trophy, 
   Gem,
   Car,
-  ShoppingCart
+  ShoppingCart,
+  Compass,
+  Info,
+  HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
-import { auctionCategories, navItems } from "@/components/Header";
+import { auctionCategories, navItems, discoverItems } from "@/components/Header";
 
 interface MobileNavigationProps {
   user: any;
@@ -59,6 +63,17 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
         return <Car className="h-5 w-5" />;
       default:
         return <Tag className="h-5 w-5" />;
+    }
+  };
+
+  const getDiscoverIcon = (name: string) => {
+    switch (name) {
+      case "How it Works":
+        return <HelpCircle className="h-5 w-5" />;
+      case "About Us":
+        return <Info className="h-5 w-5" />;
+      default:
+        return <Info className="h-5 w-5" />;
     }
   };
 
@@ -107,6 +122,28 @@ const MobileNavigation = ({ user, closeMobileMenu, onCreateListing }: MobileNavi
                 >
                   {getCategoryIcon(category.slug)}
                   <span className="text-base">{category.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <span className="font-semibold text-gray-800 text-lg flex items-center gap-2">
+                <Compass className="h-5 w-5" />
+                Discover
+              </span>
+            </div>
+            <div className="pl-2 space-y-1">
+              {discoverItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="flex items-center space-x-3 text-gray-600 hover:text-auction-purple hover:bg-gray-50 rounded-lg p-3 transition-colors min-h-[48px]"
+                  onClick={closeMobileMenu}
+                >
+                  {getDiscoverIcon(item.name)}
+                  <span className="text-base">{item.name}</span>
                 </Link>
               ))}
             </div>

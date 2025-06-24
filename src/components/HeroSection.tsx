@@ -15,6 +15,10 @@ const HeroSection = () => {
     }
   };
 
+  const handleExploreAuctions = () => {
+    navigate("/auctions");
+  };
+
   return (
     <section className="relative bg-gradient-to-tr from-auction-purple to-auction-magenta py-12 md:py-20">
       <div className="absolute inset-0 pattern-dots pattern-blue-500 pattern-bg-white pattern-size-4 pattern-opacity-10"></div>
@@ -27,13 +31,17 @@ const HeroSection = () => {
             Find amazing deals or sell your items quickly on our fast-paced auction platform
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="bg-white text-auction-purple hover:bg-gray-100 text-lg px-6">
+            <Button 
+              size="lg" 
+              className="bg-white text-auction-purple hover:bg-gray-100 hover:scale-105 transition-all duration-200 text-lg px-6"
+              onClick={handleExploreAuctions}
+            >
               Explore Auctions
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
-              className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-6"
+              className="bg-transparent border-white text-white hover:bg-white/10 hover:scale-105 transition-all duration-200 text-lg px-6"
               onClick={handleStartSelling}
             >
               Start Selling

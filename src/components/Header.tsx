@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Gavel } from "lucide-react";
@@ -22,9 +21,13 @@ export const auctionCategories = [
 export const navItems = [
   { name: "Auctions", href: "#", isDropdown: true },
   { name: "Declutter", href: "/declutter" },
-  { name: "How it Works", href: "/how-it-works" },
-  { name: "About", href: "/about" },
+  { name: "Discover", href: "#", isDropdown: true },
   { name: "Contact", href: "/contact" },
+];
+
+export const discoverItems = [
+  { name: "How it Works", href: "/how-it-works" },
+  { name: "About Us", href: "/about" },
 ];
 
 const Header = () => {
