@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -58,12 +59,6 @@ const CreateListing = () => {
       returnPolicy: "No returns accepted",
       // Regular listing defaults
       price: 0,
-      // Auction listing defaults (will be ignored for regular listings)
-      startingBid: 0,
-      bidIncrement: 1,
-      auctionType: "standard",
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
 
@@ -80,10 +75,47 @@ const CreateListing = () => {
   });
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value as "regular" | "auction");
-    form.setValue("listingType", value as "regular" | "auction");
+    const newActiveTab = value as "regular" | "auction";
+    setActiveTab(newActiveTab);
     
-    // Reset form validation with new schema
+    // Reset form with new defaults for the selected tab
+    if (newActiveTab === "regular") {
+      form.reset({
+        listingType: "regular",
+        title: "",
+        description: "",
+        categoryId: "",
+        condition: "",
+        quantity: 1,
+        shippingOptions: JSON.stringify({ 
+          domestic: "Standard shipping",
+          international: "Not available" 
+        }),
+        returnPolicy: "No returns accepted",
+        price: 0,
+      });
+    } else {
+      form.reset({
+        listingType: "auction",
+        title: "",
+        description: "",
+        categoryId: "",
+        condition: "",
+        quantity: 1,
+        shippingOptions: JSON.stringify({ 
+          domestic: "Standard shipping",
+          international: "Not available" 
+        }),
+        returnPolicy: "No returns accepted",
+        startingBid: 0,
+        bidIncrement: 1,
+        auctionType: "standard",
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+    }
+    
+    // Clear form errors
     form.clearErrors();
   };
 
@@ -314,7 +346,7 @@ const CreateListing = () => {
                       <ListingImageUpload images={images} setImages={setImages} />
                     </div>
 
-                    <RegularListingForm control={form.control} />
+                    <RegularListingForm control={form.control as Control<RegularListingFormData>} />
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="space-y-4">
@@ -336,7 +368,7 @@ const CreateListing = () => {
                       <ListingImageUpload images={images} setImages={setImages} />
                     </div>
 
-                    <AuctionSpecificFields control={form.control} />
+                    <AuctionSpecificFields control={form.control as Control<AuctionListingFormData>} />
                     
                     <AuctionDetails 
                       control={form.control}
