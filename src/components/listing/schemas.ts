@@ -46,35 +46,11 @@ export const auctionListingSchema = baseListingSchema.extend({
   }),
   endDate: z.date({
     required_error: "End date is required.",
-  }).refine(
-    (date) => date > new Date(),
-    "End date must be in the future."
-  ),
+  }),
   autoExtend: z.boolean().optional(),
   extensionDuration: z.number().optional(),
   triggerTimeframe: z.number().optional(),
-}).refine(
-  (data) => {
-    const startDate = new Date(data.startDate);
-    const endDate = new Date(data.endDate);
-    return endDate > startDate;
-  },
-  {
-    message: "End date must be after start date",
-    path: ["endDate"]
-  }
-).refine(
-  (data) => {
-    if (data.buyNowPrice && data.startingBid) {
-      return data.buyNowPrice > data.startingBid;
-    }
-    return true;
-  },
-  {
-    message: "Buy now price must be greater than starting bid",
-    path: ["buyNowPrice"]
-  }
-);
+});
 
 // Combined schema that validates based on listing type
 export const listingFormSchema = z.discriminatedUnion("listingType", [

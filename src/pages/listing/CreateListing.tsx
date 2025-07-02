@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Control } from "react-hook-form";
 import { 
   listingFormSchema, 
   regularListingSchema,
@@ -122,6 +122,16 @@ const CreateListing = () => {
           toast({
             title: "Error",
             description: "End date must be in the future",
+            variant: "destructive",
+          });
+          setUploading(false);
+          return;
+        }
+
+        if (auctionData.buyNowPrice && auctionData.startingBid && auctionData.buyNowPrice <= auctionData.startingBid) {
+          toast({
+            title: "Error",
+            description: "Buy now price must be greater than starting bid",
             variant: "destructive",
           });
           setUploading(false);
@@ -304,7 +314,7 @@ const CreateListing = () => {
                       <ListingImageUpload images={images} setImages={setImages} />
                     </div>
 
-                    <RegularListingForm control={form.control as Control<RegularListingFormData>} />
+                    <RegularListingForm control={form.control} />
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="space-y-4">
@@ -326,10 +336,10 @@ const CreateListing = () => {
                       <ListingImageUpload images={images} setImages={setImages} />
                     </div>
 
-                    <AuctionSpecificFields control={form.control as Control<AuctionListingFormData>} />
+                    <AuctionSpecificFields control={form.control} />
                     
                     <AuctionDetails 
-                      control={form.control as Control<AuctionListingFormData>}
+                      control={form.control}
                       categories={categories || []}
                       categoriesLoading={categoriesLoading}
                     />
