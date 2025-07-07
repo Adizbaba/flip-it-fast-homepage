@@ -86,14 +86,17 @@ export type Database = {
       auction_items: {
         Row: {
           auction_type: string
+          bid_count: number | null
           bid_increment: number
           buy_now_price: number | null
           category_id: string
           condition: string
           created_at: string
+          current_bid: number | null
           description: string
           edit_count: number | null
           end_date: string
+          highest_bidder_id: string | null
           id: string
           images: Json | null
           quantity: number
@@ -110,14 +113,17 @@ export type Database = {
         }
         Insert: {
           auction_type: string
+          bid_count?: number | null
           bid_increment?: number
           buy_now_price?: number | null
           category_id: string
           condition: string
           created_at?: string
+          current_bid?: number | null
           description: string
           edit_count?: number | null
           end_date: string
+          highest_bidder_id?: string | null
           id?: string
           images?: Json | null
           quantity?: number
@@ -134,14 +140,17 @@ export type Database = {
         }
         Update: {
           auction_type?: string
+          bid_count?: number | null
           bid_increment?: number
           buy_now_price?: number | null
           category_id?: string
           condition?: string
           created_at?: string
+          current_bid?: number | null
           description?: string
           edit_count?: number | null
           end_date?: string
+          highest_bidder_id?: string | null
           id?: string
           images?: Json | null
           quantity?: number
@@ -169,6 +178,41 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bids: {
+        Row: {
+          auction_item_id: string
+          bid_amount: number
+          bidder_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          auction_item_id: string
+          bid_amount: number
+          bidder_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          auction_item_id?: string
+          bid_amount?: number
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_bids_auction_item_id"
+            columns: ["auction_item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
             referencedColumns: ["id"]
           },
         ]

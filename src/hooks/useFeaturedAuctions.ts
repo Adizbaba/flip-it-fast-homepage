@@ -7,6 +7,8 @@ export interface FeaturedAuction {
   title: string;
   images: any;
   starting_bid: number;
+  current_bid: number | null;
+  bid_count: number;
   end_date: string;
   created_at: string;
   profiles?: {
@@ -29,6 +31,8 @@ export const useFeaturedAuctions = (limit: number = 8) => {
           title,
           images,
           starting_bid,
+          current_bid,
+          bid_count,
           end_date,
           created_at,
           profiles!fk_auction_items_seller_id (

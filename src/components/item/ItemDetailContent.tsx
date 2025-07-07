@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { ItemData } from "./types";
+import { useBidding } from "@/hooks/useBidding";
+import BiddingSection from "./BiddingSection";
 import {
   Carousel,
   CarouselContent,
@@ -27,54 +29,14 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [bidAmount, setBidAmount] = useState<number | "">("");
-  
-  // Reset bid amount when item changes
-  useEffect(() => {
-    if (item) {
-      // Set initial bid amount based on starting bid and increment
-      const startingBid = item.starting_bid || 0;
-      const bidIncrement = item.bid_increment || 1;
-      setBidAmount(startingBid + bidIncrement);
-    } else {
-      setBidAmount("");
-    }
-  }, [item]);
+  const { getCurrentBid } = useBidding(item.id);
 
   // Ensure we have valid images array
   const itemImages = item.images && Array.isArray(item.images) && item.images.length > 0 
     ? item.images 
     : ["/placeholder.svg"];
 
-  const handlePlaceBid = () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to place a bid",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (bidAmount && item) {
-      // Compare bid amount with starting bid
-      if (typeof bidAmount === 'number' && bidAmount < (item.starting_bid || 0)) {
-        toast({
-          title: "Invalid bid",
-          description: "Your bid must be at least the starting bid amount",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // In a real app, you would make an API call to place the bid
-      toast({
-        title: "Bid placed successfully",
-        description: `You have placed a bid of $${bidAmount} on ${item.title}`,
-      });
-      onClose();
-    }
-  };
+  const currentBid = getCurrentBid();
 
   const handleBuyNow = () => {
     if (!user) {
@@ -133,12 +95,12 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
 
       {/* Item Details */}
       <div className="space-y-4">
-        {/* Price and Bid */}
+        {/* Price and Buy Now Info */}
         <div className="bg-muted/50 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-3">
             <div>
               <p className="text-sm text-muted-foreground">Current Bid</p>
-              <p className="text-2xl font-bold">${item.starting_bid || 0}</p>
+              <p className="text-2xl font-bold">${currentBid}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Quantity</p>
@@ -146,49 +108,30 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
             </div>
           </div>
 
-          {user && user.id !== item.seller_id && !isEnded && (
-            <div className="space-y-3">
-              <div className="flex gap-2 items-center">
-                <Input
-                  type="number"
-                  min={(item.starting_bid || 0) + (item.bid_increment || 1)}
-                  step={item.bid_increment || 1}
-                  value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value ? parseFloat(e.target.value) : "")}
-                  placeholder="Enter bid amount"
-                  className="flex-1"
-                />
-                <Button onClick={handlePlaceBid}>
-                  <DollarSign className="h-4 w-4 mr-1" /> Bid
-                </Button>
-              </div>
-
-              {hasBuyNowOption && (
-                <div className="flex gap-2">
-                  <Button className="flex-1" variant="outline" onClick={handleBuyNow}>
-                    <ShoppingCart className="h-4 w-4 mr-1" /> Buy Now ${item.buy_now_price}
-                  </Button>
-                  <AddToCartButton
-                    itemId={item.id}
-                    itemType="auction"
-                    title={item.title}
-                    price={item.buy_now_price || 0}
-                    image={itemImages[0]}
-                    className="flex-1"
-                  />
-                </div>
-              )}
+          {hasBuyNowOption && user && user.id !== item.seller_id && !isEnded && (
+            <div className="flex gap-2">
+              <Button className="flex-1" variant="outline" onClick={handleBuyNow}>
+                <ShoppingCart className="h-4 w-4 mr-1" /> Buy Now ${item.buy_now_price}
+              </Button>
+              <AddToCartButton
+                itemId={item.id}
+                itemType="auction"
+                title={item.title}
+                price={item.buy_now_price || 0}
+                image={itemImages[0]}
+                className="flex-1"
+              />
             </div>
           )}
 
-          {(!user || user.id === item.seller_id) && !isEnded && (
+          {(!user || user.id === item.seller_id) && !isEnded && hasBuyNowOption && (
             <div className="text-center py-1">
               {!user ? (
                 <p className="text-sm text-muted-foreground">
-                  Please <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/auth")}>sign in</Button> to bid or purchase
+                  Please <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/auth")}>sign in</Button> to purchase
                 </p>
               ) : (
-                <p className="text-sm text-muted-foreground">You can't bid on your own listing</p>
+                <p className="text-sm text-muted-foreground">You can't purchase your own listing</p>
               )}
             </div>
           )}
@@ -221,6 +164,11 @@ const ItemDetailContent = ({ item, onClose }: ItemDetailContentProps) => {
         <Button variant="outline" className="w-full" onClick={handleViewFullDetails}>
           <Info className="mr-2 h-4 w-4" /> View Full Details
         </Button>
+      </div>
+
+      {/* Bidding Section */}
+      <div className="md:col-span-2">
+        <BiddingSection auctionItemId={item.id} />
       </div>
     </div>
   );

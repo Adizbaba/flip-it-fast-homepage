@@ -122,9 +122,11 @@ const FeaturedAuctionsSection = () => {
         
         <div className="flex justify-between items-center mb-3">
           <div>
-            <p className="text-xs text-muted-foreground mb-1">Starting Bid</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              {auction.current_bid ? "Current Bid" : "Starting Bid"}
+            </p>
             <p className="font-bold text-lg text-green-600">
-              {formatPrice(auction.starting_bid)}
+              {formatPrice(auction.current_bid || auction.starting_bid)}
             </p>
           </div>
           <div className="text-right">
@@ -132,6 +134,9 @@ const FeaturedAuctionsSection = () => {
               <User className="h-3 w-3" />
               <span className="truncate max-w-[60px]">{auction.profiles?.username || "Anonymous"}</span>
             </div>
+            {auction.bid_count > 0 && (
+              <p className="text-xs text-muted-foreground">{auction.bid_count} bids</p>
+            )}
           </div>
         </div>
         
