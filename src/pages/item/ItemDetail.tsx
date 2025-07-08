@@ -19,6 +19,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Clock, DollarSign, User, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import AuctionTimer from "@/components/auction/AuctionTimer";
 
 const ItemDetail = () => {
   const { itemId } = useParams();
@@ -146,11 +147,13 @@ const ItemDetail = () => {
                   <p className="text-2xl font-bold">${item.starting_bid}</p>
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="text-sm text-muted-foreground">Time Remaining</p>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{isEnded ? "Auction ended" : "Ending soon"}</span>
-                  </div>
+                  <AuctionTimer 
+                    endDate={item.end_date}
+                    status={item.status}
+                    winnerId={item.winner_id}
+                    currentUserId={user?.id}
+                    reserveMet={item.reserve_met}
+                  />
                 </div>
               </div>
 

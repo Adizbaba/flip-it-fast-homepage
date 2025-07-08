@@ -88,6 +88,41 @@ export type Database = {
         }
         Relationships: []
       }
+      auction_events: {
+        Row: {
+          auction_item_id: string
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          auction_item_id: string
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          auction_item_id?: string
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_events_auction_item_id_fkey"
+            columns: ["auction_item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auction_items: {
         Row: {
           auction_type: string
@@ -101,10 +136,13 @@ export type Database = {
           description: string
           edit_count: number | null
           end_date: string
+          ended_at: string | null
+          final_selling_price: number | null
           highest_bidder_id: string | null
           id: string
           images: Json | null
           quantity: number
+          reserve_met: boolean | null
           reserve_price: number | null
           return_policy: string | null
           seller_id: string
@@ -115,6 +153,7 @@ export type Database = {
           title: string
           updated_at: string
           variations: Json | null
+          winner_id: string | null
         }
         Insert: {
           auction_type: string
@@ -128,10 +167,13 @@ export type Database = {
           description: string
           edit_count?: number | null
           end_date: string
+          ended_at?: string | null
+          final_selling_price?: number | null
           highest_bidder_id?: string | null
           id?: string
           images?: Json | null
           quantity?: number
+          reserve_met?: boolean | null
           reserve_price?: number | null
           return_policy?: string | null
           seller_id: string
@@ -142,6 +184,7 @@ export type Database = {
           title: string
           updated_at?: string
           variations?: Json | null
+          winner_id?: string | null
         }
         Update: {
           auction_type?: string
@@ -155,10 +198,13 @@ export type Database = {
           description?: string
           edit_count?: number | null
           end_date?: string
+          ended_at?: string | null
+          final_selling_price?: number | null
           highest_bidder_id?: string | null
           id?: string
           images?: Json | null
           quantity?: number
+          reserve_met?: boolean | null
           reserve_price?: number | null
           return_policy?: string | null
           seller_id?: string
@@ -169,6 +215,7 @@ export type Database = {
           title?: string
           updated_at?: string
           variations?: Json | null
+          winner_id?: string | null
         }
         Relationships: [
           {
@@ -530,6 +577,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      end_auction: {
+        Args: { auction_id: string }
+        Returns: Json
+      }
       has_admin_permission: {
         Args: {
           user_id: string
@@ -558,6 +609,10 @@ export type Database = {
           ip_address?: string
         }
         Returns: string
+      }
+      process_expired_auctions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
     }
     Enums: {

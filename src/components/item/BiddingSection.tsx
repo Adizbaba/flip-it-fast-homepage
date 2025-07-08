@@ -8,6 +8,7 @@ import { Clock, DollarSign, Users, Wifi, WifiOff } from "lucide-react";
 import { useBidding } from "@/hooks/useBidding";
 import { useAuth } from "@/lib/auth";
 import BidHistory from "./BidHistory";
+import AuctionTimer from "@/components/auction/AuctionTimer";
 
 interface BiddingSectionProps {
   auctionItemId: string;
@@ -105,14 +106,13 @@ const BiddingSection = ({ auctionItemId }: BiddingSectionProps) => {
               )}
             </CardTitle>
             <div className="flex items-center gap-2">
-              {isAuctionEnded ? (
-                <Badge variant="destructive">Ended</Badge>
-              ) : (
-                <Badge variant="secondary">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {getTimeRemaining(auctionItem.end_date)}
-                </Badge>
-              )}
+              <AuctionTimer 
+                endDate={auctionItem.end_date}
+                status={auctionItem.status}
+                winnerId={auctionItem.highest_bidder_id}
+                currentUserId={user?.id}
+                reserveMet={auctionItem.reserve_met}
+              />
             </div>
           </div>
         </CardHeader>

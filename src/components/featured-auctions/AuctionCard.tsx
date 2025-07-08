@@ -4,13 +4,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { formatPrice, getTimeRemaining, getItemImage, isNewListing } from "./utils";
+import AuctionTimer from "@/components/auction/AuctionTimer";
+import { useAuth } from "@/lib/auth";
 
 interface AuctionCardProps {
   auction: any;
   onViewItem: (auctionId: string) => void;
 }
 
-export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => (
+export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => {
+  const { user } = useAuth();
+
+  return (
   <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
     <div className="relative">
       <AspectRatio ratio={1/1} className="bg-muted">
@@ -39,8 +44,14 @@ export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => (
       {/* Countdown Timer */}
       <div className="absolute bottom-2 right-2">
         <div className="flex items-center gap-1 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-          <Clock className="h-3 w-3" />
-          <span>{getTimeRemaining(auction.end_date)}</span>
+          <AuctionTimer 
+            endDate={auction.end_date}
+            status={auction.status || 'Active'}
+            winnerId={auction.winner_id}
+            currentUserId={user?.id}
+            reserveMet={auction.reserve_met}
+            compact={true}
+          />
         </div>
       </div>
     </div>
@@ -84,4 +95,5 @@ export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => (
       </Button>
     </CardContent>
   </Card>
-);
+  );
+};

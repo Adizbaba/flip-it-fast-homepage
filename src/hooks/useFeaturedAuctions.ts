@@ -11,6 +11,10 @@ export interface FeaturedAuction {
   bid_count: number;
   end_date: string;
   created_at: string;
+  status?: string;
+  winner_id?: string | null;
+  final_selling_price?: number | null;
+  reserve_met?: boolean | null;
   profiles?: {
     username: string;
   };
@@ -35,11 +39,15 @@ export const useFeaturedAuctions = (limit: number = 8) => {
           bid_count,
           end_date,
           created_at,
+          status,
+          winner_id,
+          final_selling_price,
+          reserve_met,
           profiles!fk_auction_items_seller_id (
             username
           )
         `)
-        .eq('status', 'Active')
+        .in('status', ['Active', 'Ended'])
         .order('created_at', { ascending: false })
         .limit(limit);
 

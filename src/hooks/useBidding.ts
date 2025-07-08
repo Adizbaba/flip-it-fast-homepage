@@ -27,6 +27,10 @@ export interface AuctionItemWithBids {
   end_date: string;
   seller_id: string;
   status: string;
+  reserve_price: number | null;
+  winner_id: string | null;
+  final_selling_price: number | null;
+  reserve_met: boolean | null;
 }
 
 export const useBidding = (auctionItemId: string | null) => {
@@ -43,7 +47,7 @@ export const useBidding = (auctionItemId: string | null) => {
       
       const { data, error } = await supabase
         .from("auction_items")
-        .select("id, title, current_bid, starting_bid, bid_increment, highest_bidder_id, bid_count, end_date, seller_id, status")
+        .select("id, title, current_bid, starting_bid, bid_increment, highest_bidder_id, bid_count, end_date, seller_id, status, reserve_price, winner_id, final_selling_price, reserve_met")
         .eq("id", auctionItemId)
         .single();
 
