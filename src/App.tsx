@@ -1,154 +1,74 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { QueryClient } from "react-query";
+import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/contexts/CartContext";
-import AuthGuard from "@/components/AuthGuard";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/auth/Auth";
-import CreateListing from "./pages/listing/CreateListing";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import Home from "./pages/Home";
+import Auctions from "./pages/Auctions";
+import Declutter from "./pages/Declutter";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import CreateAuctionItem from "./pages/CreateAuctionItem";
+import CreateDeclutterItem from "./pages/CreateDeclutterItem";
+import EditAuctionItem from "./pages/EditAuctionItem";
+import EditDeclutterItem from "./pages/EditDeclutterItem";
 import WatchList from "./pages/WatchList";
-import Search from "./pages/Search";
-import ItemDetail from "./pages/item/ItemDetail";
-import AllAuctions from "./pages/AllAuctions";
-import HowItWorksPage from "./pages/HowItWorks";
-import ContactPage from "./pages/Contact";
-import AboutPage from "./pages/About";
-import Checkout from "./pages/Checkout";
-import PaymentConfirmation from "./pages/PaymentConfirmation";
 import Cart from "./pages/Cart";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import Checkout from "./pages/Checkout";
+import CheckoutFlow from "./pages/CheckoutFlow";
+import PaymentConfirmation from "./pages/PaymentConfirmation";
+import ItemDetail from "./pages/item/ItemDetail";
+import DeclutterDetail from "./pages/declutter/DeclutterDetail";
 import Dashboard from "./pages/dashboard/Dashboard";
-import { 
-  MyBidsPage, 
-  WonAuctionsPage, 
-  FavoritesPage, 
-  PaymentHistoryPage 
-} from "./pages/dashboard/BuyerPages";
-import {
-  MyListingsPage,
-  CreateListingPage,
-  SoldItemsPage,
-  EarningsPage
-} from "./pages/dashboard/SellerPages";
-import {
-  NotificationsPage,
-  ProfilePage,
-  SettingsPage
-} from "./pages/dashboard/SharedPages";
-import {
-  DeclutterListingsPage,
-  EditDeclutterListingPage
-} from "./pages/dashboard/DeclutterPages";
 import OrdersPage from "./pages/dashboard/OrdersPage";
 import OrderDetail from "./pages/dashboard/OrderDetail";
-import Declutter from "./pages/declutter/Declutter";
-import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
-import CreateDeclutterListing from "./pages/declutter/CreateDeclutterListing";
-import EditListing from "./pages/dashboard/seller/EditListing";
-import BrowseCategories from "./pages/BrowseCategories";
-import CategoryPage from "./pages/CategoryPage";
-import CheckoutFlow from "./pages/CheckoutFlow";
-import OrderConfirmation from "./pages/OrderConfirmation";
+import { MyBidsPage, WonAuctionsPage, FavoritesPage, PaymentHistoryPage } from "./pages/dashboard/BuyerPages";
+import AuctionPayment from "./pages/AuctionPayment";
 
-const App = () => {
-  const [queryClient] = useState(() => new QueryClient());
-  
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+    <QueryClient>
+      <Toaster />
+      <CartProvider>
         <BrowserRouter>
-          <CartProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              
-              {/* Protected Routes */}
-              <Route path="/create-listing" element={
-                <AuthGuard requireAuth>
-                  <CreateListing />
-                </AuthGuard>
-              } />
-              <Route path="/create-declutter-listing" element={
-                <AuthGuard requireAuth>
-                  <CreateDeclutterListing />
-                </AuthGuard>
-              } />
-              <Route path="/admin" element={
-                <AuthGuard requireAuth>
-                  <AdminDashboard />
-                </AuthGuard>
-              } />
-              <Route path="/watch-list" element={
-                <AuthGuard requireAuth>
-                  <WatchList />
-                </AuthGuard>
-              } />
-              
-              {/* Public Routes */}
-              <Route path="/search" element={<Search />} />
-              <Route path="/item/:itemId" element={<ItemDetail />} />
-              <Route path="/declutter" element={<Declutter />} />
-              <Route path="/declutter/:id" element={<DeclutterListingDetail />} />
-              <Route path="/auctions" element={<AllAuctions />} />
-              <Route path="/browse-categories" element={<BrowseCategories />} />
-              <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
-              <Route path="/how-it-works" element={<HowItWorksPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              
-              {/* Cart and Checkout Routes */}
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/checkout-flow" element={<CheckoutFlow />} />
-              <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-              
-              {/* Dashboard Routes - All Protected */}
-              <Route path="/dashboard" element={
-                <AuthGuard requireAuth>
-                  <DashboardLayout />
-                </AuthGuard>
-              }>
-                <Route index element={<Dashboard />} />
-                
-                {/* Buyer Pages */}
-                <Route path="bids" element={<MyBidsPage />} />
-                <Route path="won-auctions" element={<WonAuctionsPage />} />
-                <Route path="favorites" element={<FavoritesPage />} />
-                <Route path="payment-history" element={<PaymentHistoryPage />} />
-                <Route path="orders" element={<OrdersPage />} />
-                <Route path="orders/:orderId" element={<OrderDetail />} />
-                
-                {/* Seller Pages */}
-                <Route path="listings" element={<MyListingsPage />} />
-                <Route path="create-listing" element={<CreateListingPage />} />
-                <Route path="edit-listing/:id" element={<EditListing />} />
-                <Route path="declutter-listings" element={<DeclutterListingsPage />} />
-                <Route path="edit-declutter-listing/:id" element={<EditDeclutterListingPage />} />
-                <Route path="sold-items" element={<SoldItemsPage />} />
-                <Route path="earnings" element={<EarningsPage />} />
-                
-                {/* Shared Pages */}
-                <Route path="notifications" element={<NotificationsPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </CartProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auctions" element={<Auctions />} />
+            <Route path="/declutter" element={<Declutter />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/create-auction-item" element={<CreateAuctionItem />} />
+            <Route path="/create-declutter-item" element={<CreateDeclutterItem />} />
+            <Route path="/edit-auction-item/:itemId" element={<EditAuctionItem />} />
+            <Route path="/edit-declutter-item/:itemId" element={<EditDeclutterItem />} />
+            <Route path="/watch-list" element={<WatchList />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout-flow" element={<CheckoutFlow />} />
+            <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+            <Route path="/item/:itemId" element={<ItemDetail />} />
+            <Route path="/declutter/:itemId" element={<DeclutterDetail />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/orders" element={<OrdersPage />} />
+            <Route path="/dashboard/orders/:orderId" element={<OrderDetail />} />
+            <Route path="/dashboard/my-bids" element={<MyBidsPage />} />
+            <Route path="/dashboard/won-auctions" element={<WonAuctionsPage />} />
+            <Route path="/dashboard/favorites" element={<FavoritesPage />} />
+            <Route path="/dashboard/payment-history" element={<PaymentHistoryPage />} />
+            
+            {/* Add the new auction payment route */}
+            <Route path="/auction-payment" element={<AuctionPayment />} />
+            
+            {/* Add a default route to redirect to home page */}
+            <Route path="*" element={<Home />} />
+          </Routes>
         </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+      </CartProvider>
+    </QueryClient>
   );
-};
+}
 
 export default App;

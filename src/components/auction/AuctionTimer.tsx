@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from "react";
-import { Clock, Trophy, XCircle } from "lucide-react";
+import { Clock, Trophy, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import PayNowButton from "./PayNowButton";
 
 interface AuctionTimerProps {
   endDate: string;
@@ -8,7 +10,9 @@ interface AuctionTimerProps {
   winnerId?: string | null;
   currentUserId?: string | null;
   reserveMet?: boolean | null;
-  compact?: boolean;
+  auctionId?: string;
+  paymentCompleted?: boolean;
+  className?: string;
 }
 
 const AuctionTimer = ({ 
@@ -16,16 +20,13 @@ const AuctionTimer = ({
   status, 
   winnerId, 
   currentUserId, 
-  reserveMet,
-  compact = false 
+  reserveMet, 
+  auctionId,
+  paymentCompleted = false,
+  className 
 }: AuctionTimerProps) => {
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-    total: number;
-  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -33,127 +34,82 @@ const AuctionTimer = ({
       const end = new Date(endDate).getTime();
       const difference = end - now;
 
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      if (difference <= 0 || status === "Ended") {
+        setIsEnded(true);
+        setTimeLeft("Ended");
+        return;
+      }
 
-        setTimeLeft({ days, hours, minutes, seconds, total: difference });
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setTimeLeft(`${minutes}m ${seconds}s`);
       } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
+        setTimeLeft(`${seconds}s`);
       }
     };
 
-    // Calculate immediately
     calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
 
-    // Update every second
-    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, [endDate, status]);
 
-    return () => clearInterval(timer);
-  }, [endDate]);
+  const isCurrentUserWinner = currentUserId && winnerId === currentUserId;
+  const shouldShowPayButton = isCurrentUserWinner && isEnded && reserveMet && auctionId;
 
-  const formatTime = (value: number): string => {
-    return value.toString().padStart(2, '0');
-  };
-
-  const getStatusDisplay = () => {
-    if (status === 'Ended') {
-      if (winnerId) {
-        if (reserveMet === false) {
-          return (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <XCircle className="h-3 w-3" />
-              Reserve Not Met
-            </Badge>
-          );
-        } else if (currentUserId === winnerId) {
-          return (
-            <Badge variant="default" className="flex items-center gap-1 bg-green-500">
-              <Trophy className="h-3 w-3" />
-              You Won!
-            </Badge>
-          );
-        } else {
-          return (
-            <Badge variant="destructive" className="flex items-center gap-1">
-              <XCircle className="h-3 w-3" />
-              Auction Ended
-            </Badge>
-          );
-        }
-      } else {
-        return (
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <XCircle className="h-3 w-3" />
-            No Bids
-          </Badge>
-        );
-      }
-    }
-
-    if (timeLeft.total <= 0) {
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          Ending Soon
-        </Badge>
-      );
-    }
-
-    return null;
-  };
-
-  const getTimeDisplay = () => {
-    if (status === 'Ended' || timeLeft.total <= 0) {
-      return null;
-    }
-
-    if (compact) {
-      if (timeLeft.days > 0) return `${timeLeft.days}d ${timeLeft.hours}h`;
-      if (timeLeft.hours > 0) return `${timeLeft.hours}h ${timeLeft.minutes}m`;
-      return `${timeLeft.minutes}m ${timeLeft.seconds}s`;
-    }
-
+  if (isEnded) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <Clock className="h-4 w-4" />
-        <div className="flex gap-1">
-          {timeLeft.days > 0 && (
-            <span className="bg-muted px-2 py-1 rounded text-xs font-mono">
-              {formatTime(timeLeft.days)}d
-            </span>
+      <div className={`space-y-2 ${className}`}>
+        <div className="flex items-center gap-2">
+          {isCurrentUserWinner ? (
+            <>
+              <Trophy className="h-4 w-4 text-yellow-500" />
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                You Won!
+              </Badge>
+            </>
+          ) : reserveMet === false ? (
+            <>
+              <AlertCircle className="h-4 w-4 text-orange-500" />
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                Reserve Not Met
+              </Badge>
+            </>
+          ) : (
+            <>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Badge variant="secondary">Auction Ended</Badge>
+            </>
           )}
-          <span className="bg-muted px-2 py-1 rounded text-xs font-mono">
-            {formatTime(timeLeft.hours)}h
-          </span>
-          <span className="bg-muted px-2 py-1 rounded text-xs font-mono">
-            {formatTime(timeLeft.minutes)}m
-          </span>
-          <span className="bg-muted px-2 py-1 rounded text-xs font-mono">
-            {formatTime(timeLeft.seconds)}s
-          </span>
         </div>
-      </div>
-    );
-  };
-
-  const statusDisplay = getStatusDisplay();
-  const timeDisplay = getTimeDisplay();
-
-  if (compact) {
-    return (
-      <div className="text-xs text-muted-foreground">
-        {statusDisplay || timeDisplay}
+        
+        {shouldShowPayButton && (
+          <PayNowButton
+            auctionId={auctionId}
+            isWinner={true}
+            auctionEnded={true}
+            paymentCompleted={paymentCompleted}
+            size="sm"
+          />
+        )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {statusDisplay && statusDisplay}
-      {timeDisplay && timeDisplay}
+    <div className={`flex items-center gap-2 ${className}`}>
+      <Clock className="h-4 w-4 text-primary" />
+      <Badge variant="outline" className="font-mono">
+        {timeLeft}
+      </Badge>
     </div>
   );
 };
