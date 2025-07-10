@@ -1,0 +1,1 @@
+export { EditDeclutterListingPage as default } from '../dashboard/DeclutterPages';
