@@ -32,8 +32,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster />
-      <CartProvider>
-        <BrowserRouter>
+      <BrowserRouter>
+        <CartProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<Search />} />
@@ -66,8 +66,8 @@ function App() {
             {/* Add a default route to redirect to home page */}
             <Route path="*" element={<Index />} />
           </Routes>
-        </BrowserRouter>
-      </CartProvider>
+        </CartProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
