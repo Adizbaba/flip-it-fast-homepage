@@ -13,6 +13,7 @@ interface AuctionTimerProps {
   auctionId?: string;
   paymentCompleted?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 const AuctionTimer = ({ 
@@ -23,7 +24,8 @@ const AuctionTimer = ({
   reserveMet, 
   auctionId,
   paymentCompleted = false,
-  className 
+  className,
+  compact = false
 }: AuctionTimerProps) => {
   const [timeLeft, setTimeLeft] = useState("");
   const [isEnded, setIsEnded] = useState(false);
@@ -45,14 +47,24 @@ const AuctionTimer = ({
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-      } else if (hours > 0) {
-        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-      } else if (minutes > 0) {
-        setTimeLeft(`${minutes}m ${seconds}s`);
+      if (compact) {
+        if (days > 0) {
+          setTimeLeft(`${days}d ${hours}h`);
+        } else if (hours > 0) {
+          setTimeLeft(`${hours}h ${minutes}m`);
+        } else {
+          setTimeLeft(`${minutes}m ${seconds}s`);
+        }
       } else {
-        setTimeLeft(`${seconds}s`);
+        if (days > 0) {
+          setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+        } else if (hours > 0) {
+          setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+        } else if (minutes > 0) {
+          setTimeLeft(`${minutes}m ${seconds}s`);
+        } else {
+          setTimeLeft(`${seconds}s`);
+        }
       }
     };
 
@@ -60,10 +72,10 @@ const AuctionTimer = ({
     const interval = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(interval);
-  }, [endDate, status]);
+  }, [endDate, status, compact]);
 
   const isCurrentUserWinner = currentUserId && winnerId === currentUserId;
-  const shouldShowPayButton = isCurrentUserWinner && isEnded && reserveMet && auctionId;
+  const shouldShowPayButton = isCurrentUserWinner && isEnded && reserveMet && auctionId && !compact;
 
   if (isEnded) {
     return (

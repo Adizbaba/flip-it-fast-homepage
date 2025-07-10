@@ -83,7 +83,14 @@ const AuctionPayment = () => {
           return;
         }
 
-        setAuction(data);
+        // Transform the data to match our interface
+        const transformedData: AuctionData = {
+          ...data,
+          images: Array.isArray(data.images) ? data.images as string[] : [],
+          profiles: data.profiles as { username: string; avatar_url: string | null; }
+        };
+
+        setAuction(transformedData);
       } catch (error) {
         console.error("Error fetching auction:", error);
         toast({
@@ -160,9 +167,7 @@ const AuctionPayment = () => {
     );
   }
 
-  const mainImage = Array.isArray(auction.images) && auction.images.length > 0 
-    ? auction.images[0] 
-    : "/placeholder.svg";
+  const mainImage = auction.images.length > 0 ? auction.images[0] : "/placeholder.svg";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

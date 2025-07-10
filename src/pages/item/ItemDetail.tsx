@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useToast } from "@/components/ui/use-toast";
+import PayNowButton from "@/components/auction/PayNowButton";
 import {
   Carousel,
   CarouselContent,

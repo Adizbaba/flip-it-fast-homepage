@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag, ArrowRight, Clock, CheckCircle, XCircle } from "lucide-react";
@@ -108,14 +109,16 @@ const OrdersPage = () => {
                 const itemData = item.item_data as Record<string, any> || {};
                 return {
                   id: item.id,
+                  item_id: item.item_id,
+                  item_type: item.item_type,
                   title: itemData.title || 'Unknown Item',
                   price: item.price,
                   quantity: item.quantity,
                   image: itemData.image,
-                };
+                } as OrderItem;
               });
               
-            return { ...order, items };
+            return { ...order, items } as Order;
           });
           
           setOrders(ordersWithItems);
@@ -289,7 +292,7 @@ const OrdersPage = () => {
               <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-medium mb-2">No orders yet</h2>
               <p className="text-muted-foreground mb-6">You haven't made any purchases or won any auctions yet.</p>
-              <Button onClick={() => navigate("/auctions")}>Browse Auctions</Button>
+              <Button onClick={() => navigate("/search")}>Browse Auctions</Button>
             </div>
           )}
         </div>
