@@ -7,6 +7,7 @@ import MobileNavigation from "@/components/navigation/MobileNavigation";
 import UserMenuSection from "@/components/navigation/UserMenuSection";
 import { useAuth } from "@/lib/auth";
 import { CreateListingModal } from "@/components/CreateListingModal";
+import { NotificationCenter } from "@/components/NotificationCenter";
 
 // Mock categories data - in a real app, this would come from an API
 export const auctionCategories = [

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CartIcon from "@/components/CartIcon";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAuth } from "@/lib/auth";
 
 interface UserMenuSectionProps {
@@ -51,6 +52,7 @@ const UserMenuSection = ({
       {!isMobile && (
         <>
           <CartIcon />
+          {user && <NotificationCenter />}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -94,7 +96,8 @@ const UserMenuSection = ({
       {isMobile && (
         <>
           <CartIcon />
-          <Button 
+          {user && <NotificationCenter />}
+          <Button
             variant="ghost" 
             size="sm" 
             onClick={toggleMobileMenu}

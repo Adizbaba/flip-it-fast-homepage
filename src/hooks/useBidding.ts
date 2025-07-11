@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export interface Bid {
   id: string;
@@ -35,7 +35,6 @@ export interface AuctionItemWithBids {
 
 export const useBidding = (auctionItemId: string | null) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -116,8 +115,7 @@ export const useBidding = (auctionItemId: string | null) => {
       return data;
     },
     onSuccess: () => {
-      toast({
-        title: "Bid placed successfully!",
+      toast.success("Bid placed successfully!", {
         description: "Your bid has been recorded.",
       });
       // Refetch queries to get updated data
@@ -125,10 +123,8 @@ export const useBidding = (auctionItemId: string | null) => {
       queryClient.invalidateQueries({ queryKey: ["auction-item", auctionItemId] });
     },
     onError: (error: any) => {
-      toast({
-        title: "Failed to place bid",
+      toast.error("Failed to place bid", {
         description: error.message || "Please try again.",
-        variant: "destructive",
       });
     },
   });
@@ -154,9 +150,8 @@ export const useBidding = (auctionItemId: string | null) => {
           
           // Show toast if it's not the current user's bid
           if (payload.new.bidder_id !== user?.id) {
-            toast({
-              title: "New bid placed!",
-              description: `Someone bid $${payload.new.bid_amount}`,
+            toast.info("New bid placed!", {
+              description: `Someone bid ₦${payload.new.bid_amount}`,
             });
           }
         }
@@ -181,7 +176,7 @@ export const useBidding = (auctionItemId: string | null) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [auctionItemId, user?.id, queryClient, toast]);
+  }, [auctionItemId, user?.id, queryClient]);
 
   const getCurrentBid = () => {
     if (!auctionItem) return 0;
