@@ -211,7 +211,7 @@ export const DeclutterSoldItemsPage = () => {
     listings, 
     loading, 
     error 
-  } = useDeclutterListings({ ownListings: true, soldOnly: true });
+  } = useDeclutterListings({ ownListings: true, status: 'Sold' });
   
   return (
     <div className="space-y-6">

@@ -37,6 +37,7 @@ interface UseDeclutterListingsOptions {
   limit?: number;
   page?: number;
   ownListings?: boolean;
+  status?: string;
 }
 
 export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) => {
@@ -89,6 +90,11 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       if (options.searchQuery) {
         query = query.or(`title.ilike.%${options.searchQuery}%,description.ilike.%${options.searchQuery}%`);
         countQuery = countQuery.or(`title.ilike.%${options.searchQuery}%,description.ilike.%${options.searchQuery}%`);
+      }
+      
+      if (options.status) {
+        query = query.eq('status', options.status);
+        countQuery = countQuery.eq('status', options.status);
       }
       
       if (options.ownListings) {
@@ -206,7 +212,8 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
     options.searchQuery,
     options.limit,
     options.page,
-    options.ownListings
+    options.ownListings,
+    options.status
   ]);
 
   return {
