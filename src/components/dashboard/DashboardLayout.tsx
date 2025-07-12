@@ -21,6 +21,7 @@ import {
 import { Outlet } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DashboardNav from "./DashboardNav";
+import RoleToggle from "./RoleToggle";
 import { DashboardProvider } from "@/contexts/DashboardContext";
 
 const DashboardLayout = () => {
@@ -53,7 +54,7 @@ const DashboardLayout = () => {
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full bg-gray-50">
           <Sidebar side="left" className="border-r bg-white">
-            <SidebarHeader className="border-b p-4">
+            <SidebarHeader className="border-b p-4 space-y-4">
               <div className="flex items-center space-x-2">
                 <Avatar>
                   <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -68,6 +69,7 @@ const DashboardLayout = () => {
                   <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
               </div>
+              <RoleToggle />
             </SidebarHeader>
             <SidebarContent>
               <DashboardNav />

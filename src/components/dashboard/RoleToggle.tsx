@@ -8,10 +8,10 @@ const RoleToggle = () => {
   const { activeRole, setActiveRole } = useDashboard();
 
   return (
-    <div className="flex items-center justify-center space-x-2 bg-white py-3 shadow-sm">
+    <div className="flex items-center justify-center space-x-2 bg-gray-50 rounded-lg py-2 px-3">
       <div
         className={`flex items-center space-x-2 rounded-lg p-2 transition-colors ${
-          activeRole === "buyer" ? "bg-gray-100" : ""
+          activeRole === "buyer" ? "bg-white shadow-sm" : ""
         }`}
       >
         <ShoppingBag
@@ -38,7 +38,7 @@ const RoleToggle = () => {
 
       <div
         className={`flex items-center space-x-2 rounded-lg p-2 transition-colors ${
-          activeRole === "seller" ? "bg-gray-100" : ""
+          activeRole === "seller" ? "bg-white shadow-sm" : ""
         }`}
       >
         <Store

@@ -41,11 +41,16 @@ const initialBuyerStats: BuyerStats = {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [activeRole, setActiveRole] = useState<DashboardRole>("buyer");
+  const [activeRole, setActiveRoleState] = useState<DashboardRole>("buyer");
   const [loading, setLoading] = useState(true);
   const [sellerStats, setSellerStats] = useState<SellerStats>(initialSellerStats);
   const [buyerStats, setBuyerStats] = useState<BuyerStats>(initialBuyerStats);
   const { user } = useAuth();
+
+  const setActiveRole = (role: DashboardRole) => {
+    setActiveRoleState(role);
+    localStorage.setItem('dashboardActiveRole', role);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -57,6 +62,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       
       try {
+        // Check localStorage for saved role preference
+        const savedRole = localStorage.getItem('dashboardActiveRole') as DashboardRole;
+        
         // Check if the user has any seller activity
         const { data: sellerData, error: sellerError } = await supabase
           .from('auction_items')
@@ -71,11 +79,18 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
           .eq('user_id', user.id)
           .limit(1);
         
-        // Set default role based on activity
-        if (sellerData && sellerData.length > 0) {
-          setActiveRole('seller');
+        // Set role based on saved preference or activity
+        if (savedRole && (savedRole === 'buyer' || savedRole === 'seller')) {
+          setActiveRoleState(savedRole);
+        } else if (sellerData && sellerData.length > 0) {
+          setActiveRoleState('seller');
+          localStorage.setItem('dashboardActiveRole', 'seller');
         } else if (buyerData && buyerData.length > 0) {
-          setActiveRole('buyer');
+          setActiveRoleState('buyer');
+          localStorage.setItem('dashboardActiveRole', 'buyer');
+        } else {
+          setActiveRoleState('buyer');
+          localStorage.setItem('dashboardActiveRole', 'buyer');
         }
         
         // Fetch seller statistics if user has seller activity
