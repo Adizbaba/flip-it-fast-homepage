@@ -206,6 +206,74 @@ export const DeclutterListingsPage = () => {
   );
 };
 
+export const DeclutterSoldItemsPage = () => {
+  const { 
+    listings, 
+    loading, 
+    error 
+  } = useDeclutterListings({ ownListings: true, soldOnly: true });
+  
+  return (
+    <div className="space-y-6">
+      <div className="mb-8">
+        <h1 className="mb-1 text-3xl font-bold tracking-tight">Sold Declutter Items</h1>
+        <p className="text-gray-500">View your sold bulk listings and transaction history</p>
+      </div>
+      
+      {loading ? (
+        <div className="text-center py-8">Loading sold items...</div>
+      ) : error ? (
+        <div className="text-center py-8 text-red-500">
+          Error loading sold items. Please try again.
+        </div>
+      ) : listings.length === 0 ? (
+        <div className="text-center py-12 border rounded-lg">
+          <PackageOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">No sold items yet</h3>
+          <p className="text-muted-foreground">
+            Your sold declutter listings will appear here once completed
+          </p>
+        </div>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Sold Price</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Sold Date</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {listings.map((listing) => (
+                <TableRow key={listing.id}>
+                  <TableCell className="font-medium">
+                    <div className="max-w-[200px] truncate">
+                      {listing.title}
+                    </div>
+                  </TableCell>
+                  <TableCell>${formatCurrency(listing.bulk_price)}</TableCell>
+                  <TableCell>{listing.quantity}</TableCell>
+                  <TableCell>
+                    {format(new Date(listing.updated_at), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {listing.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const EditDeclutterListingPage = () => {
   return (
     <div className="space-y-6">

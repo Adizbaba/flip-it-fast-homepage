@@ -26,7 +26,7 @@ import OrdersPage from "./pages/dashboard/OrdersPage";
 import OrderDetail from "./pages/dashboard/OrderDetail";
 import { MyBidsPage, WonAuctionsPage, FavoritesPage, PaymentHistoryPage } from "./pages/dashboard/BuyerPages";
 import { MyListingsPage, CreateListingPage, SoldItemsPage, EarningsPage } from "./pages/dashboard/SellerPages";
-import { MyDeclutterListingsPage, DeclutterSoldItemsPage } from "./pages/dashboard/DeclutterPages";
+import { DeclutterListingsPage, DeclutterSoldItemsPage } from "./pages/dashboard/DeclutterPages";
 import { NotificationsPage, ProfilePage, SettingsPage } from "./pages/dashboard/SharedPages";
 import AuctionPayment from "./pages/AuctionPayment";
 
@@ -71,7 +71,7 @@ function App() {
               <Route path="create-listing" element={<CreateListingPage />} />
               <Route path="sold-items" element={<SoldItemsPage />} />
               <Route path="earnings" element={<EarningsPage />} />
-              <Route path="declutter-listings" element={<MyDeclutterListingsPage />} />
+              <Route path="declutter-listings" element={<DeclutterListingsPage />} />
               <Route path="declutter-sold-items" element={<DeclutterSoldItemsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<ProfilePage />} />
