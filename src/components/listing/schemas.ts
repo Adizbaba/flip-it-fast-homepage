@@ -11,26 +11,26 @@ const baseListingSchema = z.object({
   shippingOptions: z.string(),
   returnPolicy: z.string(),
   // SKU and brand for regular listings
-  sku: z.string().optional(),
-  brand: z.string().optional(),
-  weight: z.number().optional(),
+  sku: z.string().default("").optional(),
+  brand: z.string().default("").optional(),
+  weight: z.number().default(0).optional(),
   dimensions: z.object({
-    height: z.number().optional(),
-    width: z.number().optional(),
-    length: z.number().optional(),
-  }).optional(),
-  seoTitle: z.string().optional(),
-  seoDescription: z.string().optional(),
-  tags: z.string().optional(),
+    height: z.number().default(0).optional(),
+    width: z.number().default(0).optional(),
+    length: z.number().default(0).optional(),
+  }).default({}).optional(),
+  seoTitle: z.string().default("").optional(),
+  seoDescription: z.string().default("").optional(),
+  tags: z.string().default("").optional(),
 });
 
 // Regular listing schema - fixed price, no auction fields
 export const regularListingSchema = baseListingSchema.extend({
   listingType: z.literal("regular"),
   price: z.number().min(0.01, "Price must be greater than 0."),
-  salePrice: z.number().optional(),
-  minOrderQuantity: z.number().int().min(1).optional(),
-  allowBackorders: z.boolean().optional(),
+  salePrice: z.number().default(0).optional(),
+  minOrderQuantity: z.number().int().min(1).default(1).optional(),
+  allowBackorders: z.boolean().default(false).optional(),
 });
 
 // Auction listing schema - includes auction-specific fields
@@ -38,8 +38,8 @@ export const auctionListingSchema = baseListingSchema.extend({
   listingType: z.literal("auction"),
   startingBid: z.number().min(0.01, "Starting bid must be greater than 0."),
   bidIncrement: z.number().min(0.01, "Bid increment must be greater than 0."),
-  reservePrice: z.number().optional(),
-  buyNowPrice: z.number().optional(),
+  reservePrice: z.number().default(0).optional(),
+  buyNowPrice: z.number().default(0).optional(),
   auctionType: z.string().min(1, "Please select an auction type."),
   startDate: z.date({
     required_error: "Start date is required.",
@@ -47,9 +47,9 @@ export const auctionListingSchema = baseListingSchema.extend({
   endDate: z.date({
     required_error: "End date is required.",
   }),
-  autoExtend: z.boolean().optional(),
-  extensionDuration: z.number().optional(),
-  triggerTimeframe: z.number().optional(),
+  autoExtend: z.boolean().default(false).optional(),
+  extensionDuration: z.number().default(5).optional(),
+  triggerTimeframe: z.number().default(2).optional(),
 });
 
 // Combined schema that validates based on listing type

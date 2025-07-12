@@ -43,7 +43,7 @@ export const AuctionDetails = ({ control, categories, categoriesLoading }: Aucti
               <FormLabel>Item Condition</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -74,7 +74,7 @@ export const AuctionDetails = ({ control, categories, categoriesLoading }: Aucti
             <FormLabel>Auction Type</FormLabel>
             <Select 
               onValueChange={field.onChange} 
-              defaultValue={field.value}
+              value={field.value}
             >
               <FormControl>
                 <SelectTrigger>

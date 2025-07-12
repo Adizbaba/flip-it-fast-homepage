@@ -40,7 +40,7 @@ export const CategorySelector = ({ control, categories, categoriesLoading }: Cat
           <FormLabel>Item Category</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            defaultValue={field.value}
+            value={field.value}
           >
             <FormControl>
               <SelectTrigger>

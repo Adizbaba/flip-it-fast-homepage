@@ -54,6 +54,7 @@ export const DateTimePicker = ({ control, name, label }: DateTimePickerProps) =>
               <div className="p-3 border-t border-border">
                 <Input
                   type="time"
+                  value={field.value ? format(field.value, "HH:mm") : ""}
                   onChange={(e) => {
                     const [hours, minutes] = e.target.value.split(':');
                     const newDate = new Date(field.value || new Date());

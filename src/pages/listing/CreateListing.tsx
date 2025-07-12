@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth";
-import { Form } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Control } from "react-hook-form";
 import { 
@@ -26,9 +26,11 @@ import { AdvancedFields } from "@/components/listing/AdvancedFields";
 import { PaymentInfoDialog } from "@/components/listing/PaymentInfoDialog";
 import { ListingTabs } from "@/components/listing/ListingTabs";
 import ListingImageUpload from "@/components/listing/ListingImageUpload";
+import { CategorySelector } from "@/components/listing/CategorySelector";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CreateListing = () => {
   const { user } = useAuth();
@@ -59,6 +61,16 @@ const CreateListing = () => {
       returnPolicy: "No returns accepted",
       // Regular listing defaults
       price: 0,
+      salePrice: undefined,
+      minOrderQuantity: undefined,
+      allowBackorders: false,
+      sku: "",
+      brand: "",
+      weight: undefined,
+      dimensions: undefined,
+      seoTitle: "",
+      seoDescription: "",
+      tags: "",
     },
   });
 
@@ -93,6 +105,16 @@ const CreateListing = () => {
         }),
         returnPolicy: "No returns accepted",
         price: 0,
+        salePrice: undefined,
+        minOrderQuantity: undefined,
+        allowBackorders: false,
+        sku: "",
+        brand: "",
+        weight: undefined,
+        dimensions: undefined,
+        seoTitle: "",
+        seoDescription: "",
+        tags: "",
       });
     } else {
       form.reset({
@@ -109,9 +131,21 @@ const CreateListing = () => {
         returnPolicy: "No returns accepted",
         startingBid: 0,
         bidIncrement: 1,
+        reservePrice: undefined,
+        buyNowPrice: undefined,
         auctionType: "standard",
         startDate: new Date(),
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        autoExtend: false,
+        extensionDuration: undefined,
+        triggerTimeframe: undefined,
+        sku: "",
+        brand: "",
+        weight: undefined,
+        dimensions: undefined,
+        seoTitle: "",
+        seoDescription: "",
+        tags: "",
       });
     }
     
@@ -349,12 +383,41 @@ const CreateListing = () => {
                     <RegularListingForm control={form.control as Control<RegularListingFormData>} />
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <label className="text-sm font-medium">Category & Condition</label>
-                        <div className="grid grid-cols-1 gap-4">
-                          {/* Category and condition selectors would go here */}
-                        </div>
-                      </div>
+                      <CategorySelector 
+                        control={form.control}
+                        categories={categories || []}
+                        categoriesLoading={categoriesLoading}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="condition"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Item Condition</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select condition" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="New">New</SelectItem>
+                                <SelectItem value="Like New">Like New</SelectItem>
+                                <SelectItem value="Good">Good</SelectItem>
+                                <SelectItem value="Fair">Fair</SelectItem>
+                                <SelectItem value="Poor">Poor</SelectItem>
+                                <SelectItem value="Refurbished">Refurbished</SelectItem>
+                                <SelectItem value="Vintage">Vintage</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
                     <AdvancedFields control={form.control} />
