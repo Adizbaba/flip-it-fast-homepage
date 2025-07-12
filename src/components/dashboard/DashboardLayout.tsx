@@ -20,16 +20,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Outlet } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import DashboardNav from "./DashboardNav";
-import RoleToggle from "./RoleToggle";
-import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
+import { DashboardProvider } from "@/contexts/DashboardContext";
 
-export const DashboardContent = () => {
+const DashboardLayout = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { activeRole } = useDashboard();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -45,24 +41,6 @@ export const DashboardContent = () => {
       </div>
     );
   }
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <div className="flex-1">
-        <RoleToggle />
-        <div className="container mx-auto py-6">
-          <Outlet />
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
-};
-
-const DashboardLayout = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
 
   if (!user) {
     return null;
@@ -120,7 +98,9 @@ const DashboardLayout = () => {
                 <div className="flex items-center justify-between px-4 py-2">
                   <SidebarTrigger className="md:hidden" />
                 </div>
-                <DashboardContent />
+                <div className="container mx-auto py-6">
+                  <Outlet />
+                </div>
               </main>
             </div>
           </SidebarInset>

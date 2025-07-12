@@ -21,9 +21,13 @@ import PaymentConfirmation from "./pages/PaymentConfirmation";
 import ItemDetail from "./pages/item/ItemDetail";
 import DeclutterListingDetail from "./pages/declutter/DeclutterListingDetail";
 import Dashboard from "./pages/dashboard/Dashboard";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
 import OrdersPage from "./pages/dashboard/OrdersPage";
 import OrderDetail from "./pages/dashboard/OrderDetail";
 import { MyBidsPage, WonAuctionsPage, FavoritesPage, PaymentHistoryPage } from "./pages/dashboard/BuyerPages";
+import { MyListingsPage, CreateListingPage, SoldItemsPage, EarningsPage } from "./pages/dashboard/SellerPages";
+import { MyDeclutterListingsPage, DeclutterSoldItemsPage } from "./pages/dashboard/DeclutterPages";
+import { NotificationsPage, ProfilePage, SettingsPage } from "./pages/dashboard/SharedPages";
 import AuctionPayment from "./pages/AuctionPayment";
 
 const queryClient = new QueryClient();
@@ -52,16 +56,27 @@ function App() {
             <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
             <Route path="/item/:itemId" element={<ItemDetail />} />
             <Route path="/declutter/:itemId" element={<DeclutterListingDetail />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/orders" element={<OrdersPage />} />
-            <Route path="/dashboard/orders/:orderId" element={<OrderDetail />} />
-            <Route path="/dashboard/my-bids" element={<MyBidsPage />} />
-            <Route path="/dashboard/won-auctions" element={<WonAuctionsPage />} />
-            <Route path="/dashboard/favorites" element={<FavoritesPage />} />
-            <Route path="/dashboard/payment-history" element={<PaymentHistoryPage />} />
-            
-            {/* Add the new auction payment route */}
             <Route path="/auction-payment" element={<AuctionPayment />} />
+            
+            {/* All dashboard routes now use DashboardLayout */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="orders" element={<OrdersPage />} />
+              <Route path="orders/:orderId" element={<OrderDetail />} />
+              <Route path="bids" element={<MyBidsPage />} />
+              <Route path="won-auctions" element={<WonAuctionsPage />} />
+              <Route path="favorites" element={<FavoritesPage />} />
+              <Route path="payment-history" element={<PaymentHistoryPage />} />
+              <Route path="listings" element={<MyListingsPage />} />
+              <Route path="create-listing" element={<CreateListingPage />} />
+              <Route path="sold-items" element={<SoldItemsPage />} />
+              <Route path="earnings" element={<EarningsPage />} />
+              <Route path="declutter-listings" element={<MyDeclutterListingsPage />} />
+              <Route path="declutter-sold-items" element={<DeclutterSoldItemsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
             
             {/* Add a default route to redirect to home page */}
             <Route path="*" element={<Index />} />
