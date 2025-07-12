@@ -7,6 +7,10 @@ import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Contact from "./pages/Contact";
 import HowItWorks from "./pages/HowItWorks";
+import AllAuctions from "./pages/AllAuctions";
+import BrowseCategories from "./pages/BrowseCategories";
+import CategoryPage from "./pages/CategoryPage";
+import About from "./pages/About";
 import Auth from "./pages/auth/Auth";
 import ProfileManagement from "./pages/dashboard/ProfileManagement";
 import CreateListing from "./pages/listing/CreateListing";
@@ -43,6 +47,10 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/auctions" element={<AllAuctions />} />
+            <Route path="/browse-categories" element={<BrowseCategories />} />
+            <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<ProfileManagement />} />
             <Route path="/create-listing" element={<CreateListing />} />
