@@ -28,6 +28,7 @@ const baseListingSchema = z.object({
 export const regularListingSchema = baseListingSchema.extend({
   listingType: z.literal("regular"),
   price: z.number().min(0.01, "Price must be greater than 0."),
+  location: z.string().min(1, "Location is required."),
   salePrice: z.number().default(0).optional(),
   minOrderQuantity: z.number().int().min(1).default(1).optional(),
   allowBackorders: z.boolean().default(false).optional(),

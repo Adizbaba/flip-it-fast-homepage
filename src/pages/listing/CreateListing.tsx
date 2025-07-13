@@ -19,7 +19,7 @@ import {
 } from "@/components/listing/schemas";
 import { BasicDetails } from "@/components/listing/BasicDetails";
 import { AuctionDetails } from "@/components/listing/AuctionDetails";
-import { RegularListingForm } from "@/components/listing/RegularListingForm";
+import { ModernRegularListingForm } from "@/components/listing/ModernRegularListingForm";
 import { AuctionSpecificFields } from "@/components/listing/AuctionSpecificFields";
 import { AdvancedFields } from "@/components/listing/AdvancedFields";
 import { PaymentInfoDialog } from "@/components/listing/PaymentInfoDialog";
@@ -30,6 +30,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Package } from "lucide-react";
 
 const CreateListing = () => {
   const { user } = useAuth();
@@ -60,6 +61,7 @@ const CreateListing = () => {
       returnPolicy: "No returns accepted",
       // Regular listing defaults
       price: 0,
+      location: "",
       salePrice: undefined,
       minOrderQuantity: undefined,
       allowBackorders: false,
@@ -104,6 +106,7 @@ const CreateListing = () => {
         }),
         returnPolicy: "No returns accepted",
         price: 0,
+        location: "",
         salePrice: undefined,
         minOrderQuantity: undefined,
         allowBackorders: false,
@@ -358,106 +361,92 @@ const CreateListing = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
-      <main className="flex-1 bg-gray-50 flex items-center justify-center py-12">
-        <div className="w-full max-w-4xl px-4">
-          <div className="bg-white rounded-xl shadow-md p-8 md:p-12 space-y-6">
-            <h1 className="text-3xl font-bold text-center mb-6">Create New Listing</h1>
-            
-            {submissionError && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-                <p className="text-red-800 font-medium">Error: {submissionError}</p>
-                <p className="text-sm text-red-600 mt-1">Please check your form values and try again.</p>
-              </div>
-            )}
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <ListingTabs onTabChange={handleTabChange} defaultValue="regular">
-                  <TabsContent value="regular" className="space-y-6">
-                    <BasicDetails control={form.control} />
-                    
-                    <div className="p-4 border rounded-md bg-muted/30">
-                      <h3 className="font-medium mb-4">Upload Images</h3>
-                      <ListingImageUpload images={images} setImages={setImages} />
-                    </div>
+      <main className="flex-1 py-8 md:py-12">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+            {/* Header Section */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8">
+              <h1 className="text-3xl md:text-4xl font-bold text-center">Create New Listing</h1>
+              <p className="text-center mt-2 text-blue-100">List your items for sale on FastFlip marketplace</p>
+            </div>
 
-                    <RegularListingForm control={form.control as Control<RegularListingFormData>} />
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <CategorySelector 
+            <div className="p-8 md:p-12">
+              {submissionError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-800 font-medium">Error: {submissionError}</p>
+                  <p className="text-sm text-red-600 mt-1">Please check your form values and try again.</p>
+                </div>
+              )}
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <ListingTabs onTabChange={handleTabChange} defaultValue="regular">
+                    <TabsContent value="regular" className="space-y-8">
+                      {/* Image Upload Section */}
+                      <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-xl p-6">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Product Images *
+                        </h3>
+                        <ListingImageUpload images={images} setImages={setImages} />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Upload high-quality images to attract more buyers. First image will be your thumbnail.
+                        </p>
+                      </div>
+
+                      <ModernRegularListingForm 
+                        control={form.control as Control<RegularListingFormData>} 
+                        categories={categories || []}
+                        categoriesLoading={categoriesLoading}
+                      />
+
+                      <AdvancedFields control={form.control} />
+                    </TabsContent>
+
+                    <TabsContent value="auction" className="space-y-8">
+                      <BasicDetails control={form.control} />
+                      
+                      <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-xl p-6">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Product Images *
+                        </h3>
+                        <ListingImageUpload images={images} setImages={setImages} />
+                      </div>
+
+                      <AuctionSpecificFields control={form.control as Control<AuctionListingFormData>} />
+                      
+                      <AuctionDetails 
                         control={form.control}
                         categories={categories || []}
                         categoriesLoading={categoriesLoading}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="condition"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Item Condition</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              value={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select condition" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="New">New</SelectItem>
-                                <SelectItem value="Like New">Like New</SelectItem>
-                                <SelectItem value="Good">Good</SelectItem>
-                                <SelectItem value="Fair">Fair</SelectItem>
-                                <SelectItem value="Poor">Poor</SelectItem>
-                                <SelectItem value="Refurbished">Refurbished</SelectItem>
-                                <SelectItem value="Vintage">Vintage</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                      <AdvancedFields control={form.control} />
+                    </TabsContent>
+                  </ListingTabs>
 
-                    <AdvancedFields control={form.control} />
-                  </TabsContent>
-
-                  <TabsContent value="auction" className="space-y-6">
-                    <BasicDetails control={form.control} />
-                    
-                    <div className="p-4 border rounded-md bg-muted/30">
-                      <h3 className="font-medium mb-4">Upload Images</h3>
-                      <ListingImageUpload images={images} setImages={setImages} />
-                    </div>
-
-                    <AuctionSpecificFields control={form.control as Control<AuctionListingFormData>} />
-                    
-                    <AuctionDetails 
-                      control={form.control}
-                      categories={categories || []}
-                      categoriesLoading={categoriesLoading}
-                    />
-
-                    <AdvancedFields control={form.control} />
-                  </TabsContent>
-                </ListingTabs>
-
-                <Button type="submit" className="w-full" disabled={uploading}>
-                  {uploading ? (
-                    <>
-                      <span className="animate-spin mr-2">⭘</span> 
-                      Creating Listing...
-                    </>
-                  ) : (
-                    `Create ${activeTab === "regular" ? "Regular" : "Auction"} Listing`
-                  )}
-                </Button>
-              </form>
-            </Form>
+                  <div className="border-t pt-8">
+                    <Button 
+                      type="submit" 
+                      className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200" 
+                      disabled={uploading}
+                    >
+                      {uploading ? (
+                        <>
+                          <span className="animate-spin mr-3">⭘</span> 
+                          Creating Your Listing...
+                        </>
+                      ) : (
+                        `Create ${activeTab === "regular" ? "Normal Listing/Auction" : "Bidding Auction"} Listing`
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           </div>
           
           <PaymentInfoDialog
