@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -256,13 +255,17 @@ const CreateListing = () => {
 
       if (data.listingType === "regular") {
         const regularData = data as RegularListingFormData;
+        // For regular listings, set a far future end date to indicate it's always available
+        const farFutureDate = new Date();
+        farFutureDate.setFullYear(farFutureDate.getFullYear() + 10); // 10 years from now
+        
         insertData = {
           ...insertData,
           starting_bid: regularData.price, // Use price as starting_bid for consistency
           bid_increment: 0, // No bidding for regular listings
           auction_type: 'fixed_price',
           start_date: new Date().toISOString(),
-          end_date: null, // No end date for regular listings
+          end_date: farFutureDate.toISOString(), // Set far future date instead of null
           buy_now_price: regularData.price,
         };
       } else {

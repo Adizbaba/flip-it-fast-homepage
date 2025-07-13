@@ -33,6 +33,7 @@ import { MyListingsPage, CreateListingPage, SoldItemsPage, EarningsPage } from "
 import { DeclutterListingsPage, DeclutterSoldItemsPage } from "./pages/dashboard/DeclutterPages";
 import { NotificationsPage, ProfilePage, SettingsPage } from "./pages/dashboard/SharedPages";
 import AuctionPayment from "./pages/AuctionPayment";
+import Declutter from "./pages/declutter/Declutter";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ function App() {
             <Route path="/auctions" element={<AllAuctions />} />
             <Route path="/browse-categories" element={<BrowseCategories />} />
             <Route path="/auctions/category/:categorySlug" element={<CategoryPage />} />
+            <Route path="/declutter" element={<Declutter />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<ProfileManagement />} />
             <Route path="/create-listing" element={<CreateListing />} />
