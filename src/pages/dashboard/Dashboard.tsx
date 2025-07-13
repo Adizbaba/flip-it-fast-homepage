@@ -6,7 +6,6 @@ import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Json } from "@/integrations/supabase/types";
 
 // Activity type definition for the activity log
 interface ActivityItem {
@@ -30,8 +29,6 @@ const Dashboard = () => {
 
       setActivityLoading(true);
       try {
-        // This is a placeholder - in a real app, you would have an activity table
-        // or you would combine data from multiple tables to create activity items
         let activities: ActivityItem[] = [];
 
         if (activeRole === "seller") {
@@ -64,10 +61,8 @@ const Dashboard = () => {
           if (transactionsError) throw transactionsError;
 
           activities = (transactions || []).map(tx => {
-            // Safely extract item_title from metadata
             let itemTitle = "Item";
             if (tx.metadata) {
-              // Check if metadata is an object and has item_title property
               if (typeof tx.metadata === 'object' && tx.metadata !== null) {
                 const metadata = tx.metadata as Record<string, unknown>;
                 if ('item_title' in metadata && typeof metadata.item_title === 'string') {
@@ -102,7 +97,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full w-full items-center justify-center py-12">
+      <div className="flex h-64 w-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent text-auction-purple"></div>
       </div>
     );
@@ -198,24 +193,26 @@ const Dashboard = () => {
                       {new Date(activity.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  {activity.status && (
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-medium ${
-                        activity.status.toLowerCase() === "active"
-                          ? "bg-green-100 text-green-800"
-                          : activity.status.toLowerCase() === "completed"
-                          ? "bg-blue-100 text-blue-800"
-                          : activity.status.toLowerCase() === "draft"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {activity.status}
-                    </span>
-                  )}
-                  {activity.amount !== undefined && (
-                    <span className="font-semibold">${activity.amount.toFixed(2)}</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {activity.status && (
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs font-medium ${
+                          activity.status.toLowerCase() === "active"
+                            ? "bg-green-100 text-green-800"
+                            : activity.status.toLowerCase() === "completed"
+                            ? "bg-blue-100 text-blue-800"
+                            : activity.status.toLowerCase() === "draft"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {activity.status}
+                      </span>
+                    )}
+                    {activity.amount !== undefined && (
+                      <span className="font-semibold">${activity.amount.toFixed(2)}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

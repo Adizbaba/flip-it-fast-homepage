@@ -21,7 +21,7 @@ const RoleToggle = () => {
         />
         <Label
           htmlFor="role-toggle"
-          className={`cursor-pointer ${
+          className={`cursor-pointer text-sm ${
             activeRole === "buyer" ? "text-auction-purple font-medium" : "text-gray-500"
           }`}
         >
@@ -48,7 +48,7 @@ const RoleToggle = () => {
         />
         <Label
           htmlFor="role-toggle"
-          className={`cursor-pointer ${
+          className={`cursor-pointer text-sm ${
             activeRole === "seller" ? "text-auction-purple font-medium" : "text-gray-500"
           }`}
         >

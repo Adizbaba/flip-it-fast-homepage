@@ -22,7 +22,7 @@ import { useDashboard } from "@/contexts/DashboardContext";
 export function DashboardNav() {
   const { pathname } = useLocation();
   const { activeRole } = useDashboard();
-  const [activeGroups, setActiveGroups] = useState<string[]>([]);
+  const [activeGroups, setActiveGroups] = useState<string[]>(['buyer', 'seller', 'account']);
 
   // Buyer Links
   const buyerLinks = [
@@ -137,21 +137,21 @@ export function DashboardNav() {
   };
 
   return (
-    <nav className="grid gap-2 px-2">
+    <nav className="grid gap-2 px-2 py-2">
       {navGroups.map(group => (
         group.visible && (
           <div key={group.id} className="mb-2">
             <h3
-              className="cursor-pointer flex items-center justify-between py-2 px-3 mb-1 text-sm font-medium text-muted-foreground"
+              className="cursor-pointer flex items-center justify-between py-2 px-3 mb-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => toggleGroup(group.id)}
             >
               {group.title}
-              <span className={`transition-transform ${activeGroups.includes(group.id) ? 'rotate-90' : ''}`}>
+              <span className={`transition-transform text-xs ${activeGroups.includes(group.id) ? 'rotate-90' : ''}`}>
                 ❯
               </span>
             </h3>
             {activeGroups.includes(group.id) && (
-              <div className="grid gap-1">
+              <div className="grid gap-1 ml-2">
                 {group.links.map(link => (
                   <Link
                     key={link.href}
@@ -160,13 +160,13 @@ export function DashboardNav() {
                     <Button
                       variant={pathname === link.href || pathname.startsWith(link.href + '/') ? "secondary" : "ghost"}
                       className={cn(
-                        "w-full justify-start gap-2",
+                        "w-full justify-start gap-2 h-9",
                         (pathname === link.href || pathname.startsWith(link.href + '/')) &&
-                          "bg-muted font-medium"
+                          "bg-muted font-medium text-foreground"
                       )}
                     >
                       <link.icon className="h-4 w-4" />
-                      {link.title}
+                      <span className="truncate">{link.title}</span>
                     </Button>
                   </Link>
                 ))}
