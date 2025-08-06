@@ -21,7 +21,7 @@ import { BasicDetails } from "@/components/listing/BasicDetails";
 import { AuctionDetails } from "@/components/listing/AuctionDetails";
 import { ModernRegularListingForm } from "@/components/listing/ModernRegularListingForm";
 import { AuctionSpecificFields } from "@/components/listing/AuctionSpecificFields";
-import { AdvancedFields } from "@/components/listing/AdvancedFields";
+
 import { PaymentInfoDialog } from "@/components/listing/PaymentInfoDialog";
 import { ListingTabs } from "@/components/listing/ListingTabs";
 import ListingImageUpload from "@/components/listing/ListingImageUpload";
@@ -58,20 +58,15 @@ const CreateListing = () => {
         domestic: "Standard shipping",
         international: "Not available" 
       }),
-      returnPolicy: "No returns accepted",
-      // Regular listing defaults
-      price: 0,
-      location: "",
-      salePrice: undefined,
-      minOrderQuantity: undefined,
-      allowBackorders: false,
-      sku: "",
-      brand: "",
-      weight: undefined,
-      dimensions: undefined,
-      seoTitle: "",
-      seoDescription: "",
-      tags: "",
+        returnPolicy: "No returns accepted",
+        // Regular listing defaults
+        price: 0,
+        location: "",
+        salePrice: undefined,
+        minOrderQuantity: undefined,
+        allowBackorders: false,
+        sku: "",
+        brand: "",
     },
   });
 
@@ -112,11 +107,6 @@ const CreateListing = () => {
         allowBackorders: false,
         sku: "",
         brand: "",
-        weight: undefined,
-        dimensions: undefined,
-        seoTitle: "",
-        seoDescription: "",
-        tags: "",
       });
     } else {
       form.reset({
@@ -143,11 +133,6 @@ const CreateListing = () => {
         triggerTimeframe: undefined,
         sku: "",
         brand: "",
-        weight: undefined,
-        dimensions: undefined,
-        seoTitle: "",
-        seoDescription: "",
-        tags: "",
       });
     }
     
@@ -380,7 +365,7 @@ const CreateListing = () => {
                 </div>
               )}
               
-              <Form {...form}>
+                <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                   <ListingTabs onTabChange={handleTabChange} defaultValue="regular">
                     <TabsContent value="regular" className="space-y-8">
@@ -401,8 +386,6 @@ const CreateListing = () => {
                         categories={categories || []}
                         categoriesLoading={categoriesLoading}
                       />
-
-                      <AdvancedFields control={form.control} />
                     </TabsContent>
 
                     <TabsContent value="auction" className="space-y-8">
@@ -423,8 +406,6 @@ const CreateListing = () => {
                         categories={categories || []}
                         categoriesLoading={categoriesLoading}
                       />
-
-                      <AdvancedFields control={form.control} />
                     </TabsContent>
                   </ListingTabs>
 

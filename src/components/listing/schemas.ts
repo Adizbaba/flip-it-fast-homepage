@@ -13,15 +13,6 @@ const baseListingSchema = z.object({
   // SKU and brand for regular listings
   sku: z.string().default("").optional(),
   brand: z.string().default("").optional(),
-  weight: z.number().default(0).optional(),
-  dimensions: z.object({
-    height: z.number().default(0).optional(),
-    width: z.number().default(0).optional(),
-    length: z.number().default(0).optional(),
-  }).default({}).optional(),
-  seoTitle: z.string().default("").optional(),
-  seoDescription: z.string().default("").optional(),
-  tags: z.string().default("").optional(),
 });
 
 // Regular listing schema - fixed price, no auction fields

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DollarSign, Package, MapPin, Tag, Info } from "lucide-react";
+import { DollarSign, Package, MapPin, Info } from "lucide-react";
 import { Control } from "react-hook-form";
 import { RegularListingFormData } from "./schemas";
 
@@ -292,57 +292,6 @@ export const ModernRegularListingForm = ({ control, categories, categoriesLoadin
         />
       </div>
 
-      {/* Product Details Section */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6">
-        <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 text-purple-900">
-          <Tag className="h-5 w-5" />
-          Product Details
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={control}
-            name="brand"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-medium">Brand/Manufacturer</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter brand name (e.g., Apple, Nike, Samsung)" 
-                    className="h-12 text-base"
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  Help buyers find your item by brand
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-medium">SKU/Model Number</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Product code or model number" 
-                    className="h-12 text-base"
-                    {...field} 
-                  />
-                </FormControl>
-                <FormDescription>
-                  Optional: Product identification number
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
     </div>
   );
 };
