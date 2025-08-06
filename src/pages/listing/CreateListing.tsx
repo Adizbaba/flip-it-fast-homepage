@@ -266,7 +266,7 @@ const CreateListing = () => {
           ...insertData,
           starting_bid: regularData.price, // Use price as starting_bid for consistency
           bid_increment: 0, // No bidding for regular listings
-          auction_type: 'fixed_price',
+          auction_type: 'standard', // Use 'standard' which is allowed by the constraint
           start_date: new Date().toISOString(),
           end_date: farFutureDate.toISOString(), // Set far future date instead of null
           buy_now_price: regularData.price,
