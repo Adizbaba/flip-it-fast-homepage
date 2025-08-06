@@ -254,7 +254,7 @@ const CreateListing = () => {
           auction_type: 'standard', // Use 'standard' which is allowed by the constraint
           start_date: new Date().toISOString(),
           end_date: farFutureDate.toISOString(), // Set far future date instead of null
-          buy_now_price: regularData.price,
+          buy_now_price: null, // Regular listings don't need buy_now_price
         };
       } else {
         const auctionData = data as AuctionListingFormData;
