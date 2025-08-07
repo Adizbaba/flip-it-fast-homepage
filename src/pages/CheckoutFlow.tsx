@@ -104,13 +104,24 @@ const CheckoutFlow = () => {
     }
   });
 
-  // Redirect if cart is empty
+  // Handle direct "Buy It Now" purchases from URL params
   useEffect(() => {
-    if (!cartLoading && items.length === 0) {
+    const buyNow = searchParams.get('buyNow');
+    const itemId = searchParams.get('itemId');
+    const itemType = searchParams.get('itemType');
+    const quantity = searchParams.get('quantity');
+
+    if (buyNow === 'true' && itemId && itemType) {
+      // This is a direct "Buy It Now" purchase, skip cart validation
+      return;
+    }
+
+    // Only redirect if this is not a direct purchase and cart is empty
+    if (!cartLoading && items.length === 0 && buyNow !== 'true') {
       toast.error("Your cart is empty");
       navigate("/cart");
     }
-  }, [items, cartLoading, navigate]);
+  }, [items, cartLoading, navigate, searchParams]);
 
   // Load user profile data if logged in
   useEffect(() => {
@@ -235,6 +246,29 @@ const CheckoutFlow = () => {
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Process stock reduction
+      try {
+        const { error: stockError } = await supabase.functions.invoke('process-order', {
+          body: {
+            orderId: order.id,
+            items: items.map(item => ({
+              itemId: item.itemId,
+              itemType: item.itemType,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        });
+
+        if (stockError) {
+          console.error("Stock processing error:", stockError);
+          // Don't block the order, but log the error
+        }
+      } catch (stockError) {
+        console.error("Failed to process stock:", stockError);
+        // Continue with order completion even if stock update fails
+      }
 
       // Clear cart
       await clearCart();

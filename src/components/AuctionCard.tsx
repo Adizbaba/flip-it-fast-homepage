@@ -3,11 +3,12 @@ import { Heart, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useSavedItems } from "@/hooks/useSavedItems";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ItemDetailModal } from "@/components/item/ItemDetailModal";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import AddToCartButton from "@/components/AddToCartButton";
 
 interface AuctionCardProps {
   id: string;
@@ -16,9 +17,11 @@ interface AuctionCardProps {
   currentBid: number;
   timeRemaining: string;
   bids: number;
+  buyNowPrice?: number;
+  startingBid?: number;
 }
 
-const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: AuctionCardProps) => {
+const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids, buyNowPrice, startingBid }: AuctionCardProps) => {
   const { user } = useAuth();
   const { addToSavedItems, removeFromSavedItems, isSaved } = useSavedItems(user);
   const navigate = useNavigate();
@@ -29,34 +32,20 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
 
   const handleWatchlistToggle = async () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to add items to your watch list.",
-        variant: "destructive"
-      });
+      toast.error("Please sign in to add items to your watch list");
       return;
     }
 
     try {
       if (isSaved(id)) {
         await removeFromSavedItems(id);
-        toast({
-          title: "Removed from Watch List",
-          description: `${title} has been removed from your watch list.`
-        });
+        toast.success("Removed from watch list");
       } else {
         await addToSavedItems(id);
-        toast({
-          title: "Added to Watch List",
-          description: `${title} has been added to your watch list.`
-        });
+        toast.success("Added to watch list");
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not update watch list. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Could not update watch list. Please try again.");
     }
   };
   
@@ -106,20 +95,39 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids }: Auct
             className="font-medium text-sm line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors" 
             onClick={handleOpenModal}
           >{title || "Untitled Item"}</h3>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Current Bid</p>
-              <p className="font-bold text-lg">${currentBid.toLocaleString()}</p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Current Bid</p>
+                <p className="font-bold text-lg">₦{currentBid.toLocaleString()}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">{bids} bids</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground">{bids} bids</p>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col space-y-2">
               <Button 
                 size="sm" 
-                className="mt-1"
+                className="w-full"
                 onClick={handleOpenModal}
               >
-                View Item
+                {buyNowPrice ? "View & Bid" : "Place Bid"}
               </Button>
+              
+              {buyNowPrice && (
+                <AddToCartButton
+                  itemId={id}
+                  itemType="auction"
+                  title={title}
+                  price={buyNowPrice}
+                  image={image}
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                />
+              )}
             </div>
           </div>
         </div>

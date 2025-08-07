@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/AddToCartButton";
-import { useToast } from "@/components/ui/use-toast";
+import BuyItNowButton from "@/components/item/BuyItNowButton";
+import QuantitySelector from "@/components/item/QuantitySelector";
+import { toast } from "sonner";
 import PayNowButton from "@/components/auction/PayNowButton";
 import {
   Carousel,
@@ -18,7 +21,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Clock, DollarSign, User, ShoppingCart } from "lucide-react";
+import { Clock, DollarSign, User, ShoppingCart, Package, Truck, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import AuctionTimer from "@/components/auction/AuctionTimer";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,12 +29,12 @@ import { supabase } from "@/integrations/supabase/client";
 const ItemDetail = () => {
   const { itemId } = useParams();
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { data: item, isLoading, error } = useItemDetail(itemId!);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [paymentType, setPaymentType] = useState<"bid" | "purchase" | null>(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   // Check if payment is completed for this auction
   useEffect(() => {
@@ -87,11 +90,8 @@ const ItemDetail = () => {
 
   const handleBid = () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to place a bid",
-        variant: "destructive",
-      });
+      toast.error("Please sign in to place a bid");
+      navigate("/auth");
       return;
     }
     
@@ -101,11 +101,8 @@ const ItemDetail = () => {
   
   const handleBuyNow = () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to make a purchase",
-        variant: "destructive",
-      });
+      toast.error("Please sign in to make a purchase");
+      navigate("/auth");
       return;
     }
     
@@ -120,6 +117,14 @@ const ItemDetail = () => {
       navigate(`/checkout?id=${item.id}&type=${paymentType}`);
     }
   };
+
+  // Determine the item type and available actions
+  const isAuction = item?.auction_type && ['standard', 'reserve'].includes(item.auction_type);
+  const isRegularListing = !isAuction;
+  const itemPrice = isRegularListing ? item?.starting_bid : (item?.buy_now_price || item?.starting_bid);
+  const maxAvailableQuantity = item?.quantity || 1;
+  const isOutOfStock = maxAvailableQuantity === 0;
+  const isSellerOwnItem = user?.id === item?.seller_id;
 
   const timeRemaining = new Date(item.end_date).getTime() - Date.now();
   const isEnded = timeRemaining <= 0;
@@ -164,63 +169,146 @@ const ItemDetail = () => {
             <Separator />
 
             <div className="space-y-4">
+              {/* Price and Status Display */}
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Current Bid</p>
-                  <p className="text-2xl font-bold">₦{(item.current_bid || item.starting_bid).toLocaleString()}</p>
+                  {isAuction ? (
+                    <>
+                      <p className="text-sm text-muted-foreground">Current Bid</p>
+                      <p className="text-2xl font-bold">₦{(item.current_bid || item.starting_bid).toLocaleString()}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-muted-foreground">Price</p>
+                      <p className="text-2xl font-bold">₦{itemPrice?.toLocaleString()}</p>
+                    </>
+                  )}
                 </div>
                 <div className="space-y-1 text-right">
-                  <AuctionTimer 
-                    endDate={item.end_date}
-                    status={item.status}
-                    winnerId={item.winner_id}
-                    currentUserId={user?.id}
-                    reserveMet={item.reserve_met}
-                    auctionId={item.id}
-                    paymentCompleted={paymentCompleted}
-                  />
+                  {isAuction ? (
+                    <AuctionTimer 
+                      endDate={item.end_date}
+                      status={item.status}
+                      winnerId={item.winner_id}
+                      currentUserId={user?.id}
+                      reserveMet={item.reserve_met}
+                      auctionId={item.id}
+                      paymentCompleted={paymentCompleted}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-end space-y-1">
+                      <Badge variant={isOutOfStock ? "destructive" : "default"}>
+                        {isOutOfStock ? "Out of Stock" : `${maxAvailableQuantity} Available`}
+                      </Badge>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Package className="h-4 w-4 mr-1" />
+                        <span>Regular Listing</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Show appropriate action buttons */}
-              {!isEnded && (
-                <div className="flex flex-col space-y-2">
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={handleBid}
-                    disabled={user?.id === item.seller_id}
-                  >
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    Place Bid
-                  </Button>
-                  
-                  {hasBuyNowOption && (
-                    <div className="flex space-x-2 w-full">
-                      <Button 
-                        className="flex-1" 
+              {/* Quantity Selector for Regular Listings */}
+              {isRegularListing && !isOutOfStock && !isSellerOwnItem && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <QuantitySelector
+                    quantity={selectedQuantity}
+                    onQuantityChange={setSelectedQuantity}
+                    maxQuantity={maxAvailableQuantity}
+                    disabled={isOutOfStock || isSellerOwnItem}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Total: ₦{((itemPrice || 0) * selectedQuantity).toLocaleString()}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              {isRegularListing ? (
+                /* Regular Listing Actions */
+                <div className="space-y-3">
+                  {!isSellerOwnItem && !isOutOfStock && (
+                    <div className="flex flex-col space-y-2">
+                      <BuyItNowButton
+                        itemId={item.id}
+                        itemType="auction"
+                        price={itemPrice || 0}
+                        quantity={selectedQuantity}
+                        className="w-full"
                         size="lg"
-                        variant="outline"
-                        onClick={handleBuyNow}
-                        disabled={user?.id === item.seller_id}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Buy Now ₦{item.buy_now_price?.toLocaleString()}
-                      </Button>
-                      
+                        disabled={isOutOfStock}
+                      />
                       <AddToCartButton 
                         itemId={item.id}
                         itemType="auction"
                         title={item.title}
-                        price={item.buy_now_price || item.starting_bid}
+                        price={itemPrice || 0}
                         image={(item.images as string[])?.[0]}
-                        className="flex-1"
+                        quantity={selectedQuantity}
+                        className="w-full"
                         size="lg"
-                        disabled={user?.id === item.seller_id}
+                        variant="outline"
+                        disabled={isOutOfStock}
                       />
                     </div>
                   )}
+                  
+                  {isSellerOwnItem && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-blue-800 font-medium">This is your listing</p>
+                      <p className="text-blue-600 text-sm">You can edit or manage this item from your dashboard.</p>
+                    </div>
+                  )}
+                  
+                  {isOutOfStock && (
+                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <p className="text-orange-800 font-medium">Out of Stock</p>
+                      <p className="text-orange-600 text-sm">This item is currently unavailable.</p>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                /* Auction Actions */
+                <>
+                  {!isEnded && (
+                    <div className="flex flex-col space-y-2">
+                      <Button 
+                        className="w-full" 
+                        size="lg"
+                        onClick={handleBid}
+                        disabled={isSellerOwnItem}
+                      >
+                        <DollarSign className="mr-2 h-4 w-4" />
+                        Place Bid
+                      </Button>
+                      
+                      {hasBuyNowOption && (
+                        <div className="flex space-x-2 w-full">
+                          <BuyItNowButton
+                            itemId={item.id}
+                            itemType="auction"
+                            price={item.buy_now_price || item.starting_bid}
+                            className="flex-1"
+                            size="lg"
+                            disabled={isSellerOwnItem}
+                          />
+                          <AddToCartButton 
+                            itemId={item.id}
+                            itemType="auction"
+                            title={item.title}
+                            price={item.buy_now_price || item.starting_bid}
+                            image={(item.images as string[])?.[0]}
+                            className="flex-1"
+                            size="lg"
+                            variant="outline"
+                            disabled={isSellerOwnItem}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Show payment status for ended auctions */}
@@ -256,6 +344,31 @@ const ItemDetail = () => {
             </div>
 
             <Separator />
+
+            {/* Item Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Condition</p>
+                  <p className="text-sm font-medium">{item.condition}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Truck className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Shipping</p>
+                  <p className="text-sm font-medium">Available</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Protection</p>
+                  <p className="text-sm font-medium">Buyer Protection</p>
+                </div>
+              </div>
+            </div>
 
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Item Description</h2>
@@ -300,7 +413,7 @@ const ItemDetail = () => {
           <div className="py-4">
             <p className="font-medium">Item: {item.title}</p>
             <p className="mt-2">
-              Amount: ${paymentType === "bid" ? item.starting_bid : item.buy_now_price}
+              Amount: ₦{paymentType === "bid" ? item.starting_bid : item.buy_now_price}
             </p>
           </div>
           
