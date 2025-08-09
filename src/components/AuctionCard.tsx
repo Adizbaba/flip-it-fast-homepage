@@ -67,6 +67,9 @@ const AuctionCard = ({ id, title, image, currentBid, timeRemaining, bids, buyNow
               alt={title || "Auction item"} 
               className="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-105" 
               onClick={handleOpenModal}
+              loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 100vw, 25vw"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "/placeholder.svg";

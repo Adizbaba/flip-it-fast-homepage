@@ -24,6 +24,9 @@ const ItemImageGallery = ({ images, title }: ItemImageGalleryProps) => {
                   src={image}
                   alt={`${title} - Image ${index + 1}`}
                   className="w-full aspect-square object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "/placeholder.svg";

@@ -24,6 +24,9 @@ export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => {
           alt={auction.title || "Auction item"} 
           className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105" 
           onClick={() => onViewItem(auction.id)}
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 768px) 100vw, 20vw"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = "/placeholder.svg";

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import SearchLayout from "@/components/search/SearchLayout";
 import { useSearchParamsState } from "@/hooks/useSearchParams";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 
 const AllAuctions = () => {
   const {
@@ -67,19 +68,26 @@ const AllAuctions = () => {
     };
   }, [refreshResults]);
 
-  return (
-    <SearchLayout
-      title="All Auctions"
-      description="Browse all available auction items and find your next treasure"
-      results={results}
-      loading={loading}
-      totalCount={totalCount}
-      page={page}
-      itemsPerPage={10}
-      filters={filters}
-      onFilterChange={handleFilterChange}
-      onPageChange={setPage}
-    />
+return (
+    <>
+      <SEO
+        title="All Auctions | FastFlip"
+        description="Browse all active auctions on FastFlip and find your next treasure."
+        type="website"
+      />
+      <SearchLayout
+        title="All Auctions"
+        description="Browse all available auction items and find your next treasure"
+        results={results}
+        loading={loading}
+        totalCount={totalCount}
+        page={page}
+        itemsPerPage={10}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onPageChange={setPage}
+      />
+    </>
   );
 };
 

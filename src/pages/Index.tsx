@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Search, PackageOpen } from "lucide-react";
 import { endingSoonAuctions } from "@/data/auctions";
 import { Card, CardContent } from "@/components/ui/card";
+import SEO from "@/components/SEO";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,9 +33,14 @@ const Index = () => {
     navigate(`/search?q=${encodeURIComponent(query)}`);
   };
 
-  return (
+return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      <SEO
+        title="FastFlip – Buy, Sell & Bid Deals"
+        description="Discover auctions and buy-now deals across categories on FastFlip. Browse, bid, or buy instantly."
+        type="website"
+      />
       <main>
         <HeroSection />
         
