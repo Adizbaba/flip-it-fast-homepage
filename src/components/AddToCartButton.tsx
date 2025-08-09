@@ -58,6 +58,8 @@ const AddToCartButton = ({
       onClick={handleAddToCart}
       disabled={loading}
       className={className}
+      aria-label={`Add ${title} to cart`}
+      type="button"
       {...props}
     >
       {loading ? (

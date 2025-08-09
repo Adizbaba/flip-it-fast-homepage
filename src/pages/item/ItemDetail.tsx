@@ -25,6 +25,7 @@ import { Clock, DollarSign, User, ShoppingCart, Package, Truck, Shield } from "l
 import { useState, useEffect } from "react";
 import AuctionTimer from "@/components/auction/AuctionTimer";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 
 const ItemDetail = () => {
   const { itemId } = useParams();
@@ -55,6 +56,20 @@ const ItemDetail = () => {
     }
   }, [user, item]);
 
+  // Preload the first product image for faster LCP
+  useEffect(() => {
+    const firstImage = (item?.images as string[])?.[0];
+    if (firstImage) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = firstImage;
+      document.head.appendChild(link);
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, [item]);
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -131,8 +146,31 @@ const ItemDetail = () => {
   const hasBuyNowOption = !!item.buy_now_price;
   const isCurrentUserWinner = user?.id === item.winner_id;
 
+  const seoDescription = (item.description || '').slice(0, 150);
+  const productSchema = {
+    "@type": "Product",
+    name: item.title,
+    image: (item.images as string[]) || [],
+    description: seoDescription,
+    sku: item.id,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "NGN",
+      price: itemPrice || item.starting_bid,
+      availability: isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      url: typeof window !== 'undefined' ? window.location.href : undefined
+    }
+  } as const;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO 
+        title={`${item.title} | FastFlip`} 
+        description={seoDescription}
+        image={(item.images as string[])?.[0]}
+        type="product"
+        structuredData={productSchema}
+      />
       <Header />
       <main className="container mx-auto px-4 py-8 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

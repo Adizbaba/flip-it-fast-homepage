@@ -47,50 +47,50 @@ const AdminDashboard = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive>
-                  <a href="/admin" className="flex items-center gap-3">
+                  <Link to="/admin" className="flex items-center gap-3">
                     <LineChart className="h-4 w-4" />
                     Dashboard
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/admin/users" className="flex items-center gap-3">
+                  <Link to="/admin/users" className="flex items-center gap-3">
                     <Users className="h-4 w-4" />
                     Users
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/admin/items" className="flex items-center gap-3">
+                  <Link to="/admin/items" className="flex items-center gap-3">
                     <Box className="h-4 w-4" />
                     Items
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/admin/categories" className="flex items-center gap-3">
+                  <Link to="/admin/categories" className="flex items-center gap-3">
                     <Tag className="h-4 w-4" />
                     Categories
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/admin/disputes" className="flex items-center gap-3">
+                  <Link to="/admin/disputes" className="flex items-center gap-3">
                     <Gavel className="h-4 w-4" />
                     Disputes
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/admin/settings" className="flex items-center gap-3">
+                  <Link to="/admin/settings" className="flex items-center gap-3">
                     <Settings className="h-4 w-4" />
                     Settings
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

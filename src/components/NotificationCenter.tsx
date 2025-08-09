@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Bell, Check, CheckCheck, Clock, Trophy, Gavel, AlertCircle } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
@@ -172,7 +173,7 @@ export const NotificationCenter = () => {
         {notifications.length > 0 && (
           <div className="p-3 border-t">
             <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
-              <a href="/dashboard/notifications">View all notifications</a>
+              <Link to="/dashboard/notifications">View all notifications</Link>
             </Button>
           </div>
         )}

@@ -1,3 +1,4 @@
+import SEO from '@/components/SEO';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -119,6 +120,7 @@ const Declutter = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <SEO title="Declutter Marketplace | FastFlip" description="Find great deals on bulk items or sell excess inventory on FastFlip Declutter." type="website" />
       <main className="flex-1 bg-gray-50">
         {/* Hero banner */}
         <div className="bg-gradient-to-r from-auction-purple to-auction-magenta text-white py-12">

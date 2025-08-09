@@ -1,4 +1,4 @@
-
+import SEO from "@/components/SEO";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -227,6 +227,8 @@ const Checkout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      
+      <SEO title="Checkout | FastFlip" description="Secure checkout for your FastFlip purchase." type="website" />
       
       <main className="flex-1 py-10">
         <Container>

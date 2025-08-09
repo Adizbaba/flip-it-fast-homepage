@@ -1,4 +1,4 @@
-
+import SEO from "@/components/SEO";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +65,7 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <SEO title="Contact FastFlip | FastFlip" description="Get support and contact FastFlip." type="website" />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">

@@ -1,11 +1,11 @@
-
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
 const AboutPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <SEO title="About FastFlip | FastFlip" description="Learn about FastFlip’s mission, values, and story." type="website" />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">

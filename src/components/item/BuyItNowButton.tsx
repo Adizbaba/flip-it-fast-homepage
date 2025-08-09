@@ -62,6 +62,8 @@ const BuyItNowButton = ({
       onClick={handleBuyNow}
       disabled={loading || disabled}
       className={className}
+      aria-label={`Buy now for ₦${price.toLocaleString()}`}
+      type="button"
       {...props}
     >
       {loading ? (
@@ -69,7 +71,7 @@ const BuyItNowButton = ({
       ) : (
         <ShoppingBag className="mr-2 h-4 w-4" />
       )}
-      Buy Now ${price.toLocaleString()}
+      Buy Now ₦{price.toLocaleString()}
     </Button>
   );
 };
