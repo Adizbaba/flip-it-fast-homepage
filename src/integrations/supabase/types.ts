@@ -232,6 +232,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_auction_items_seller_id"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_auction_items_seller_id"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bids: {
@@ -610,7 +624,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_secure: {
+        Row: {
+          avatar_url: string | null
+          contact_number: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          profile_visibility: string | null
+          shipping_address: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          contact_number?: never
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          shipping_address?: never
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          contact_number?: never
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          shipping_address?: never
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          id: string | null
+          profile_visibility: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       end_auction: {

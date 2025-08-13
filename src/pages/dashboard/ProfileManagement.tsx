@@ -45,8 +45,8 @@ const ProfileManagement = () => {
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
+      const { data, error } = await (supabase as any)
+        .from('profiles_secure')
         .select('*')
         .eq('id', user?.id)
         .single();

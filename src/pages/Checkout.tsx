@@ -76,7 +76,7 @@ const Checkout = () => {
         // Fetch item details
         const { data: itemData, error: itemError } = await supabase
           .from("auction_items")
-          .select("*, profiles:seller_id(username, avatar_url)")
+          .select("*")
           .eq("id", itemId)
           .single();
         
@@ -87,8 +87,8 @@ const Checkout = () => {
         
         // If user is logged in, fetch their profile data
         if (user) {
-          const { data: profileData } = await supabase
-            .from("profiles")
+          const { data: profileData } = await (supabase as any)
+            .from("profiles_secure")
             .select("*")
             .eq("id", user.id)
             .single();

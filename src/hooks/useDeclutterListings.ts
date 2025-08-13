@@ -140,8 +140,8 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       // Fetch seller information separately
       if (processedListings.length > 0) {
         const sellerIds = [...new Set(processedListings.map(item => item.seller_id))];
-        const { data: sellerData, error: sellerError } = await supabase
-          .from('profiles')
+        const { data: sellerData, error: sellerError } = await (supabase as any)
+          .from('public_profiles')
           .select('id, username')
           .in('id', sellerIds);
         

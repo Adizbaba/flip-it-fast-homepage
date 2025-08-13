@@ -27,7 +27,7 @@ const DeclutterListingDetail = () => {
 
         const { data, error } = await supabase
           .from("declutter_listings")
-          .select("*, profiles:seller_id(*)")
+          .select("*")
           .eq("id", id)
           .single();
 
@@ -48,11 +48,24 @@ const DeclutterListingDetail = () => {
           }
         }
 
+        // Fetch seller public profile
+        let sellerUsername = "Unknown seller";
+        if (data.seller_id) {
+          const { data: sellerProfile } = await (supabase as any)
+            .from("public_profiles")
+            .select("id, username, avatar_url")
+            .eq("id", data.seller_id)
+            .maybeSingle();
+          if (sellerProfile?.username) {
+            sellerUsername = sellerProfile.username;
+          }
+        }
+
         // Process the listing data
         setListing({
           ...data,
           category_name: categoryName,
-          seller_name: getSellerUsername(data.profiles),
+          seller_name: sellerUsername,
           // Convert JSON images to string array using our helper function
           images: convertJsonToStringArray(data.images)
         });

@@ -75,8 +75,8 @@ export const useItemDetail = (itemId: string | null) => {
       // Then, if we successfully got the item, fetch the seller profile separately
       let profileData = null;
       if (item && item.seller_id) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
+        const { data: profile, error: profileError } = await (supabase as any)
+          .from("public_profiles")
           .select("username, avatar_url")
           .eq("id", item.seller_id)
           .single();

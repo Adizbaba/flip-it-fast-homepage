@@ -144,8 +144,8 @@ export const useSearch = (initialFilters: SearchFilters) => {
         const sellerIds = [...new Set(data.map(item => item.seller_id).filter(Boolean))];
         
         if (sellerIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
+          const { data: profiles } = await (supabase as any)
+            .from('public_profiles')
             .select('id, username, avatar_url')
             .in('id', sellerIds);
 
