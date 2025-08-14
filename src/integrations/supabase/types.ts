@@ -638,23 +638,23 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          contact_number?: never
+          contact_number?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string | null
           profile_visibility?: string | null
-          shipping_address?: never
+          shipping_address?: string | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
-          contact_number?: never
+          contact_number?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string | null
           profile_visibility?: string | null
-          shipping_address?: never
+          shipping_address?: string | null
           updated_at?: string | null
           username?: string | null
         }
