@@ -9,6 +9,8 @@ import { Mail, Key, User, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 // Validation schemas
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -39,14 +41,20 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Check URL params to determine if we should show signup mode
+  // Check URL params to determine mode
   const searchParams = new URLSearchParams(location.search);
-  const [isSignUp, setIsSignUp] = useState(searchParams.get('mode') === 'signup');
+  const mode = searchParams.get('mode');
+  const [isSignUp, setIsSignUp] = useState(mode === 'signup');
+  const [showForgotPassword, setShowForgotPassword] = useState(mode === 'forgot-password');
+  const [showResetPassword, setShowResetPassword] = useState(mode === 'reset-password');
 
-  // Update isSignUp when URL changes
+  // Update mode when URL changes
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    setIsSignUp(searchParams.get('mode') === 'signup');
+    const mode = searchParams.get('mode');
+    setIsSignUp(mode === 'signup');
+    setShowForgotPassword(mode === 'forgot-password');
+    setShowResetPassword(mode === 'reset-password');
   }, [location.search]);
 
   const validateForm = () => {
@@ -144,12 +152,28 @@ const Auth = () => {
     setIsSignUp(newMode);
     setErrors({});
     setShowPassword(false);
+    setShowForgotPassword(false);
+    setShowResetPassword(false);
     // Update URL to reflect the current mode
     const searchParams = new URLSearchParams();
     if (newMode) {
       searchParams.set('mode', 'signup');
     }
     navigate(`/auth${searchParams.toString() ? `?${searchParams.toString()}` : ''}`, { replace: true });
+  };
+
+  const handleShowForgotPassword = () => {
+    setShowForgotPassword(true);
+    setIsSignUp(false);
+    setShowResetPassword(false);
+    navigate('/auth?mode=forgot-password', { replace: true });
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+    setIsSignUp(false);
+    setShowResetPassword(false);
+    navigate('/auth', { replace: true });
   };
 
   return (
@@ -159,20 +183,26 @@ const Auth = () => {
       <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">
-                {isSignUp ? "Create your account" : "Sign in to your account"}
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                {isSignUp ? "Already have an account? " : "Don't have an account? "}
-                <button
-                  onClick={handleToggleMode}
-                  className="font-medium text-auction-purple hover:text-auction-magenta transition-colors"
-                >
-                  {isSignUp ? "Sign in" : "Sign up"}
-                </button>
-              </p>
-            </div>
+            {showForgotPassword ? (
+              <ForgotPasswordForm onBackToLogin={handleBackToLogin} />
+            ) : showResetPassword ? (
+              <ResetPasswordForm />
+            ) : (
+              <>
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {isSignUp ? "Create your account" : "Sign in to your account"}
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {isSignUp ? "Already have an account? " : "Don't have an account? "}
+                    <button
+                      onClick={handleToggleMode}
+                      className="font-medium text-auction-purple hover:text-auction-magenta transition-colors"
+                    >
+                      {isSignUp ? "Sign in" : "Sign up"}
+                    </button>
+                  </p>
+                </div>
             
             <form className="mt-6 space-y-5" onSubmit={handleAuth}>
               {isSignUp && (
@@ -287,6 +317,19 @@ const Auth = () => {
                 )}
               </Button>
             </form>
+            
+            {!isSignUp && (
+              <div className="text-center">
+                <button
+                  onClick={handleShowForgotPassword}
+                  className="text-sm text-auction-purple hover:text-auction-magenta transition-colors"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
+              </>
+            )}
           </div>
         </div>
       </main>

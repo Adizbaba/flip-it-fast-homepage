@@ -69,6 +69,25 @@ const ChangePasswordDialog = ({ open, onOpenChange }: ChangePasswordDialogProps)
 
     setLoading(true);
     try {
+      // First verify the current password by getting user and attempting to sign in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        throw new Error("No authenticated user found");
+      }
+
+      // Verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwords.current,
+      });
+
+      if (signInError) {
+        setErrors({ current: "Current password is incorrect" });
+        setLoading(false);
+        return;
+      }
+
+      // Now update the password
       const { error } = await supabase.auth.updateUser({
         password: passwords.new
       });

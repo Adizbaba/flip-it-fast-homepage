@@ -42,15 +42,21 @@ const AccountDeletionDialog = ({ open, onOpenChange }: AccountDeletionDialogProp
 
     setLoading(true);
     try {
-      // In a real application, you would call a backend endpoint
-      // that handles all the cleanup (delete user data, cancel subscriptions, etc.)
-      // before deleting the auth user
+      // Prompt for current password as additional security
+      const currentPassword = window.prompt("Enter your current password to confirm account deletion:");
       
-      // For now, we'll just delete the auth user
-      // Note: This doesn't clean up related data in other tables
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-      
+      if (!currentPassword) {
+        setLoading(false);
+        return;
+      }
+
+      // Call secure edge function to handle account deletion
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        body: { currentPassword }
+      });
+
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("Account deleted successfully");
       navigate("/");
