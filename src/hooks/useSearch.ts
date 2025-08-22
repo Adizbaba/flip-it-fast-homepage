@@ -145,7 +145,7 @@ export const useSearch = (initialFilters: SearchFilters) => {
         
         if (sellerIds.length > 0) {
           const { data: profiles } = await (supabase as any)
-            .from('public_profiles')
+            .from('safe_public_profiles')
             .select('id, username, avatar_url')
             .in('id', sellerIds);
 

@@ -75,7 +75,7 @@ export const useBidding = (auctionItemId: string | null) => {
       // Then get the profiles for each unique bidder
       const bidderIds = [...new Set(bidsData.map(bid => bid.bidder_id))];
       const { data: profilesData, error: profilesError } = await (supabase as any)
-        .from("public_profiles")
+        .from("safe_public_profiles")
         .select("id, username, avatar_url")
         .in("id", bidderIds);
 

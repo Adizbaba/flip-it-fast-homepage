@@ -76,7 +76,7 @@ export const useItemDetail = (itemId: string | null) => {
       let profileData = null;
       if (item && item.seller_id) {
         const { data: profile, error: profileError } = await (supabase as any)
-          .from("public_profiles")
+          .from("safe_public_profiles")
           .select("username, avatar_url")
           .eq("id", item.seller_id)
           .single();
