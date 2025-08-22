@@ -243,20 +243,6 @@ export type Database = {
             foreignKeyName: "fk_auction_items_seller_id"
             columns: ["seller_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_auction_items_seller_id"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_auction_items_seller_id"
-            columns: ["seller_id"]
-            isOneToOne: false
             referencedRelation: "safe_public_profiles"
             referencedColumns: ["id"]
           },
@@ -669,60 +655,6 @@ export type Database = {
           id?: string | null
           profile_visibility?: string | null
           shipping_address?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          full_name: string | null
-          id: string | null
-          profile_visibility: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
-      public_profiles_view: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          profile_visibility: string | null
-          updated_at: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
           updated_at?: string | null
           username?: string | null
         }
