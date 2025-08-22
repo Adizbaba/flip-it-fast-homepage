@@ -246,6 +246,13 @@ export type Database = {
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_auction_items_seller_id"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bids: {
@@ -684,11 +691,55 @@ export type Database = {
         }
         Relationships: []
       }
+      public_profiles_view: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          profile_visibility: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          profile_visibility?: string | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       end_auction: {
         Args: { auction_id: string }
         Returns: Json
+      }
+      get_safe_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          avatar_url: string
+          contact_number: string
+          created_at: string
+          full_name: string
+          id: string
+          profile_visibility: string
+          shipping_address: string
+          updated_at: string
+          username: string
+        }[]
       }
       has_admin_permission: {
         Args: {
