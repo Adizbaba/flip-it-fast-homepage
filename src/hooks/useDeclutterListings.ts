@@ -141,9 +141,10 @@ export const useDeclutterListings = (options: UseDeclutterListingsOptions = {}) 
       if (processedListings.length > 0) {
         const sellerIds = [...new Set(processedListings.map(item => item.seller_id))];
         const { data: sellerData, error: sellerError } = await (supabase as any)
-          .from('safe_public_profiles')
+          .from('profiles')
           .select('id, username')
-          .in('id', sellerIds);
+          .in('id', sellerIds)
+          .eq('profile_visibility', 'public');
         
         if (!sellerError && sellerData) {
           // Create a map of seller_id to username

@@ -52,9 +52,10 @@ const DeclutterListingDetail = () => {
         let sellerUsername = "Unknown seller";
         if (data.seller_id) {
           const { data: sellerProfile } = await (supabase as any)
-            .from("safe_public_profiles")
+            .from("profiles")
             .select("id, username, avatar_url")
             .eq("id", data.seller_id)
+            .eq("profile_visibility", "public")
             .maybeSingle();
           if (sellerProfile?.username) {
             sellerUsername = sellerProfile.username;

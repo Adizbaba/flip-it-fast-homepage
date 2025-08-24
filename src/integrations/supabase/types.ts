@@ -232,20 +232,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_auction_items_seller_id"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_auction_items_seller_id"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "safe_public_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       bids: {
@@ -624,69 +610,7 @@ export type Database = {
       }
     }
     Views: {
-      profiles_secure: {
-        Row: {
-          avatar_url: string | null
-          contact_number: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          profile_visibility: string | null
-          shipping_address: string | null
-          updated_at: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          contact_number?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
-          shipping_address?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          contact_number?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          profile_visibility?: string | null
-          shipping_address?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
-      safe_public_profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          updated_at: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       end_auction: {
@@ -723,6 +647,10 @@ export type Database = {
       }
       is_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_profile_public: {
+        Args: { profile_id: string }
         Returns: boolean
       }
       log_admin_action: {

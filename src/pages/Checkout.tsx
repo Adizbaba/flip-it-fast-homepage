@@ -88,7 +88,7 @@ const Checkout = () => {
         // If user is logged in, fetch their profile data
         if (user) {
           const { data: profileData } = await (supabase as any)
-            .from("profiles_secure")
+            .from("profiles")
             .select("*")
             .eq("id", user.id)
             .single();

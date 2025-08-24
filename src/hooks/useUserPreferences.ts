@@ -39,7 +39,7 @@ export const useUserPreferences = () => {
 
       // Also fetch profile visibility from profiles table
       const { data: profile } = await (supabase as any)
-        .from('profiles_secure')
+        .from('profiles')
         .select('profile_visibility')
         .eq('id', user?.id)
         .single();

@@ -129,7 +129,7 @@ const CheckoutFlow = () => {
       if (user) {
         try {
           const { data: profileData } = await (supabase as any)
-            .from("profiles_secure")
+            .from("profiles")
             .select("*")
             .eq("id", user.id)
             .single();
