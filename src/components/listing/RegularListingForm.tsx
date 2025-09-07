@@ -24,7 +24,7 @@ export const RegularListingForm = ({ control }: RegularListingFormProps) => {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel>Price (₦)</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -48,7 +48,7 @@ export const RegularListingForm = ({ control }: RegularListingFormProps) => {
             name="salePrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sale Price ($) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
+                <FormLabel>Sale Price (₦) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

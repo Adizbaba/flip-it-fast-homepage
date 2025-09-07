@@ -52,7 +52,7 @@ export const AuctionSpecificFields = ({ control }: AuctionSpecificFieldsProps) =
             name="startingBid"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Starting Bid Price ($)</FormLabel>
+                <FormLabel>Starting Bid Price (₦)</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -100,7 +100,7 @@ export const AuctionSpecificFields = ({ control }: AuctionSpecificFieldsProps) =
             name="reservePrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Reserve Price ($) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
+                <FormLabel>Reserve Price (₦) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -127,7 +127,7 @@ export const AuctionSpecificFields = ({ control }: AuctionSpecificFieldsProps) =
             name="buyNowPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Buy Now Price ($) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
+                <FormLabel>Buy Now Price (₦) <span className="text-sm text-muted-foreground">(Optional)</span></FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

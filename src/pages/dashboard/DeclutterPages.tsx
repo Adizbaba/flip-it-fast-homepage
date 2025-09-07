@@ -25,7 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { Pencil, Trash2, Plus, PackageOpen } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatNGNSimple } from '@/utils/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
@@ -133,7 +133,7 @@ export const DeclutterListingsPage = () => {
                       {listing.title}
                     </div>
                   </TableCell>
-                  <TableCell>${formatCurrency(listing.bulk_price)}</TableCell>
+                  <TableCell>{formatNGNSimple(listing.bulk_price)}</TableCell>
                   <TableCell>{listing.quantity}</TableCell>
                   <TableCell>
                     <Badge
@@ -254,7 +254,7 @@ export const DeclutterSoldItemsPage = () => {
                       {listing.title}
                     </div>
                   </TableCell>
-                  <TableCell>${formatCurrency(listing.bulk_price)}</TableCell>
+                  <TableCell>{formatNGNSimple(listing.bulk_price)}</TableCell>
                   <TableCell>{listing.quantity}</TableCell>
                   <TableCell>
                     {format(new Date(listing.updated_at), 'MMM d, yyyy')}

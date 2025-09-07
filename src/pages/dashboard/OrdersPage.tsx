@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingBag, ArrowRight, Clock, CheckCircle, XCircle } from "lucide-react";
+import { ShoppingBag, ArrowRight, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PayNowButton from "@/components/auction/PayNowButton";
+import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
+import { formatNGNSimple } from "@/utils/currency";
 
 interface OrderItem {
   id: string;
@@ -234,19 +236,28 @@ const OrdersPage = () => {
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                          <Badge variant="outline" className={`${getStatusColor(order.status)} flex items-center gap-1`}>
-                            {getStatusIcon(order.status)}
-                            {order.status}
-                          </Badge>
+                          <OrderStatusBadge status={order.status || 'pending'} />
                           
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => viewOrderDetails(order.id)}
-                            className="whitespace-nowrap"
-                          >
-                            View Details <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            {order.status !== 'pending' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => navigate(`/dashboard/orders/${order.id}`)}
+                              >
+                                <MessageCircle className="h-4 w-4 mr-1" />
+                                Message
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => viewOrderDetails(order.id)}
+                              className="whitespace-nowrap"
+                            >
+                              View Details <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       
@@ -263,7 +274,7 @@ const OrdersPage = () => {
                             <div className="flex-1">
                               <p className="font-medium">{item.title}</p>
                               <p className="text-sm text-muted-foreground">
-                                Qty: {item.quantity} × ${item.price.toFixed(2)}
+                                Qty: {item.quantity} × {formatNGNSimple(item.price)}
                               </p>
                             </div>
                           </div>
@@ -277,7 +288,7 @@ const OrdersPage = () => {
                         
                         <div className="flex justify-between items-center mt-4 pt-4 border-t">
                           <span className="font-medium">Total</span>
-                          <span className="font-bold">${order.total_amount.toFixed(2)}</span>
+                          <span className="font-bold">{formatNGNSimple(order.total_amount)}</span>
                         </div>
                       </div>
                     </CardContent>

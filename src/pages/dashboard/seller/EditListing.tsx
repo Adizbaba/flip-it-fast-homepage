@@ -248,7 +248,7 @@ const EditListing = () => {
           </div>
           
           <div>
-            <Label htmlFor="buy_now_price">Buy Now Price ($) (Optional)</Label>
+            <Label htmlFor="buy_now_price">Buy Now Price (₦) (Optional)</Label>
             <Input
               id="buy_now_price"
               name="buy_now_price"

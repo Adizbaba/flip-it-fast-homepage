@@ -388,6 +388,50 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          created_at: string
+          file_type: string | null
+          file_url: string | null
+          id: string
+          message: string
+          order_id: string
+          receiver_id: string
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message: string
+          order_id: string
+          receiver_id: string
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message?: string
+          order_id?: string
+          receiver_id?: string
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null

@@ -48,7 +48,7 @@ const PriceRangeFilter = ({
       />
       <div className="flex items-center gap-2">
         <div className="grid flex-1 gap-2">
-          <Label htmlFor="minPrice" className="text-xs">Min ($)</Label>
+          <Label htmlFor="minPrice" className="text-xs">Min (₦)</Label>
           <Input
             id="minPrice"
             type="number"
@@ -58,7 +58,7 @@ const PriceRangeFilter = ({
           />
         </div>
         <div className="grid flex-1 gap-2">
-          <Label htmlFor="maxPrice" className="text-xs">Max ($)</Label>
+          <Label htmlFor="maxPrice" className="text-xs">Max (₦)</Label>
           <Input
             id="maxPrice"
             type="number"

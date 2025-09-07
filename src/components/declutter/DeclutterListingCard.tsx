@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, MapPin, Package2, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DeclutterListing } from "@/hooks/useDeclutterListings";
-import { formatCurrency } from "@/lib/utils";
+import { formatNGNSimple } from "@/utils/currency";
 
 interface DeclutterListingCardProps {
   listing: DeclutterListing;
@@ -61,10 +61,10 @@ const DeclutterListingCard = ({ listing }: DeclutterListingCardProps) => {
           <div>
             <p className="text-sm font-medium">
               <span className="text-muted-foreground line-through mr-2">
-                ${formatCurrency(listing.original_price)}
+                {formatNGNSimple(listing.original_price)}
               </span>
               <span className="text-lg font-bold text-primary">
-                ${formatCurrency(listing.bulk_price)}
+                {formatNGNSimple(listing.bulk_price)}
               </span>
             </p>
           </div>

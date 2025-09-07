@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/utils";
+import { formatNGNSimple } from "@/utils/currency";
 import { DeclutterListing } from "@/hooks/useDeclutterListings";
 
 interface DeclutterListingDetailsProps {

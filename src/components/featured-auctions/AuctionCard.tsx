@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { formatPrice, getTimeRemaining, getItemImage, isNewListing } from "./utils";
+import { getTimeRemaining, getItemImage, isNewListing } from "./utils";
+import { formatNGNSimple } from "@/utils/currency";
 import AuctionTimer from "@/components/auction/AuctionTimer";
 import { useAuth } from "@/lib/auth";
 
@@ -74,7 +75,7 @@ export const AuctionCard = ({ auction, onViewItem }: AuctionCardProps) => {
             {auction.current_bid ? "Current Bid" : "Starting Bid"}
           </p>
           <p className="font-bold text-lg text-green-600">
-            {formatPrice(auction.current_bid || auction.starting_bid)}
+            {formatNGNSimple(auction.current_bid || auction.starting_bid)}
           </p>
         </div>
         <div className="text-right">

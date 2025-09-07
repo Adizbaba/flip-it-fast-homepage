@@ -137,7 +137,7 @@ export const ModernRegularListingForm = ({ control, categories, categoriesLoadin
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-medium">Selling Price ($) *</FormLabel>
+                <FormLabel className="text-base font-medium">Selling Price (₦) *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
@@ -190,7 +190,7 @@ export const ModernRegularListingForm = ({ control, categories, categoriesLoadin
             name="salePrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-medium">Sale Price ($)</FormLabel>
+                <FormLabel className="text-base font-medium">Sale Price (₦)</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />

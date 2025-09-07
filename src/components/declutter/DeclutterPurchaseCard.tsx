@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/utils";
+import { formatNGNSimple } from "@/utils/currency";
 import { MessageContactSellerDialog } from "./MessageContactSellerDialog";
 import { DeclutterListing } from "@/hooks/useDeclutterListings";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,7 +150,7 @@ const DeclutterPurchaseCard = ({ listing }: DeclutterPurchaseCardProps) => {
               <div className="p-3 bg-secondary/40 rounded-md">
                 <div className="flex justify-between text-sm mb-1">
                   <span>Price per unit:</span>
-                  <span>${formatCurrency(listing.bulk_price)}</span>
+                  <span>{formatNGNSimple(listing.bulk_price)}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Quantity:</span>
@@ -159,7 +159,7 @@ const DeclutterPurchaseCard = ({ listing }: DeclutterPurchaseCardProps) => {
                 <Separator className="my-2" />
                 <div className="flex justify-between font-medium">
                   <span>Total:</span>
-                  <span>${formatCurrency(totalPrice)}</span>
+                  <span>{formatNGNSimple(totalPrice)}</span>
                 </div>
               </div>
             </div>

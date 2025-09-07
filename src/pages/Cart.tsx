@@ -153,9 +153,9 @@ const Cart = () => {
                                     {item.itemType === "auction" ? "Auction Item" : "Declutter Item"}
                                   </Badge>
                                 </div>
-                                <p className="font-semibold text-lg">${item.price.toFixed(2)}</p>
+                                <p className="font-semibold text-lg">{formatNGNSimple(item.price)}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  Total: ${(item.price * item.quantity).toFixed(2)}
+                                  Total: ₦{(item.price * item.quantity).toLocaleString()}
                                 </p>
                               </div>
                               <Button 
@@ -224,7 +224,7 @@ const Cart = () => {
                       </span>
                     </div>
                     {estimatedShipping === 0 && (
-                      <p className="text-xs text-green-600">Free shipping on orders over $50</p>
+                      <p className="text-xs text-green-600">Free shipping on orders over ₦80,000</p>
                     )}
                   </div>
                   <Separator className="my-4" />

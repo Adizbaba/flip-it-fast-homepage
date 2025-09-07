@@ -263,7 +263,7 @@ const CreateDeclutterListing = () => {
                       name="originalPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Original Price per Unit ($)</FormLabel>
+                          <FormLabel>Original Price per Unit (₦)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
@@ -285,7 +285,7 @@ const CreateDeclutterListing = () => {
                       name="bulkPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Bulk Price per Unit ($)</FormLabel>
+                          <FormLabel>Bulk Price per Unit (₦)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
