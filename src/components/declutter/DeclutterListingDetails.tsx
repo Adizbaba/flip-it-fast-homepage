@@ -18,11 +18,11 @@ const DeclutterListingDetails = ({ listing }: DeclutterListingDetailsProps) => {
         </div>
         <h1 className="text-3xl font-bold">{listing.title}</h1>
         <p className="text-2xl font-semibold text-primary mt-2">
-          ${formatCurrency(listing.bulk_price)} <span className="text-sm text-muted-foreground">per unit</span>
+          {formatNGNSimple(listing.bulk_price)} <span className="text-sm text-muted-foreground">per unit</span>
         </p>
         {listing.original_price > 0 && (
           <p className="text-sm text-muted-foreground">
-            Original value: ${formatCurrency(listing.original_price)} per unit
+            Original value: {formatNGNSimple(listing.original_price)} per unit
           </p>
         )}
       </div>

@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { formatNGNSimple } from "@/utils/currency";
 
 const Cart = () => {
   const { user } = useAuth();
