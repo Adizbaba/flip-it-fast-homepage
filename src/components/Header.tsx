@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gavel } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import fastFlipLogo from "@/assets/fastflip-logo.png";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/components/navigation/MobileNavigation";
 import UserMenuSection from "@/components/navigation/UserMenuSection";
@@ -90,11 +90,14 @@ const Header = () => {
         {/* Logo */}
         <Link 
           to="/" 
-          className="flex items-center space-x-2 hover:opacity-80 transition-opacity" 
+          className="flex items-center hover:opacity-80 transition-opacity" 
           onClick={closeMobileMenu}
         >
-          <Gavel className="h-6 w-6 text-auction-purple" />
-          <span className="font-bold text-lg text-auction-purple">FastFlip</span>
+          <img 
+            src={fastFlipLogo} 
+            alt="FastFlip Logo" 
+            className="h-8 w-auto md:h-10" 
+          />
         </Link>
 
         {/* Desktop Navigation */}

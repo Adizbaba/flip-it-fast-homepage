@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import fastFlipLogo from "@/assets/fastflip-logo.png";
 const Footer = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -19,11 +20,13 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-auction-purple to-auction-magenta bg-clip-text text-transparent">
-                Fast<span className="text-auction-orange">Flip</span>
-              </span>
-            </h3>
+            <div className="mb-4">
+              <img 
+                src={fastFlipLogo} 
+                alt="FastFlip Logo" 
+                className="h-8 w-auto" 
+              />
+            </div>
             <p className="text-gray-400 mb-4">
               The fastest way to buy and sell in online auctions. Find great deals or sell your items today!
             </p>
