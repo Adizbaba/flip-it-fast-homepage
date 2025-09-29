@@ -105,7 +105,7 @@ const DashboardLayout = () => {
                   <h1 className="text-lg font-semibold">Dashboard</h1>
                 </div>
                 <main className="flex-1 bg-gray-50 p-4 overflow-auto">
-                  <div className="container mx-auto py-6">
+                  <div className="container mx-auto py-6 mt-4">
                     <Outlet />
                   </div>
                 </main>
