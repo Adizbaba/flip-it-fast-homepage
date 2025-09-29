@@ -24,7 +24,7 @@ const Footer = () => {
               <img 
                 src={fastFlipLogo} 
                 alt="FastFlip Logo" 
-                className="h-8 w-auto" 
+                className="h-10 w-auto" 
               />
             </div>
             <p className="text-gray-400 mb-4">

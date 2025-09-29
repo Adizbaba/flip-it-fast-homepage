@@ -96,7 +96,7 @@ const Header = () => {
           <img 
             src={fastFlipLogo} 
             alt="FastFlip Logo" 
-            className="h-8 w-auto md:h-10" 
+            className="h-10 w-auto md:h-12" 
           />
         </Link>
 
