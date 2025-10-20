@@ -57,7 +57,7 @@ const DashboardLayout = () => {
       <DashboardProvider>
         <SidebarProvider defaultOpen={true}>
           <div className="flex flex-1 w-full bg-gray-50">
-            <Sidebar side="left" className="border-r bg-white">
+            <Sidebar side="left" className="border-r bg-white pt-16">
               <SidebarHeader className="border-b p-4 space-y-4">
                 <div className="flex items-center space-x-2">
                   <Avatar>
