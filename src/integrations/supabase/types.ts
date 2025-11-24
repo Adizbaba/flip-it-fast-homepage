@@ -657,10 +657,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      end_auction: {
-        Args: { auction_id: string }
-        Returns: Json
-      }
+      end_auction: { Args: { auction_id: string }; Returns: Json }
       get_safe_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -689,14 +686,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_profile_public: {
-        Args: { profile_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { user_id: string }; Returns: boolean }
+      is_profile_public: { Args: { profile_id: string }; Returns: boolean }
       log_admin_action: {
         Args: {
           action: string
@@ -708,10 +699,7 @@ export type Database = {
         }
         Returns: string
       }
-      process_expired_auctions: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      process_expired_auctions: { Args: never; Returns: Json }
     }
     Enums: {
       admin_role:
