@@ -43,6 +43,7 @@ const DeclutterSoldItemsPage = lazy(() => import("./pages/dashboard/DeclutterPag
 const NotificationsPage = lazy(() => import("./pages/dashboard/SharedPages").then(m => ({ default: m.NotificationsPage })));
 const ProfilePage = lazy(() => import("./pages/dashboard/SharedPages").then(m => ({ default: m.ProfilePage })));
 const SettingsPage = lazy(() => import("./pages/dashboard/SharedPages").then(m => ({ default: m.SettingsPage })));
+const AddressesPage = lazy(() => import("./pages/dashboard/AddressesPage"));
 
 const AuctionPayment = lazy(() => import("./pages/AuctionPayment"));
 const Declutter = lazy(() => import("./pages/declutter/Declutter"));
@@ -95,6 +96,7 @@ function App() {
                 <Route path="declutter-sold-items" element={<DeclutterSoldItemsPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="addresses" element={<AddressesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
               <Route path="*" element={<Index />} />

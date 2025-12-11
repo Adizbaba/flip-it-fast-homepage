@@ -16,6 +16,7 @@ import {
   Settings,
   PackageOpen,
   Receipt,
+  MapPin,
 } from "lucide-react";
 import { useDashboard } from "@/contexts/DashboardContext";
 
@@ -88,6 +89,11 @@ export function DashboardNav() {
       title: "Profile",
       href: "/dashboard/profile",
       icon: UserRound,
+    },
+    {
+      title: "Addresses",
+      href: "/dashboard/addresses",
+      icon: MapPin,
     },
     {
       title: "Settings",
