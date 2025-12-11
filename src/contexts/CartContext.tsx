@@ -22,10 +22,13 @@ interface CartContextType {
   totalItems: number;
   subtotal: number;
   isLoading: boolean;
-  addToCart: (item: Omit<CartItem, 'id'>) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  error: string | null;
+  isOperationLoading: boolean;
+  addToCart: (item: Omit<CartItem, 'id'>) => Promise<void>;
+  removeFromCart: (id: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  refetchCart: () => Promise<void>;
 }
 
 // Create context with default values
@@ -34,10 +37,13 @@ const CartContext = createContext<CartContextType>({
   totalItems: 0,
   subtotal: 0,
   isLoading: true,
-  addToCart: () => {},
-  removeFromCart: () => {},
-  updateQuantity: () => {},
-  clearCart: () => {},
+  error: null,
+  isOperationLoading: false,
+  addToCart: async () => {},
+  removeFromCart: async () => {},
+  updateQuantity: async () => {},
+  clearCart: async () => {},
+  refetchCart: async () => {},
 });
 
 // Generate a unique ID for local cart items
@@ -49,18 +55,20 @@ const generateId = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
   const { user } = useAuth();
 
   // Calculate derived state
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Load cart items when the user changes
-  useEffect(() => {
-    const loadCartItems = async () => {
-      setIsLoading(true);
-      
-      try {
+  // Load cart items function
+  const loadCartItems = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
         // If user is logged in, fetch cart from database
         if (user) {
           const { data, error } = await supabase
@@ -135,15 +143,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             setItems([]);
           }
         }
-      } catch (error) {
-        console.error('Error loading cart:', error);
-        toast.error('Failed to load cart');
-        setItems([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
+    } catch (err) {
+      console.error('Error loading cart:', err);
+      setError('Failed to load your cart. Please try again.');
+      setItems([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Refetch cart function for retry
+  const refetchCart = async () => {
+    await loadCartItems();
+  };
+
+  // Load cart items when the user changes
+  useEffect(() => {
     loadCartItems();
   }, [user]);
 
@@ -156,6 +171,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Add item to cart
   const addToCart = async (item: Omit<CartItem, 'id'>) => {
+    setIsOperationLoading(true);
     try {
       // Check if the item is already in the cart
       const existingItem = items.find(
@@ -197,14 +213,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       
       toast.success('Added to cart');
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      toast.error('Failed to add item to cart');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      toast.error('Failed to add item to cart. Please try again.');
+      throw err;
+    } finally {
+      setIsOperationLoading(false);
     }
   };
 
   // Remove item from cart
   const removeFromCart = async (id: string) => {
+    setIsOperationLoading(true);
     try {
       // If user is logged in, remove from database
       if (user) {
@@ -219,14 +239,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       // Remove from state
       setItems(items.filter(item => item.id !== id));
       toast.success('Item removed from cart');
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      toast.error('Failed to remove item');
+    } catch (err) {
+      console.error('Error removing from cart:', err);
+      toast.error('Failed to remove item. Please try again.');
+      throw err;
+    } finally {
+      setIsOperationLoading(false);
     }
   };
 
   // Update item quantity
   const updateQuantity = async (id: string, quantity: number) => {
+    setIsOperationLoading(true);
     try {
       // Make sure quantity is valid
       if (quantity < 1) return;
@@ -246,14 +270,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         item.id === id ? { ...item, quantity } : item
       ));
       toast.success('Quantity updated');
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      toast.error('Failed to update quantity');
+    } catch (err) {
+      console.error('Error updating quantity:', err);
+      toast.error('Failed to update quantity. Please try again.');
+      throw err;
+    } finally {
+      setIsOperationLoading(false);
     }
   };
 
   // Clear the entire cart
   const clearCart = async () => {
+    setIsOperationLoading(true);
     try {
       // If user is logged in, clear from database
       if (user) {
@@ -268,9 +296,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       // Clear state
       setItems([]);
       toast.success('Cart cleared');
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      toast.error('Failed to clear cart');
+    } catch (err) {
+      console.error('Error clearing cart:', err);
+      toast.error('Failed to clear cart. Please try again.');
+      throw err;
+    } finally {
+      setIsOperationLoading(false);
     }
   };
 
@@ -281,10 +312,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         totalItems,
         subtotal,
         isLoading,
+        error,
+        isOperationLoading,
         addToCart,
         removeFromCart,
         updateQuantity,
-        clearCart
+        clearCart,
+        refetchCart
       }}
     >
       {children}

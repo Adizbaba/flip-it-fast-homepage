@@ -10,22 +10,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 import { formatNGNSimple } from "@/utils/currency";
+import CartError from "@/components/cart/CartError";
+import CartItemSkeleton from "@/components/cart/CartItemSkeleton";
 
 const Cart = () => {
   const { user } = useAuth();
   const { 
     items, 
     isLoading, 
+    error,
+    isOperationLoading,
     updateQuantity, 
     removeFromCart, 
     clearCart,
+    refetchCart,
     subtotal,
     totalItems
   } = useCart();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
 
   // Calculate estimated shipping (could be enhanced with real shipping API)
   const estimatedShipping = subtotal > 50 ? 0 : 9.99;
@@ -47,7 +52,7 @@ const Cart = () => {
     navigate("/checkout-flow");
   };
 
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       toast.error("Minimum quantity is 1");
       return;
@@ -56,17 +61,64 @@ const Cart = () => {
       toast.error("Maximum quantity is 99");
       return;
     }
-    updateQuantity(itemId, newQuantity);
+    setUpdatingItemId(itemId);
+    try {
+      await updateQuantity(itemId, newQuantity);
+    } finally {
+      setUpdatingItemId(null);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    if (window.confirm("Remove this item from cart?")) {
+      setUpdatingItemId(itemId);
+      try {
+        await removeFromCart(itemId);
+      } finally {
+        setUpdatingItemId(null);
+      }
+    }
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <div className="flex items-center justify-center h-64">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent text-auction-purple"></div>
+        <main className="container mx-auto px-4 py-4 md:py-8 flex-1">
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
           </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              <CartItemSkeleton />
+              <CartItemSkeleton />
+            </div>
+            <div className="lg:col-span-1">
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <div className="h-10 bg-muted animate-pulse rounded w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
+          </div>
+          <CartError message={error} onRetry={refetchCart} />
         </main>
         <Footer />
       </div>
@@ -162,14 +214,15 @@ const Cart = () => {
                               <Button 
                                 variant="ghost" 
                                 size="icon"
-                                onClick={() => {
-                                  if (window.confirm("Remove this item from cart?")) {
-                                    removeFromCart(item.id);
-                                  }
-                                }}
+                                onClick={() => handleRemoveItem(item.id)}
+                                disabled={updatingItemId === item.id}
                                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
                               >
-                                <Trash className="h-4 w-4" />
+                                {updatingItemId === item.id ? (
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                  <Trash className="h-4 w-4" />
+                                )}
                               </Button>
                             </div>
                           </div>
@@ -181,17 +234,23 @@ const Cart = () => {
                                 size="icon" 
                                 className="h-8 w-8"
                                 onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
+                                disabled={item.quantity <= 1 || updatingItemId === item.id}
                               >
                                 <Minus className="h-3 w-3" />
                               </Button>
-                              <span className="w-12 text-center font-medium">{item.quantity}</span>
+                              <span className="w-12 text-center font-medium">
+                                {updatingItemId === item.id ? (
+                                  <div className="h-4 w-4 mx-auto animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                  item.quantity
+                                )}
+                              </span>
                               <Button 
                                 variant="outline" 
                                 size="icon" 
                                 className="h-8 w-8"
                                 onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                                disabled={item.quantity >= 99}
+                                disabled={item.quantity >= 99 || updatingItemId === item.id}
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>

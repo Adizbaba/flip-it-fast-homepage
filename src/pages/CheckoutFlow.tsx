@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -8,10 +8,8 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Container } from "@/components/ui/container";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import CheckoutProgress from "@/components/checkout/CheckoutProgress";
 import ContactInformationStep from "@/components/checkout/ContactInformationStep";
 import ShippingInformationStep from "@/components/checkout/ShippingInformationStep";
@@ -19,6 +17,7 @@ import ShippingMethodStep from "@/components/checkout/ShippingMethodStep";
 import PaymentInformationStep from "@/components/checkout/PaymentInformationStep";
 import ReviewOrderStep from "@/components/checkout/ReviewOrderStep";
 import CheckoutSidebar from "@/components/checkout/CheckoutSidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface CheckoutData {
   contactInfo: {
@@ -60,12 +59,13 @@ export interface CheckoutData {
 
 const CheckoutFlow = () => {
   const { user } = useAuth();
-  const { items, subtotal, clearCart, isLoading: cartLoading } = useCart();
+  const { items, subtotal, clearCart, isLoading: cartLoading, error: cartError, refetchCart } = useCart();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     contactInfo: {
       email: user?.email || '',
@@ -195,6 +195,7 @@ const CheckoutFlow = () => {
     }
 
     setIsLoading(true);
+    setOrderError(null);
     
     try {
       // Generate 5-digit order number
@@ -276,22 +277,86 @@ const CheckoutFlow = () => {
       // Navigate to confirmation
       navigate(`/order-confirmation?orderNumber=${orderNumber}&orderId=${order.id}`);
       
-    } catch (error) {
-      console.error("Error placing order:", error);
-      toast.error("Failed to place order. Please try again.");
+    } catch (err: any) {
+      console.error("Error placing order:", err);
+      const errorMessage = err?.message || "Failed to place order. Please try again.";
+      setOrderError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Checkout loading skeleton
+  const CheckoutSkeleton = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-4">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-3/4" />
+      </div>
+      <div className="lg:col-span-1">
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  // Error display component
+  const CheckoutErrorDisplay = ({ message, onRetry }: { message: string; onRetry?: () => void }) => (
+    <Card className="border-destructive/50 bg-destructive/5">
+      <CardContent className="p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
+        <p className="text-muted-foreground mb-4">{message}</p>
+        {onRetry && (
+          <Button onClick={onRetry} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Try Again
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   if (cartLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 py-10">
+        <main className="flex-1 py-6 md:py-10">
           <Container>
-            <div className="flex items-center justify-center h-64">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent text-primary"></div>
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4">Secure Checkout</h1>
+              </div>
+              <CheckoutSkeleton />
+            </div>
+          </Container>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (cartError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 py-6 md:py-10">
+          <Container>
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4">Secure Checkout</h1>
+              </div>
+              <CheckoutErrorDisplay message={cartError} onRetry={refetchCart} />
             </div>
           </Container>
         </main>
