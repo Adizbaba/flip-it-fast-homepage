@@ -32,7 +32,7 @@ const OrdersPage = lazy(() => import("./pages/dashboard/OrdersPage"));
 const OrderDetail = lazy(() => import("./pages/dashboard/OrderDetail"));
 const MyBidsPage = lazy(() => import("./pages/dashboard/BuyerPages").then(m => ({ default: m.MyBidsPage })));
 const WonAuctionsPage = lazy(() => import("./pages/dashboard/BuyerPages").then(m => ({ default: m.WonAuctionsPage })));
-const FavoritesPage = lazy(() => import("./pages/dashboard/BuyerPages").then(m => ({ default: m.FavoritesPage })));
+const FavoritesPage = lazy(() => import("./pages/dashboard/FavoritesPage"));
 const PaymentHistoryPage = lazy(() => import("./pages/dashboard/BuyerPages").then(m => ({ default: m.PaymentHistoryPage })));
 const MyListingsPage = lazy(() => import("./pages/dashboard/SellerPages").then(m => ({ default: m.MyListingsPage })));
 const CreateListingPage = lazy(() => import("./pages/dashboard/SellerPages").then(m => ({ default: m.CreateListingPage })));
